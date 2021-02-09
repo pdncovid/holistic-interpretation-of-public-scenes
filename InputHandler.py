@@ -14,7 +14,7 @@ class InputHandler:
 		self.noConnectedComponents=0
 		self.connectedCoponentBlockSizes=[]
 		self.connectComponentNextFrame=[]		
-		# readOneFrameToBuffer()
+		readOneFrameToBuffer(self)
 		
 	def readOneFrameToBuffer(self):
 		# print("a")
