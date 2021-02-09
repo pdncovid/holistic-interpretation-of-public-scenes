@@ -1,29 +1,30 @@
 class Person:
-	self.location2D=None
-	self.locationX=[]
-	self.locationY=[]
-	self.locationZ=[]
-	self.parameters={}
 
 	def __init__(self,isLocation2D=True,timeSeriesLength=1000):
 		self.location2D=isLocation2D
 		self.timeSeriesLength=timeSeriesLength
+		self.params={}
+		self.params["X"]=[0 for _ in range(self.timeSeriesLength)]
+		self.params["Y"]=[0 for _ in range(self.timeSeriesLength)]
 
 	def setInitialLocation(self,X,Y,Z=None):
-		self.locationX=X
-		self.locationY=Y
-		if Z!=None:
-			self.locationZ=Z
+		self.params["X"][0]=X
+		self.params["Y"][0]=Y
 	
-	def addNewParameter(self,paramName):
-		self.parameters[paramName]=[]
+	def addNewParam(self,paramName):
+		self.params[paramName]=[0 for _ in range(self.timeSeriesLength)]
 
-	def setX(self,t,X):
-		self.locationX[t]=X
+	def setParam(self,paramName,t,val):
+		self.params[paramName][t]=val
 
-	def setY(self,t,Y):
-		self.locationY[t]=Y
+	def getParam(self,paramName,t):
+		return self.params[paramName][t]
 
+	def getParamsDict(self):
+		return self.params
+
+	def setParamsFromDict(self,dictt):
+		self.params=dictt
 
 
 

@@ -3,10 +3,10 @@ from abc import ABC, abstractmethod
 class NNHandler(ABC):
 	def __int__(self):
 		pass
-	def setInputBlockSize(self,N):
+	def setInputBlockSize(self,N=32):
 		self.inputBlockSize=N
 	
-	def getInputBlockSize(self,):
+	def getInputBlockSize(self):
 		return self.inputBlockSize
 
 	def connectToInput(self,inputHandlerInstance):
@@ -15,10 +15,8 @@ class NNHandler(ABC):
 	def connectToGraph(self,gr):
 		self.graph=gr
 
-	def run():
+	def run(self):
 		pass
 
-	def updateGraph():
-		pass
 
 

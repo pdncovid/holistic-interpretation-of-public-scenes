@@ -4,8 +4,9 @@ class NNHandler_yolo(NNHandler):
 	def __int__(self):
 		print("Creating an Yolo handler")
 
-	def updateGraph():
-		print("Updated the graph")
-
-	def run():
+	def runForBatch(self):
 		print("Running....")
+		'''
+			Code here
+		'''
+		print("Updated the graph")
