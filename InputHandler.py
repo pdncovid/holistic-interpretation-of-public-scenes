@@ -1,6 +1,6 @@
 import cv2 as cv
 
-class InputHandle:
+class InputHandler:
 	def __init__(self):
 		print("Created input handle")
 

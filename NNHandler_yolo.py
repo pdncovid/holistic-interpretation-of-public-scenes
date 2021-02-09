@@ -6,3 +6,6 @@ class NNHandler_yolo(NNHandler):
 
 	def updateGraph():
 		print("Updated the graph")
+
+	def run():
+		print("Running....")

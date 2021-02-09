@@ -15,6 +15,9 @@ class NNHandler(ABC):
 	def connectToGraph(self,gr):
 		self.graph=gr
 
+	def run():
+		pass
+
 	def updateGraph():
 		pass
 
