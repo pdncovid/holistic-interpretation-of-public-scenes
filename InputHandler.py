@@ -27,14 +27,17 @@ class InputHandler:
 
 	def connectComponent(self,framesPerBlock):
 		#Returns the connected component ID
+		thisNNID=self.noConnectedComponents
 		self.noConnectedComponents+=1
 		self.connectedCoponentBlockSizes.append(framesPerBlock)
 		self.connectComponentNextFrame.append(0)
-		return self.noConnectedComponents-1
+
+		print("Connected NN {} with block size {}".format(thisNNID,self.connectedCoponentBlockSizes[thisNNID]))
+		return thisNNID
 		#Connected component ID
 
 	def cleanBuffer(self):
-		print("Implement buffer cleaner")
+		print("Dummy buffer cleaner")
 		
 
 	def getFrameBlock(self,requesterID):
@@ -46,4 +49,6 @@ class InputHandler:
 
 		self.cleanBuffer()
 
-		return self.buffer[:2]
+		toReturn= self.buffer[requestZerothFrame-self.bufferZerothFrame:requestZerothFrame-self.bufferZerothFrame]
+		print("Returning {} frames".format(len(toReturn)))
+		return toReturn

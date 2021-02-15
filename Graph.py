@@ -1,3 +1,6 @@
+import json
+from Person import *
+
 class Graph:
 	def __init__(self,timeSeriesLength=100):
 		self.nodes=[]
@@ -26,6 +29,7 @@ class Graph:
 	def loadFromFile(self, fileName="graph.txt"):
 		with open(fileName) as json_file:
 			data = json.load(json_file)
+		# print("Finished reading")
 		N=data["N"]
 		for n in range(N):
 			p=Person()

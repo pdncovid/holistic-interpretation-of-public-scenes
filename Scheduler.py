@@ -37,6 +37,8 @@ if __name__=="__main__":
 		for n in nn:
 			n.runForBatch()
 
+	graph.saveToFile()
+
 
 
 

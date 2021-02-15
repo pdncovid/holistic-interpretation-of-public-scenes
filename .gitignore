@@ -2,3 +2,5 @@ Polygon.py
 Triangle.py
 __pycache__/
 *.mp4
+*.jpg
+*.png
