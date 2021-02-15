@@ -22,4 +22,10 @@ if __name__=="__main__":
 	plt.show()
 
 	plt.figure()
+
+	k=p.keys()
+	k=k-"X"
+	k=k-"Y"
+	print(k)
+
 	plt.show()	
