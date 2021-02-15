@@ -7,6 +7,7 @@ if __name__=="__main__":
 	args=argparse.ArgumentParser()
 	args.add_argument("--input","-i",type=str,dest="input")
 	args.add_argument("--person","-p",type=int,dest="person")
+	args.add_argument("--output","-o",type=str,dest="output")
 	args=args.parse_args()
 	print("---")
 	graph=Graph()
@@ -47,4 +48,5 @@ if __name__=="__main__":
 		axs[1].plot(np.arange(len(ar)),ar)
 
 	axs[1].legend(keys)
+	print(args.output)
 	plt.show()	
