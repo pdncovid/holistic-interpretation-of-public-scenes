@@ -14,10 +14,9 @@ class InputHandler:
 		self.noConnectedComponents=0
 		self.connectedCoponentBlockSizes=[]
 		self.connectComponentNextFrame=[]		
-		readOneFrameToBuffer(self)
+		# readOneFrameToBuffer(self)
 		
 	def readOneFrameToBuffer(self):
-		# print("a")
 		ret,fr=self.videoIn.read()
 		if ret:
 			self.buffer.append(fr)
@@ -31,9 +30,11 @@ class InputHandler:
 		self.noConnectedComponents+=1
 		self.connectedCoponentBlockSizes.append(framesPerBlock)
 		self.connectComponentNextFrame.append(0)
-		return self.noConnectedComponents-1#Connected component ID
+		return self.noConnectedComponents-1
+		#Connected component ID
 
-	# def cleanBuffer():
+	def cleanBuffer(self):
+		print("Implement buffer cleaner")
 		
 
 	def getFrameBlock(self,requesterID):
@@ -41,6 +42,8 @@ class InputHandler:
 		requestLastFrame=requestZerothFrame+self.connectedCoponentBlockSizes[requesterID]
 		
 		while self.bufferZerothFrame+len(self.buffer) < requestLastFrame:
-			readOneFrameToBuffer()
+			self.readOneFrameToBuffer()
 
-		cleanBuffer()
+		self.cleanBuffer()
+
+		return self.buffer[:2]

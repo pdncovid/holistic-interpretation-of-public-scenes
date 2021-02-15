@@ -10,12 +10,13 @@ class NNHandler(ABC):
 		return self.inputBlockSize
 
 	def connectToInput(self,inputHandlerInstance):
+		self.myInput=inputHandlerInstance
 		self.myId = inputHandlerInstance.connectComponent(self.inputBlockSize)
 
 	def connectToGraph(self,gr):
 		self.graph=gr
 
-	def run(self):
+	def runForBatch(self):
 		pass
 
 
