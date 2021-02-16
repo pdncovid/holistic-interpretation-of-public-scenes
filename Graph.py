@@ -8,10 +8,17 @@ class Graph:
 		self.TIME_SERIES_LENGTH=timeSeriesLength
 
 	def addNode(self,time):
-		print("GRAPH: adding node")
+		print("GRAPH: adding (person) node")
 		self.nodes.append(Person())
 		return len(self.nodes)-1
 
+	def addNode2(self,node):
+		'''
+		Merge this with addNode()
+		'''
+		print("GRAPH: adding (general) node")
+		self.nodes.append(node)
+		return len(self.nodes)-1
 
 	def getNode(self,idx):
 		return self.nodes[idx]
