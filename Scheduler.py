@@ -19,7 +19,7 @@ if __name__=="__main__":
 	cctv=InputHandler()
 	cctv.setInputFile(args.input)
 
-	nn=[NNHandler_yolo(), NNHandler_openpose()]
+	nn=[NNHandler_yolo()]
 
 	for n in nn:
 		n.setInputBlockSize(32)
