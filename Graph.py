@@ -8,10 +8,17 @@ class Graph:
 		self.TIME_SERIES_LENGTH=timeSeriesLength
 
 	def addNode(self,time):
-		print("GRAPH: adding node")
+		print("GRAPH: adding (person) node")
 		self.nodes.append(Person())
 		return len(self.nodes)-1
 
+	def addNode2(self,node):
+		'''
+		Merge this with addNode()
+		'''
+		print("GRAPH: adding (general) node")
+		self.nodes.append(node)
+		return len(self.nodes)-1
 
 	def getNode(self,idx):
 		return self.nodes[idx]
@@ -21,7 +28,8 @@ class Graph:
 		data["N"]=len(self.nodes)
 		data["nodes"]=[]
 		for n in self.nodes:
-			data["nodes"].append(n.getParamsDict)
+			data["nodes"].append(n.getParamsDict())
+		print(data)
 		with open(fileName, 'w') as outfile:
 			json.dump(data, outfile)
 		print("Finished writing all nodes to {}".format(fileName))
