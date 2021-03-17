@@ -72,7 +72,7 @@ class NNHandler_yolo(NNHandler):
 		for i in range(len(ids)):
 			self.graph.addNode(0)
 			node=self.graph.getNode(i)
-			node.addParam("detection")
+			# node.addParam("detection")
 			for t in range(100):
 				node.setParam("X",t,0)
 				node.setParam("Y",t,0)
