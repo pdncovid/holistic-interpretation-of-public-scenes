@@ -4,7 +4,7 @@ from Person import *
 class Graph:
 	def __init__(self,timeSeriesLength=100):
 		self.nodes=[]
-		self.BIG_BANG=0
+		self.BIG_BANG=0			# HUH -_-
 		self.TIME_SERIES_LENGTH=timeSeriesLength
 
 	def addNode(self,time):

@@ -1,7 +1,7 @@
 from Node import *
 
 class Node_GroupCOG():
-	def init():
+	def init(self):
 		self.params["X"]=[0 for _ in range(timeSeriesLength)]
 		self.params["Y"]=[0 for _ in range(timeSeriesLength)]
 		graph=self.initParams["graph"]
