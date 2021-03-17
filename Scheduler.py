@@ -33,7 +33,7 @@ if __name__=="__main__":
 
 	#>>> Naive scheduling>>>>>>
 
-	for ITER in range(2):
+	for ITER in range(1):
 		for n in nn:
 			n.runForBatch()
 

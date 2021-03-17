@@ -28,7 +28,8 @@ class Graph:
 		data["N"]=len(self.nodes)
 		data["nodes"]=[]
 		for n in self.nodes:
-			data["nodes"].append(n.getParamsDict)
+			data["nodes"].append(n.getParamsDict())
+		print(data)
 		with open(fileName, 'w') as outfile:
 			json.dump(data, outfile)
 		print("Finished writing all nodes to {}".format(fileName))

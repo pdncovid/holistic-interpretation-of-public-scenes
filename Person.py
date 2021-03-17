@@ -1,4 +1,6 @@
-class Person:
+from abc import ABC, abstractmethod 
+from Node import *
+class Person(Node):
 
 	def __init__(self,isLocation2D=True,timeSeriesLength=1000):
 		self.location2D=isLocation2D
@@ -6,6 +8,7 @@ class Person:
 		self.params={}
 		self.params["X"]=[0 for _ in range(self.timeSeriesLength)]
 		self.params["Y"]=[0 for _ in range(self.timeSeriesLength)]
+
 
 	def setInitialLocation(self,X,Y,Z=None):
 		self.params["X"][0]=X

@@ -17,6 +17,20 @@ class NNHandler_yolo(NNHandler):
 
 	
 
+	def refinePersonTrajectory(self,p):
+		firstApperanceT=0
+		lastAppearanceT=p.timeSeriesLength-1
+
+		for a in range(p.timeSeriesLength):
+			if p.getParam("detection")==False:
+				firstApperanceT=a
+
+		for a in range(p.timeSeriesLength-1,-1,-1):
+			if p.getParam("detection")==False:
+				lastAppearanceT=a			
+
+
+		print("This person is visible only from {} to {} frames".format(firstApperanceT,lastAppearanceT))
 
 
 
@@ -40,7 +54,7 @@ class NNHandler_yolo(NNHandler):
 					# print(frames[-1])
 					frames[-1][-1]["id"]=int(self.extractValForKey(l,a,b)[:-1])
 					frames[-1][-1]["class"]=self.extractValForKey(l,b,c)
-					frames[-1][-1]["bb"]=list(map(int,self.extractValForKey(l,c,d)[1:-1].split(",")))
+					frames[-1][-1]["bbox"]=list(map(int,self.extractValForKey(l,c,d)[1:-1].split(",")))
 				except:
 					break
 
@@ -50,13 +64,30 @@ class NNHandler_yolo(NNHandler):
 		for f in frames:
 			for o in f:
 				ids.append(o["id"])
-		ids=set(ids)
+		ids=sorted(set(ids))
+
+		print("UniqueIDs ",ids)
 
 
-		print("UniqueIDs ",sorted(ids))
+		for i in range(len(ids)):
+			self.graph.addNode(0)
+			node=self.graph.getNode(i)
+			node.addParam("detection")
+			for t in range(100):
+				node.setParam("X",t,0)
+				node.setParam("Y",t,0)
+				node.setParam("detection",t,False)
+				for pt in range(len(frames[t])):
+					if frames[t][pt]["id"]==ids[i]:
+						pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
+						pointOnFloorY=frames[t][pt]["bbox"][3]
+
+						node.setParam("X",t,pointOnFloorX)
+						node.setParam("Y",t,pointOnFloorY)
+						node.setParam("detection",t,True)
 
 
-
+		self.graph.saveToFile(fileName="yoloExp.txt")
 		# self.myInput()
 
 
