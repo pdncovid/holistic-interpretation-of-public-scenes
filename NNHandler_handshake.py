@@ -56,7 +56,7 @@ class NNHandler_handshake(NNHandler):
 				conf = 0	# @jameel, write the confidence val too.
 
 				# iou between bb_hs and bb_yolo
-				iou = map(lambda x : get_iou(bb_yolo, x), list(node_t.values()))
+				iou = map(lambda x : get_iou(bb_yolo, x), node_t)
 
 				# get 2 max values
 				ind1, ind2 = np.argpartition(iou, -2)[-2:]
