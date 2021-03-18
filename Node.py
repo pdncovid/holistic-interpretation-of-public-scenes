@@ -1,24 +1,31 @@
-from abc import ABC, abstractmethod 
+# from abc import ABC, abstractmethod
 
-class Node(ABC):
-	def __init__(self,initParams=None,timeSeriesLength=100):
-		self.timeSeriesLength=timeSeriesLength
-		self.initParams=initParams
-		self.params={}
-		init()
+class Node:
+    def __init__(self, initParams=None, time_series_length=100):
+        self.time_series_length = time_series_length
+        self.initParams = initParams
+        self.params = {}
 
-	def init(self):
-		'''
-		This function is called for every node after the init.
-		'''
-		pass
+    def setType(self, ty):
+        self.type = ty
 
-	def setType(self,ty):
-		self.type=ty
+    def addParam(self, param):
+        self.params[param] = [None for _ in range(self.time_series_length)]
 
-	def addParam(self,param):
-		self.params[param]=[0 for _ in range(self.timeSeriesLength)]
-	
-	def addStaticParam(self,param,val):
-		self.params[param]=val
+    def addStaticParam(self, param, val):
+        self.params[param] = val
 
+    def setParam(self, paramName, t, val):
+        self.params[paramName][t] = val
+
+
+    def getParam(self, paramName, t):
+        return self.params[paramName][t]
+
+
+    def getParamsDict(self):
+        return self.params
+
+
+    def setParamsFromDict(self, dictt):
+        self.params = dictt
