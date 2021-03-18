@@ -50,7 +50,7 @@ class Json():
         except Exception as e:
             raise Exception(e)
 
-def get_iou(bb1, bb2):
+def get_iou(bb1, bb2, mode=0):
     """
     Calculate the Intersection over Union (IoU) of two bounding boxes.
 
@@ -104,7 +104,10 @@ def get_iou(bb1, bb2):
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
     # areas - the interesection area
-    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    if mode:
+        iou = intersection_area / float(bb1_area)
+    else:
+        iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
     assert iou >= 0.0
     assert iou <= 1.0
     return iou

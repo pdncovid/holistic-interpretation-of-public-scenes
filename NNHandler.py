@@ -1,8 +1,9 @@
-from abc import ABC, abstractmethod 
+# from abc import ABC, abstractmethod
 
-class NNHandler(ABC):
-	def __int__(self):
+class NNHandler:
+	def __init__(self):
 		pass
+
 	def setInputBlockSize(self,N=32):
 		self.inputBlockSize=N
 	
