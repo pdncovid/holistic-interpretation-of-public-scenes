@@ -19,7 +19,7 @@ if __name__=="__main__":
 	cctv=InputHandler()
 	cctv.setInputFile(args.input)
 
-	nn=[NNHandler_yolo(), NNHandler_openpose()]
+	nn=[NNHandler_yolo()]
 
 	for n in nn:
 		n.setInputBlockSize(32)
@@ -33,7 +33,7 @@ if __name__=="__main__":
 
 	#>>> Naive scheduling>>>>>>
 
-	for ITER in range(2):
+	for ITER in range(1):
 		for n in nn:
 			n.runForBatch()
 
