@@ -1,4 +1,5 @@
 # from abc import ABC, abstractmethod
+import json
 
 class NNHandler:
 
@@ -17,6 +18,11 @@ class NNHandler:
 
 	def runForBatch(self):
 		raise NotImplementedError
+
+	def init_from_json(self):
+		# Read json file
+		raise NotImplementedError
+
 
 
 
