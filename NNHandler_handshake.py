@@ -89,6 +89,6 @@ if __name__ == "__main__":
 	nn_handshake = NNHandler_handshake(g, './nn-outputs/sample-handshake-output.json')
 	nn_handshake.init_from_json()
 
-
-
+	for p in g.nodes:
+		print(p.params)
 
