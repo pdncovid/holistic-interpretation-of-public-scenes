@@ -15,18 +15,12 @@ class NNHandler_handshake(NNHandler):
 
 	def runForBatch(self):
 		
-		# print("Getting frames from InputHandler")
-		# frames=self.myInput.getFrameBlock(self.myId)
-		
-		# f=open(self.inputFileName,"r")
-		#Get the handshake bounding boxes.
 
 
 		#Use self.graph and find the two people using maximum intersection area
-
-
 		# TODO SUREN ;-)
 
+		# Read json and return data in self.yolo_data
 		yolo_handshake = YOLO_Handshake(self.handshake_file)
 
 		assert yolo_handshake.TIME_SERIES_LENGTH == self.graph.TIME_SERIES_LENGTH, \
