@@ -1,5 +1,5 @@
 import json
-from Person import *
+from Node_Person import Person
 
 class Graph:
 	def __init__(self, time_series_length=None):
