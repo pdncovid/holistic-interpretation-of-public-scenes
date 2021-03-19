@@ -1,5 +1,7 @@
-from NNHandler import *
+import json
+from NNHandler import NNHandler
 import numpy as np
+
 class NNHandler_yolo(NNHandler):
 	def __init__(self, textFileName="yoloOut.txt", N=256):
 
