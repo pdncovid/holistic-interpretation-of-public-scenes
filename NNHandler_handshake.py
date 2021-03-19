@@ -12,12 +12,8 @@ class NNHandler_handshake(NNHandler):
 		self.graph = graph
 		self.handshake_file = handshake_file
 
-
-	def runForBatch(self):
-		
-
-
-		#Use self.graph and find the two people using maximum intersection area
+	def update_handshake(self):
+		# Use self.graph and find the two people using maximum intersection area
 		# TODO SUREN ;-)
 
 		# Read json and return data in self.yolo_data
@@ -40,17 +36,16 @@ class NNHandler_handshake(NNHandler):
 					node_t.append([node.params["xMin"], node.params["xMax"], node.params["yMin"], node.params["yMax"]])
 					node_ind.append(ind)
 
-
 			# Next consider all YOLO bboxes at time t
 			nbox = yolo_handshake.yolo_data[str(t)]["noBboxes"]
 
 			for bbox in yolo_handshake.yolo_data[str(t)]["Bboxes"]:
-				bb_yolo = [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]]
+				bb_hs = [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]]
 
-				conf = 0	# @jameel, write the confidence val too.
+				conf = bbox["conf"]
 
-				# iou between bb_hs and bb_yolo
-				iou = map(lambda x : get_iou(bb_yolo, x), node_t)
+				# iou between bb_hs and bb_person (node_t)
+				iou = map(lambda x: get_iou(bb_hs, x), node_t)
 
 				# get 2 max values
 				ind1, ind2 = np.argpartition(iou, -2)[-2:]
@@ -60,11 +55,17 @@ class NNHandler_handshake(NNHandler):
 				self.graph[p1].params["handshake"][t] = {"person": p2, "confidence": conf}
 				self.graph[p2].params["handshake"][t] = {"person": p1, "confidence": conf}
 
-
 		print("Updated the graph")
-		
-
 
 	# def processBatch(self,fr):
 	# 	print("NN in action")
 
+	def runForBatch(self):
+
+		self.update_handshake()
+		
+
+
+
+
+if __name__ == "__main__":
