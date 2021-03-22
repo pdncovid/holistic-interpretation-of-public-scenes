@@ -2,18 +2,17 @@ from abc import ABC, abstractmethod
 from Node import *
 class Person(Node):
 
-	def __init__(self, isLocation2D=True, time_series_length=1000):
+	def __init__(self, isLocation2D=True, initParams=None, time_series_length=None, idx=None):
 		"""
 		@gihan what are these params
-		:param isLocation2D: ???
+		:param isLocation2D: ??? @gihan
 		:param time_series_length: Number of time samples
 		"""
 
-		super().__init__(time_series_length=time_series_length)
+		super().__init__(initParams=initParams, time_series_length=time_series_length, idx=idx)
 
 		self.location2D=isLocation2D
-		# self.timeSeriesLength=timeSeriesLength		@ gihan, once you init this in the parent node... you done have  to repeat this
-		# self.params={}			@ gihan , same as above
+		# self.type = 'Person'
 
 		self.init_pos()
 		self.init_handshake()

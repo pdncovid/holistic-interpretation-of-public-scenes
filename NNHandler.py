@@ -1,8 +1,7 @@
 # from abc import ABC, abstractmethod
+import json
 
 class NNHandler:
-	def __init__(self):
-		pass
 
 	def setInputBlockSize(self,N=32):
 		self.inputBlockSize=N
@@ -18,7 +17,12 @@ class NNHandler:
 		self.graph=gr
 
 	def runForBatch(self):
-		pass
+		raise NotImplementedError
+
+	def init_from_json(self):
+		# Read json file
+		raise NotImplementedError
+
 
 
 

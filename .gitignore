@@ -5,3 +5,4 @@ __pycache__/
 *.jpg
 *.png
 .idea/*
+suren/temp/*

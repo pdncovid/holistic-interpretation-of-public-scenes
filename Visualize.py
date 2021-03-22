@@ -1,8 +1,9 @@
 import argparse
 from Graph import *
-from Person import *
+from Node_Person import Person
 import matplotlib.pyplot as plt
 import numpy as np
+
 if __name__=="__main__":
 	args=argparse.ArgumentParser()
 	args.add_argument("--input","-i",type=str,dest="input")

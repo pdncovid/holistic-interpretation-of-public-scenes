@@ -111,3 +111,19 @@ def get_iou(bb1, bb2, mode=0):
     assert iou >= 0.0
     assert iou <= 1.0
     return iou
+
+def stop():
+    input("Enter to continue")
+
+def progress(count, total, status=''):
+    # bar_len = 60
+    # filled_len = int(round(bar_len * count / float(total)))
+    # bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+    percents = round(100.0 * count / float(total), 1)
+
+    if count == total:
+        print('%s%s ...%s' % (percents, '%', status), end='\n')
+    else:
+        print('%s%s ...%s' % (percents, '%', status), end='\n')
+

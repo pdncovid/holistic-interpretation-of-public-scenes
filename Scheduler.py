@@ -1,7 +1,7 @@
 import argparse
 
 from Graph import *
-from Person import *
+from Node_Person import Person
 from InputHandler import *
 
 from NNHandler_openpose import *
