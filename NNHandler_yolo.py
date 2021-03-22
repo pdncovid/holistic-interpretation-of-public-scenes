@@ -81,15 +81,22 @@ class NNHandler_yolo(NNHandler):
 				node.setParam("detection",t,False)
 				for pt in range(len(frames[t])):
 					if frames[t][pt]["id"]==ids[i]:
-						pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
-						pointOnFloorY=frames[t][pt]["bbox"][3]
 
-						node.setParam("X",t,pointOnFloorX)
-						node.setParam("Y",t,pointOnFloorY)
-						node.setParam("detection",t,True)
+						# pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
+						# pointOnFloorY=frames[t][pt]["bbox"][3]
+
+						# node.setParam("X",t,pointOnFloorX)
+						# node.setParam("Y",t,pointOnFloorY)
+						# node.setParam("detection",t,True)
+
+						node.setParam("xMin",t,frames[t][pt]["bbox"[0]])
+						node.setParam("xMax",t,frames[t][pt]["bbox"[2]])
+						node.setParam("yMin",t,frames[t][pt]["bbox"[1]])
+						node.setParam("yMax",t,frames[t][pt]["bbox"[3]])
+						node.setParam("detection",t,true)
 
 
-		self.graph.saveToFile(fileName="yoloExp.txt")
+		# self.graph.saveToFile(fileName="yoloExp.txt")
 		# self.myInput()
 
 

@@ -16,7 +16,7 @@ except ImportError as e:
 # Graph visualization packages
 
 class Graph:
-	def __init__(self, time_series_length=None):
+	def __init__(self, time_series_length=None,saveGraphFileName="graph.txt"):
 		"""
 		:param timeSeriesLength: Number of frames
 		"""
@@ -25,6 +25,7 @@ class Graph:
 		self.n_nodes = 0
 		self.n_person = 0
 		self.nodes=[]
+		self.saveGraphFileName=saveGraphFileName
 
 		self.BIG_BANG=0			# HUH -_-
 
@@ -177,14 +178,14 @@ class Graph:
 	def getNode(self,idx):
 		return self.nodes[idx]
 
-	def saveToFile(self,fileName="graph.txt"):
+	def saveToFile(self):
 		data={}
 		data["N"]=len(self.nodes)
 		data["nodes"]=[]
 		for n in self.nodes:
 			data["nodes"].append(n.getParamsDict())
 		print(data)
-		with open(fileName, 'w') as outfile:
+		with open(self.saveGraphFileName, 'w') as outfile:
 			json.dump(data, outfile)
 		print("Finished writing all nodes to {}".format(fileName))
 
