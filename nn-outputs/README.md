@@ -7,7 +7,7 @@ This folder is going to contain triplets of files for all the videos. The three 
 /storage/datasets/covid.eng.pdn.ac.lk/ltl/main-gate/04-01-2021.mp4
 kepler.ce.pdn.ac.lk
 ```
-2. **vid-01-yolo.txt**: This file is processed by [NNHandler_yolo.py](../blob/main/NNHandler_yolo,py)
+2. **vid-01-yolo.txt**: This file is processed by [NNHandler_yolo.py](../NNHandler_yolo,py)
 ```
 Frame #:  1
 Tracker ID: 1, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (230, 127, 301, 355)
@@ -22,7 +22,7 @@ Tracker ID: 3, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (330, 47, 3
 Tracker ID: 4, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (452, 133, 514, 351)
 FPS: 8.81
 ```
-3. **vid-01-handshake.json** This file is processed by [NNHandler_handshake.py](../blob/main/NNHandler_handshake.py)
+3. **vid-01-handshake.json** This file is processed by [NNHandler_handshake.py](../NNHandler_handshake.py)
 ```
 {
 	"noFrames" : 10,
