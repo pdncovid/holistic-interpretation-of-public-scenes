@@ -1,6 +1,7 @@
 # from abc import ABC, abstractmethod
 
 class Node:
+
     def __init__(self, initParams=None, time_series_length=100, idx=None):
         initParams = {} if initParams is None else initParams
 

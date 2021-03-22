@@ -11,9 +11,11 @@ from NNHandler_yolo import *
 if __name__=="__main__":
 	args=argparse.ArgumentParser()
 	args.add_argument("--input","-i",type=str,dest="input")
+	args.add_argument("--saveGraph","-sg",type=str,dest="saveGraph",default=None)
 	args=args.parse_args()
 
-	graph= Graph()
+
+	graph= Graph(saveGraphFileName=args.saveGraph)
 
 
 	cctv=InputHandler()
@@ -37,7 +39,8 @@ if __name__=="__main__":
 		for n in nn:
 			n.runForBatch()
 
-	graph.saveToFile()
+	if args.saveGraph!=None:
+		graph.saveToFile()
 
 
 
