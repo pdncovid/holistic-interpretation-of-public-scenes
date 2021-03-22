@@ -1,10 +1,11 @@
 # from abc import ABC, abstractmethod
 
 class Node:
-    def __init__(self, initParams=None, time_series_length=100):
+    def __init__(self, initParams=None, time_series_length=100,,idx=None):
         self.time_series_length = time_series_length
         self.initParams = initParams
         self.params = {}
+        self.idx=idx
 
     def setType(self, ty):
         self.type = ty
