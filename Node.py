@@ -1,11 +1,14 @@
 # from abc import ABC, abstractmethod
 
 class Node:
-    def __init__(self, initParams=None, time_series_length=100,,idx=None):
+
+    def __init__(self, initParams=None, time_series_length=100, idx=None):
+        initParams = {} if initParams is None else initParams
+
         self.time_series_length = time_series_length
-        self.initParams = initParams
-        self.params = {}
-        self.idx=idx
+        self.params = initParams
+        self.idx = idx          # id is inbuilt. Dont use
+        self.type = None
 
     def setType(self, ty):
         self.type = ty
@@ -28,5 +31,5 @@ class Node:
         return self.params
 
 
-    def setParamsFromDict(self, dictt):
-        self.params = dictt
+    def setParamsFromDict(self, dic):
+        self.params = dic

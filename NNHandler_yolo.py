@@ -1,7 +1,10 @@
-from NNHandler import *
+import json
+from NNHandler import NNHandler
 import numpy as np
+
 class NNHandler_yolo(NNHandler):
-	def __init__(self,textFileName="yoloOut.txt",N=256):
+	def __init__(self, textFileName="yoloOut.txt", N=256):
+
 		print("Creating an Yolo handler")
 		self.fileName=textFileName
 		self.file=open(self.fileName,mode='r')
@@ -31,7 +34,6 @@ class NNHandler_yolo(NNHandler):
 
 
 		print("This person is visible only from {} to {} frames".format(firstApperanceT,lastAppearanceT))
-
 
 
 	def runForBatch(self):
@@ -97,16 +99,18 @@ class NNHandler_yolo(NNHandler):
 
 
 
-	if __name__=="__main__":
-		print("Testing started >>>>>>")
-		a=extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","Tracker ID:",", Class")
-		print(a)
+if __name__=="__main__":
+	nn_yolo = NNHandler_yolo()
 
-		a=extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","BBox Coords (xmin, ymin, xmax, ymax):","\n")
-		print(a)
+	print("Testing started >>>>>>")
+	a=nn_yolo.extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","Tracker ID:",", Class")
+	print(a)
 
-		a=extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","Class:",",  BBox")
-		print(a)
+	a=nn_yolo.extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","BBox Coords (xmin, ymin, xmax, ymax):","\n")
+	print(a)
+
+	a=nn_yolo.extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","Class:",",  BBox")
+	print(a)
 
 
-		print(">>>>>> Testing ended")
+	print(">>>>>> Testing ended")
