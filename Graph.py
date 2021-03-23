@@ -162,10 +162,10 @@ class Graph:
 
 		return p
 
-	def addNode(self,time):
-		print("GRAPH: adding (person) node")
-		self.nodes.append(Person())
-		return len(self.nodes)-1
+	# def addNode(self,time):
+	# 	print("GRAPH: adding (person) node")
+	# 	self.nodes.append(Person())
+	# 	return len(self.nodes)-1
 
 	# def addNode2(self,node):
 	# 	'''
@@ -184,10 +184,10 @@ class Graph:
 		data["nodes"]=[]
 		for n in self.nodes:
 			data["nodes"].append(n.getParamsDict())
-		print(data)
+		# print(data)
 		with open(self.saveGraphFileName, 'w') as outfile:
 			json.dump(data, outfile)
-		print("Finished writing all nodes to {}".format(fileName))
+		print("Finished writing all nodes to {}".format(self.saveGraphFileName))
 
 	def init_from_json(self, file_name):
 		with open(file_name) as json_file:

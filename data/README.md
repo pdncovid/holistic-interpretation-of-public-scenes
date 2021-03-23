@@ -38,3 +38,7 @@ FPS: 8.81
 
 }
 ```
+
+## Graph Structure
+
+4. **vid-01-graph.json** This file is processed by [Graph.py](../Graph.py)

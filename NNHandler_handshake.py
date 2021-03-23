@@ -20,7 +20,7 @@ class NNHandler_handshake(NNHandler):
 		js = Json(handshake_file)
 
 		self.json_data = js.read()
-		self.time_series_length = self.json_data["noFrames"]
+		self.time_series_length = self.json_data["frames"]
 
 		return self.json_data
 
@@ -40,7 +40,7 @@ class NNHandler_handshake(NNHandler):
 		# Graph contains nodes which have time series info for separate nodes
 		# YOLO output has timeseries info first and then info of each node for that time series
 
-		for t in self.graph.TIME_SERIES_LENGTH:
+		for t in range(self.graph.time_series_length):
 
 			# First take all the detected nodes at time t
 			node_t = []
@@ -49,25 +49,29 @@ class NNHandler_handshake(NNHandler):
 				if node.params["detection"][t]:
 					node_t.append([node.params["xMin"], node.params["xMax"], node.params["yMin"], node.params["yMax"]])
 					node_ind.append(ind)
-
 			# Next consider all YOLO bboxes at time t
-			nbox = handshake_data[str(t)]["noBboxes"]
+			
+			try:
+				nbox = handshake_data[str(t)]["noBboxes"]
+				print("AAA",t)
 
-			for bbox in handshake_data[str(t)]["Bboxes"]:
-				bb_hs = [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]]
+				for bbox in handshake_data[str(t)]["Bboxes"]:
+					bb_hs = [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]]
 
-				conf = bbox["conf"]
+					conf = bbox["conf"]
 
-				# iou between bb_hs and bb_person (node_t)
-				iou = map(lambda x: get_iou(bb_hs, x, mode=1), node_t)
+					# iou between bb_hs and bb_person (node_t)
+					iou = map(lambda x: get_iou(bb_hs, x, mode=1), node_t)
 
-				# get 2 max values
-				ind1, ind2 = np.argpartition(iou, -2)[-2:]
+					# get 2 max values
+					ind1, ind2 = np.argpartition(iou, -2)[-2:]
 
-				p1, p2 = np.array(node_ind)[ind1, ind2]
+					p1, p2 = np.array(node_ind)[ind1, ind2]
 
-				self.graph[p1].params["handshake"][t] = {"person": p2, "confidence": conf}
-				self.graph[p2].params["handshake"][t] = {"person": p1, "confidence": conf}
+					self.graph[p1].params["handshake"][t] = {"person": p2, "confidence": conf}
+					self.graph[p2].params["handshake"][t] = {"person": p1, "confidence": conf}
+			except:
+				_=0
 
 		print("Updated the graph")
 
