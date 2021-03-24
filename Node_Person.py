@@ -60,3 +60,28 @@ class Person(Node):
 			X=int((self.params["xMin"][t]+self.params["xMax"][t])/2)
 			self.setParam("X",t,X)
 			self.setParam("Y",t,self.params["yMax"][t])
+
+	def calculate_detected_time_period(self):
+		print("DEBUG: running person calc")
+		startT=0
+		endTExclusive=self.time_series_length
+
+		print(self.params["detection"])
+		for t in range(0,self.time_series_length):
+			if self.params["detection"][t]==False:
+				startT=t+1
+			else:
+				break
+		for t in range(self.time_series_length-1,0,-1):
+			# print("XXX")
+			if self.params["detection"][t]==False:
+				endTExclusive=t
+			else:
+				break
+
+		if startT <endTExclusive:
+			self.params["neverDetected"]=False
+			self.params["detectionStartT"]=startT
+			self.params["detectionEndTExclusive"]=endTExclusive
+		else:
+			self.params["neverDetected"]=True
