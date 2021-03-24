@@ -9,6 +9,9 @@ if __name__=="__main__":
 	args.add_argument("--input","-i",type=str,dest="input")
 	args.add_argument("--person","-p",type=str,dest="person")
 	args.add_argument("--output","-o",type=str,dest="output")
+	args.add_argument("--outputPrefix","-op",type=str,dest="outputPrefix")
+	args.add_argument("--onlyDetectedTime",type=bool,dest="onlyDetectedTime"\
+		,default=False)
 	args=args.parse_args()
 	print("---")
 	graph=Graph()
@@ -19,6 +22,7 @@ if __name__=="__main__":
 	if "," not in args.person:
 		args.person=int(args.person)
 		p = graph.getNode(args.person)
+		p.calculate_detected_time_period()
 		p = p.params
 
 
@@ -27,14 +31,25 @@ if __name__=="__main__":
 		# axs[0].plot(x, y)
 		# axs[1].plot(x, -y)
 
-		axs[0].scatter(p["X"][0],p["Y"][0],color='r')
-		axs[0].scatter(p["X"][1:-1],p["Y"][1:-1],color='g')
-		axs[0].scatter(p["X"][-1],p["Y"][-1],color='b')
-		axs[0].legend(["Start","Path","End"])
+		X=p["X"]
+		Y=p["Y"]
+		# print("Before trimming : ",len(X),len(Y))
+		if args.onlyDetectedTime:
+			X=X[p["detectionStartT"]:p["detectionEndTExclusive"]]
+			Y=Y[p["detectionStartT"]:p["detectionEndTExclusive"]]
+		# print("After trimming : ",len(X),len(Y))
+		# print(p["detection"][p["detectionStartT"]:p["detectionEndTExclusive"]])
 
-		for a in range(min(len(p["X"]),len(p["Y"]))-1):
-			axs[0].arrow(p["X"][a],p["Y"][a],\
-				p["X"][a+1]-p["X"][a],p["Y"][a+1]-p["Y"][a])
+		axs[0].scatter(X[0],Y[0],color='r',s=40)
+		axs[0].scatter(X[1:-1],Y[1:-1],color='g',s=10)
+		axs[0].scatter(X[-1],Y[-1],color='b',s=40)
+		axs[0].legend(["Start","Path","End"])
+		axs[0].set_xlabel("Spatial dimension (x)")
+		axs[0].set_ylabel("Spatial dimension (y)")
+
+		for a in range(min(len(X),len(Y))-1):
+			axs[0].arrow(X[a],Y[a],\
+				X[a+1]-X[a],Y[a+1]-Y[a],overhang=0)
 
 		# plt.show()
 
@@ -47,11 +62,14 @@ if __name__=="__main__":
 
 		toPlot=[]
 		for k in keys:
-			ar=np.array(p[k],dtype=np.float)
-			ar=ar-np.min(ar)
-			ar=ar/np.max(ar)
-			toPlot.append(ar)
-			axs[1].plot(np.arange(len(ar)),ar)
+			if type(p[k])==list:
+				ar=np.array(p[k],dtype=np.float)
+				ar=ar-np.min(ar)
+				ar=ar/np.max(ar)
+				toPlot.append(ar)
+				axs[1].plot(np.arange(len(ar)),ar)
+		axs[1].set_xlabel("time (t)")
+		axs[1].set_ylabel("parameter f(t)")
 
 		axs[1].legend(keys)
 		
@@ -124,10 +142,15 @@ if __name__=="__main__":
 		print("Dist",dist)
 
 
-	if args.output==None:
+	if False:#args.output==None:
 		plt.show()	
 	else:
-		plt.savefig(args.output)
+		if args.output != None:
+			plt.savefig(args.output)
+		elif args.outputPrefix !=None:
+			fileName="{}-GRAPH-{}-PERSON-{}".format(args.outputPrefix,\
+				args.input.replace(".json","").replace("/","-"),str(args.person).replace(",","-"))
+			plt.savefig(fileName,dpi=300)
 
 
 		# print(pp)
