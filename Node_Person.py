@@ -45,3 +45,18 @@ class Person(Node):
 
 
 	
+	def calculate_standing_locations(self):
+		self.addParam("X")
+		self.addParam("Y")
+
+		# pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
+		# pointOnFloorY=frames[t][pt]["bbox"][3]
+
+		# node.setParam("X",t,pointOnFloorX)
+		# node.setParam("Y",t,pointOnFloorY)
+		# node.setParam("detection",t,True)
+
+		for t in range(self.time_series_length):
+			X=int((self.params["xMin"][t]+self.params["xMax"][t])/2)
+			self.setParam("X",t,X)
+			self.setParam("Y",t,self.params["yMax"][t])

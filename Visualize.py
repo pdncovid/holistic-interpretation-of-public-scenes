@@ -12,7 +12,8 @@ if __name__=="__main__":
 	args=args.parse_args()
 	print("---")
 	graph=Graph()
-	graph.loadFromFile(args.input)
+	graph.init_from_json(args.input)
+	graph.calculate_standing_locations()
 	
 
 	if "," not in args.person:
@@ -40,8 +41,8 @@ if __name__=="__main__":
 		# plt.figure()
 
 		keys=list(p.keys())
-		keys.remove("X")
-		keys.remove("Y")
+		for k in ["X","Y","xMin","xMax","yMin","yMax","handshake"]:
+			keys.remove(k)
 		print(keys)
 
 		toPlot=[]

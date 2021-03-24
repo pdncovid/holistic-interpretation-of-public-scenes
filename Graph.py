@@ -16,7 +16,7 @@ except ImportError as e:
 # Graph visualization packages
 
 class Graph:
-	def __init__(self, time_series_length=None,saveGraphFileName="graph.txt"):
+	def __init__(self, time_series_length=1000,saveGraphFileName="graph.txt"):
 		"""
 		:param timeSeriesLength: Number of frames
 		"""
@@ -181,6 +181,7 @@ class Graph:
 	def saveToFile(self):
 		data={}
 		data["N"]=len(self.nodes)
+		data["frames"]=self.time_series_length
 		data["nodes"]=[]
 		for n in self.nodes:
 			data["nodes"].append(n.getParamsDict())
@@ -201,7 +202,7 @@ class Graph:
 			N = len(data["nodes"])
 
 		try:
-			time_series_length = data["NoFrames"]
+			time_series_length = data["frames"]
 			assert len(data["nodes"][0]["detection"]) == time_series_length, "No of nodes not equal to N"
 		except Exception as e:
 			eprint(e)
@@ -211,7 +212,11 @@ class Graph:
 			return
 
 		if self.time_series_length is None: self.time_series_length = time_series_length
-		else: assert self.time_series_length == N, "Graph time is not equal to the json file [N]"
+
+		#>>>Suren
+		# else: assert self.time_series_length == N, "Graph time is not equal to the json file [N]"
+		#>>> Gihan
+		else: _=0#assert self.time_series_length == N, "Graph time is not equal to the json file [N]"
 
 		for n in range(N):
 			p = self.add_person()
@@ -233,7 +238,9 @@ class Graph:
 			self.nodes.append(p)
 
 		print("Finished reading {} modes from {}".format(len(self.nodes),fileName))
-
+	def calculate_standing_locations(self):
+		for n in self.nodes:
+			n.calculate_standing_locations()
 if __name__ == "__main__":
 	g = Graph()
 	g.init_from_json('./nn-outputs/sample-YOLO-bbox.json')
