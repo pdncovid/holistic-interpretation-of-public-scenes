@@ -12,6 +12,8 @@ if __name__=="__main__":
 	args.add_argument("--outputPrefix","-op",type=str,dest="outputPrefix")
 	args.add_argument("--onlyDetectedTime",type=bool,dest="onlyDetectedTime"\
 		,default=False)
+	args.add_argument("--interpolateUndetected",type=bool,\
+		dest="interpolateUndetected",default=False)
 	args=args.parse_args()
 	print("---")
 	graph=Graph()
@@ -22,7 +24,10 @@ if __name__=="__main__":
 	if "," not in args.person:
 		args.person=int(args.person)
 		p = graph.getNode(args.person)
-		p.calculate_detected_time_period()
+		if args.interpolateUndetected:
+			p.interpolate_undetected_timestamps()
+		else:
+			p.calculate_detected_time_period()
 		p = p.params
 
 
@@ -40,8 +45,8 @@ if __name__=="__main__":
 		# print("After trimming : ",len(X),len(Y))
 		# print(p["detection"][p["detectionStartT"]:p["detectionEndTExclusive"]])
 
-		axs[0].scatter(X[0],Y[0],color='r',s=40)
 		axs[0].scatter(X[1:-1],Y[1:-1],color='g',s=10)
+		axs[0].scatter(X[0],Y[0],color='r',s=40)
 		axs[0].scatter(X[-1],Y[-1],color='b',s=40)
 		axs[0].legend(["Start","Path","End"])
 		axs[0].set_xlabel("Spatial dimension (x)")
@@ -56,18 +61,25 @@ if __name__=="__main__":
 		# plt.figure()
 
 		keys=list(p.keys())
-		for k in ["X","Y","xMin","xMax","yMin","yMax","handshake"]:
+		for k in ["X","Y","xMin","xMax","yMin","yMax",\
+		"handshake","neverDetected","detectionStartT","detectionEndTExclusive"]:
 			keys.remove(k)
-		print(keys)
+		print("Time series to plot: ",keys)
+
+		booleanFunctionsToPlot=0
+		for k in keys:
+			if type(p[k])==list:
+				booleanFunctionsToPlot+=1
+
 
 		toPlot=[]
 		for k in keys:
 			if type(p[k])==list:
-				ar=np.array(p[k],dtype=np.float)
+				ar=np.array(p[k],dtype=float)
 				ar=ar-np.min(ar)
 				ar=ar/np.max(ar)
 				toPlot.append(ar)
-				axs[1].plot(np.arange(len(ar)),ar)
+				axs[1].plot(np.arange(len(ar)),ar,"-")
 		axs[1].set_xlabel("time (t)")
 		axs[1].set_ylabel("parameter f(t)")
 
@@ -148,9 +160,10 @@ if __name__=="__main__":
 		if args.output != None:
 			plt.savefig(args.output)
 		elif args.outputPrefix !=None:
-			fileName="{}-GRAPH-{}-PERSON-{}".format(args.outputPrefix,\
+			fileName="{}-GRAPH-{}-PERSON-{}.png".format(args.outputPrefix,\
 				args.input.replace(".json","").replace("/","-"),str(args.person).replace(",","-"))
 			plt.savefig(fileName,dpi=300)
+			print("Saved figure to {}".format(fileName))
 
 
 		# print(pp)
