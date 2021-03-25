@@ -58,9 +58,10 @@ class NNHandler_yolo(NNHandler):
 					frames[-1][-1]["bbox"]=list(map(int,self.extractValForKey(l,c,d)[1:-1].split(",")))
 				except:
 					break
+			else:
+				print("Unidentified line: ",l)
 
-
-		# print(len(frames),len(frames[300]),frames[5])
+		print(len(frames))
 		ids=[]
 		for f in frames:
 			for o in f:
@@ -74,7 +75,7 @@ class NNHandler_yolo(NNHandler):
 			self.graph.add_person()
 			node=self.graph.getNode(i)
 			# node.addParam("detection")
-			for t in range(100):
+			for t in range(len(frames)):
 				node.setParam("xMin",t,0)
 				node.setParam("yMin",t,0)
 				node.setParam("xMax",t,0)
@@ -83,12 +84,6 @@ class NNHandler_yolo(NNHandler):
 				for pt in range(len(frames[t])):
 					if frames[t][pt]["id"]==ids[i]:
 
-						# pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
-						# pointOnFloorY=frames[t][pt]["bbox"][3]
-
-						# node.setParam("X",t,pointOnFloorX)
-						# node.setParam("Y",t,pointOnFloorY)
-						# node.setParam("detection",t,True)
 
 						node.setParam("xMin",t,frames[t][pt]["bbox"][0])
 						node.setParam("xMax",t,frames[t][pt]["bbox"][2])
