@@ -46,8 +46,10 @@ class Person(Node):
 
 	
 	def calculate_standing_locations(self):
-		self.addParam("X")
-		self.addParam("Y")
+		if not "X" in self.params.keys():
+			self.addParam("X")
+		if not "Y" in self.params.keys():
+			self.addParam("Y")
 
 		# pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
 		# pointOnFloorY=frames[t][pt]["bbox"][3]
@@ -85,3 +87,40 @@ class Person(Node):
 			self.params["detectionEndTExclusive"]=endTExclusive
 		else:
 			self.params["neverDetected"]=True
+
+
+	def interpolate_undetected_timestamps(self):
+		'''
+			Gihan (25/03/2021)
+			I am implementing this without thinking straight.
+			I will be refining this logic later on.
+		'''
+		self.calculate_standing_locations()
+		self.calculate_detected_time_period()
+		self.params["interpolated"]=[False for _ in range(self.time_series_length)]
+
+		if not self.params["neverDetected"]:
+			t1=self.params["detectionStartT"]
+			while t1<self.params["detectionEndTExclusive"]:
+				if self.params["detection"][t1]==True:
+					t1+=1
+				else:
+					t2=t1
+					while t2<self.params["detectionEndTExclusive"]:
+						if self.params["detection"][t2]==False:
+							t2+=1
+						else:
+							#Now we know t1----t2(exclusive) are false detections.
+							toFillCount=t2-t1
+							xStep=self.params["X"][t2]-self.params["X"][t1-1]
+							yStep=self.params["Y"][t2]-self.params["Y"][t1-1]
+							for tt in range(toFillCount+1):
+								self.setParam("X",t1+tt,\
+									self.params["X"][t1-1] + tt*xStep)
+								self.setParam("Y",t1+tt,\
+									self.params["Y"][t1-1] + tt*yStep)
+								self.setParam("interpolated",t1+tt,True)
+							t1=t2
+							break
+
+
