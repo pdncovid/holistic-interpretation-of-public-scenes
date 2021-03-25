@@ -77,10 +77,10 @@ def get_iou(bb1, bb2, mode=0):
 
     # print(bb1, bb2)
 
-    assert bb1[0] < bb1[2]
-    assert bb1[1] < bb1[3]
-    assert bb2[0] < bb2[2]
-    assert bb2[1] < bb2[3]
+    assert bb1[0] <= bb1[2], "bb1[0] < bb1[2], (%d, %d)"%(bb1[0], bb1[2])
+    assert bb1[1] <= bb1[3], "bb1[1] < bb1[3], (%d, %d)"%(bb1[1], bb1[3])
+    assert bb2[0] <= bb2[2], "bb2[0] < bb2[2], (%d, %d)"%(bb2[0], bb2[2])
+    assert bb2[1] <= bb2[3], "bb2[1] < bb2[3], (%d, %d)"%(bb2[1], bb2[3])
 
     # determine the coordinates of the intersection rectangle
     x_left = max(bb1[0], bb2[0])
