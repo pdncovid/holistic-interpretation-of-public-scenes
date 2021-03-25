@@ -243,7 +243,7 @@ class Graph:
 			n.calculate_standing_locations()
 if __name__ == "__main__":
 	g = Graph()
-	g.init_from_json('./nn-outputs/sample-YOLO-bbox.json')
+	g.init_from_json('./example-graphs/graph4.json')
 
 	print("Created graph with %s nodes. Param example:"%g.n_nodes)
 	print(g.nodes[0].params)
