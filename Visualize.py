@@ -64,18 +64,18 @@ if __name__=="__main__":
 		for k in ["X","Y","xMin","xMax","yMin","yMax",\
 		"handshake","neverDetected","detectionStartT","detectionEndTExclusive"]:
 			keys.remove(k)
-		print(keys)
+		print("Time series to plot: ",keys)
 
 		booleanFunctionsToPlot=0
 		for k in keys:
 			if type(p[k])==list:
 				booleanFunctionsToPlot+=1
 
-		
+
 		toPlot=[]
 		for k in keys:
 			if type(p[k])==list:
-				ar=np.array(p[k],dtype=np.float)
+				ar=np.array(p[k],dtype=float)
 				ar=ar-np.min(ar)
 				ar=ar/np.max(ar)
 				toPlot.append(ar)
@@ -160,9 +160,10 @@ if __name__=="__main__":
 		if args.output != None:
 			plt.savefig(args.output)
 		elif args.outputPrefix !=None:
-			fileName="{}-GRAPH-{}-PERSON-{}".format(args.outputPrefix,\
+			fileName="{}-GRAPH-{}-PERSON-{}.png".format(args.outputPrefix,\
 				args.input.replace(".json","").replace("/","-"),str(args.person).replace(",","-"))
 			plt.savefig(fileName,dpi=300)
+			print("Saved figure to {}".format(fileName))
 
 
 		# print(pp)
