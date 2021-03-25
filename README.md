@@ -17,5 +17,7 @@ python Scheduler.py -sg data/vid-01-graph.json --nnout_yolo data/vid-01-yolo.txt
 
 ## Visualization
 ```
-python Visualize.py -i data/vid-01-graph.json -p 3 --onlyDetectedTime True --outputPrefix systemoutput 
+python Visualize.py -i data/vid-01-graph.json -p 3 --onlyDetectedTime True --outputPrefix plot-figure-name --onlyDetectedTime True
+
+python Visualize.py -i data/vid-01-graph.json -p 3 --onlyDetectedTime True --outputPrefix plot-figure-name --interpolateUndetected True
 ```
