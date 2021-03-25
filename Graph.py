@@ -1,7 +1,8 @@
 import json
 from Node_Person import Person
-from suren.util import  eprint, stop, progress
+from suren.util import eprint, stop, progress, Json
 import numpy as np
+from collections import defaultdict
 
 try:
 	import networkx as nx
@@ -10,13 +11,15 @@ try:
 
 except ImportError as e:
 	print(e)
-	# SHOW = False  # No idea if this would work when importing @all...maybe call as function?
+
+
+# SHOW = False  # No idea if this would work when importing @all...maybe call as function?
 
 
 # Graph visualization packages
 
 class Graph:
-	def __init__(self, time_series_length=1000,saveGraphFileName="graph.txt"):
+	def __init__(self, time_series_length=None, save_name=None):
 		"""
 		:param timeSeriesLength: Number of frames
 		"""
@@ -24,10 +27,10 @@ class Graph:
 
 		self.n_nodes = 0
 		self.n_person = 0
-		self.nodes=[]
-		self.saveGraphFileName=saveGraphFileName
+		self.nodes = []
+		self.saveGraphFileName = save_name
 
-		self.BIG_BANG=0			# HUH -_-
+		self.BIG_BANG = 0  # HUH -_-
 
 	@staticmethod
 	def plot_import():
@@ -41,14 +44,13 @@ class Graph:
 			# SHOW = False  # No idea if this would work when importing @all...maybe call as function?
 			return False
 
-
 	def __repr__(self):
-		return "Graph with %d nodes"%self.n_nodes
+		return "Graph with %d nodes" % self.n_nodes
 
-	def plot(self, window = 10):
+	def plot(self, window=10):
 
-		def get_cmap(window=10, show=False):
-			colors = cm.hsv(np.linspace(0, 1, self.n_nodes))
+		def get_cmap(show=False):
+			colors = cm.hsv(np.linspace(0, .8, self.n_nodes))
 			window = 10
 
 			col_arr = np.ones((window, 4))
@@ -66,7 +68,6 @@ class Graph:
 
 			# print(colors)
 
-
 			# stop()
 			if show:
 				x = np.tile(np.arange(cmap.shape[0]), (cmap.shape[1], 1))
@@ -75,7 +76,7 @@ class Graph:
 				# print(y)
 				plt.figure()
 				plt.title("Colour map (Close to continue)")
-				plt.scatter(x.flatten(), y.flatten(), color = np.reshape(cmap, (-1, 4), order='F'))
+				plt.scatter(x.flatten(), y.flatten(), color=np.reshape(cmap, (-1, 4), order='F'))
 				plt.show()
 
 			return cmap
@@ -86,35 +87,51 @@ class Graph:
 
 		# plt.figure()
 
-		cmap = get_cmap(window, show=True)
-
+		cmap = get_cmap(show=True)
 
 		# G = nx.Graph()
 		sc_x = []
 		sc_y = []
+		lines = []
 
 		for t in range(self.time_series_length):
-			pos = {}
+			# pos = {}
 			sc_tx, sc_ty = [], []
+			line_t = defaultdict(list)
 			for n, p in enumerate(self.nodes):
 				# print(n, p.params)
 				# if p.params["detection"][t]:
-				p_x = p.params["X"][t]
-				p_y = p.params["Y"][t]
-				pos[n] = (p_x, p_y)
+				p_x1 = p.params["xMin"][t]
+				p_y1 = p.params["yMin"][t]
+				p_x2 = p.params["xMax"][t]
+				p_y2 = p.params["yMax"][t]
+				p_x = (p_x1 + p_x2) / 2
+				p_y = (p_y1 + p_y2) / 2
+				# pos[n] = (p_x, p_y)
 				sc_tx.append(p_x)
 				sc_ty.append(p_y)
+
+				if p.params["handshake"][t]['person'] is not None:
+					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
+					line_t["%d_%d"%(n1, n2)].append([p_x, p_y])
 
 			sc_x.append(sc_tx)
 			sc_y.append(sc_ty)
 
+			# @suren : find a better way to implement variable size array
+			try: line_t = np.array([line_t[l] for l in line_t]).transpose((0, 2, 1))
+			except ValueError: line_t = []
+
+			lines.append(line_t)
+
 		sc_x = np.array(sc_x).transpose()
 		sc_y = np.array(sc_y).transpose()
+		# lines = np.array(lines)			# lines is a variable size array
 
 		print(sc_x.shape, sc_y.shape, cmap.shape)
 
 		# PLOT
-		# @suren... make this interactive (while playing video)
+		# TODO : @suren... make this interactive (while playing video)
 
 		plt.figure()
 		ax = plt.gca()
@@ -123,9 +140,9 @@ class Graph:
 		plt.ion()
 
 		for t in range(self.time_series_length):
-			sc_x_ = sc_x[:, max(t+1-window, 0):t+1]
-			sc_y_ = sc_y[:, max(t+1-window, 0):t+1]
-			cmap_ = cmap[:, max(0, window-(t+1)):, :]
+			sc_x_ = sc_x[:, max(t + 1 - window, 0):t + 1]
+			sc_y_ = sc_y[:, max(t + 1 - window, 0):t + 1]
+			cmap_ = cmap[:, max(0, window - (t + 1)):, :]
 
 			# print(sc_x_)
 			# print(sc_y_)
@@ -135,20 +152,18 @@ class Graph:
 
 			ax.scatter(sc_x_.flatten(), sc_y_.flatten(), color=np.reshape(cmap_, (-1, 4), order='C'))
 
+			for l in lines[t]:
+				ax.plot(l[0], l[1])
+				plt.pause(.5)
+
 			plt.pause(.1)
+
 			ax.clear()
 
-			if (t+1)%20 ==0:
-				progress(t+1, self.time_series_length, "drawing graph")
+			if (t + 1) % 20 == 0:
+				progress(t + 1, self.time_series_length, "drawing graph")
 
-		# plt.show(block=True)
-
-
-
-
-
-
-
+	# plt.show(block=True)
 
 	def get_nxt_id(self):
 		return len(self.nodes)
@@ -157,7 +172,7 @@ class Graph:
 		p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id()) if p is None else p
 
 		self.nodes.append(p)
-		self.n_person +=1
+		self.n_person += 1
 		self.n_nodes = len(self.nodes)
 
 		return p
@@ -175,20 +190,40 @@ class Graph:
 	# 	self.nodes.append(node)
 	# 	return len(self.nodes)-1
 
-	def getNode(self,idx):
+	def getNode(self, idx):
 		return self.nodes[idx]
 
-	def saveToFile(self):
-		data={}
-		data["N"]=len(self.nodes)
-		data["frames"]=self.time_series_length
-		data["nodes"]=[]
+	def make_jsonable(self, data):
+		for node in data["nodes"]:
+			for param in node:
+				print(param, node[param])
+				if param == "handshake":
+					for t in range(self.time_series_length):
+						print(type(node[param][t]['person']))
+						print(type(node[param][t]['confidence']))
+
+				else:
+					for t in range(self.time_series_length):
+						print(type(node[param][t]))
+					# print(type(node["handshake"]))
+
+
+
+	def saveToFile(self, file_name=None):
+		if file_name is None: file_name = self.saveGraphFileName
+
+		data = {"N": len(self.nodes), "frames": self.time_series_length, "nodes": []}
 		for n in self.nodes:
 			data["nodes"].append(n.getParamsDict())
-		# print(data)
-		with open(self.saveGraphFileName, 'w') as outfile:
-			json.dump(data, outfile)
-		print("Finished writing all nodes to {}".format(self.saveGraphFileName))
+
+		# self.make_jsonable(data)
+
+		js = Json(file_name)
+		js.write(data)
+
+		# with open(file_name, 'w') as outfile:
+		# 	json.dump(data, outfile)
+		print("Finished writing all nodes to {}".format(file_name))
 
 	def init_from_json(self, file_name):
 		with open(file_name) as json_file:
@@ -209,35 +244,28 @@ class Graph:
 			time_series_length = len(data["nodes"][0]["detection"])
 
 		if N == 0:
+			eprint("No nodes :(")
 			return
 
 		if self.time_series_length is None: self.time_series_length = time_series_length
 
-		#>>>Suren
-		# else: assert self.time_series_length == N, "Graph time is not equal to the json file [N]"
-		#>>> Gihan
-		else: _=0#assert self.time_series_length == N, "Graph time is not equal to the json file [N]"
-
 		for n in range(N):
 			p = self.add_person()
 			p.setParamsFromDict(data["nodes"][n])
-
-		print("Finished reading {} modes from {}".format(len(self.nodes),file_name))
-
-
 
 	def loadFromFile(self, fileName="graph.txt"):
 		# @gihan check why detection goes from False to 00000
 		with open(fileName) as json_file:
 			data = json.load(json_file)
 		# print("Finished reading")
-		N=data["N"]
+		N = data["N"]
 		for n in range(N):
-			p=Person()
+			p = Person()
 			p.setParamsFromDict(data["nodes"][n])
 			self.nodes.append(p)
 
-		print("Finished reading {} modes from {}".format(len(self.nodes),fileName))
+		print("Finished reading {} modes from {}".format(len(self.nodes), fileName))
+
 	def calculate_standing_locations(self):
 		for n in self.nodes:
 			n.calculate_standing_locations()
@@ -248,9 +276,10 @@ class Graph:
 
 if __name__ == "__main__":
 	g = Graph()
-	g.init_from_json('./example-graphs/graph4.json')
+	# g.init_from_json('./data/vid-01-graph.json')
+	g.init_from_json('./data/vid-01-graph_handshake.json')
 
-	print("Created graph with %s nodes. Param example:"%g.n_nodes)
+	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	print(g.nodes[0].params)
 
 	g.plot()
