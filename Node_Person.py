@@ -68,7 +68,7 @@ class Person(Node):
 		startT=0
 		endTExclusive=self.time_series_length
 
-		print(self.params["detection"])
+		# print(self.params["detection"])
 		for t in range(0,self.time_series_length):
 			if self.params["detection"][t]==False:
 				startT=t+1
