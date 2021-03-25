@@ -270,6 +270,9 @@ class Graph:
 		for n in self.nodes:
 			n.calculate_standing_locations()
 
+	def interpolate_undetected_timestamps(self):
+		for n in self.nodes:
+			n.interpolate_undetected_timestamps()
 
 if __name__ == "__main__":
 	g = Graph()

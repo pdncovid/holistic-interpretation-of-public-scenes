@@ -31,6 +31,7 @@ if __name__=="__main__":
 		p = p.params
 
 
+
 		fig, axs = plt.subplots(2)
 		fig.suptitle('Information of person : {}'.format(args.person))
 		# axs[0].plot(x, y)
@@ -45,13 +46,39 @@ if __name__=="__main__":
 		# print("After trimming : ",len(X),len(Y))
 		# print(p["detection"][p["detectionStartT"]:p["detectionEndTExclusive"]])
 
-		axs[0].scatter(X[1:-1],Y[1:-1],color='g',s=10)
+
+		legendWord=[]		
 		axs[0].scatter(X[0],Y[0],color='r',s=40)
+		legendWord.append("Start")
 		axs[0].scatter(X[-1],Y[-1],color='b',s=40)
-		axs[0].legend(["Start","Path","End"])
+		legendWord.append("End")
 		axs[0].set_xlabel("Spatial dimension (x)")
 		axs[0].set_ylabel("Spatial dimension (y)")
 
+
+
+		boolFlagFirstRealPathPlotted=False
+		boolFlagFirstInterpolatedPathPlotted=False
+
+		for dot in range(1,len(X)-1):
+			# print(p["interpolated"][dot])
+			if p["detection"][p["detectionStartT"]+ dot]==True:
+				if not boolFlagFirstRealPathPlotted:
+					axs[0].scatter(X[dot],Y[dot],color='g',s=10)
+					boolFlagFirstRealPathPlotted=True
+					legendWord.append("Path (detected)")
+				else:
+					axs[0].scatter(X[dot],Y[dot],color='g',s=10,label='_nolegend_')
+			else:
+				if not boolFlagFirstInterpolatedPathPlotted:
+					axs[0].scatter(X[dot],Y[dot],color='orange',s=10)
+					boolFlagFirstInterpolatedPathPlotted=True
+					legendWord.append("Path (interpolated)")
+				else:
+					axs[0].scatter(X[dot],Y[dot],color='orange',s=10,label='_nolegend_')
+
+
+		axs[0].legend(legendWord)
 		for a in range(min(len(X),len(Y))-1):
 			axs[0].arrow(X[a],Y[a],\
 				X[a+1]-X[a],Y[a+1]-Y[a],overhang=0)
@@ -107,6 +134,9 @@ if __name__=="__main__":
 
 		legLine=[]
 		legLine.append(axs[0].scatter(cogX[0],cogY[0],color='r'))
+
+
+
 		legLine.append(axs[0].scatter(cogX[1:-1],cogY[1:-1],color='g'))
 		legLine.append(axs[0].scatter(cogX[-1],cogY[-1],color='b'))
 		
@@ -115,7 +145,8 @@ if __name__=="__main__":
 				cogX[a+1]-cogX[a],cogY[a+1]-cogY[a])
 
 		
-		legWord=["Start","Path","End"]
+		legWord=["Start","Path (detected)","Path (interpolated)","End"]
+
 		for p in range(len(pp)):
 			person=graph.getNode(pp[p]).params
 			x=person["X"]

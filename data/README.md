@@ -47,7 +47,7 @@ Consider an example graph where
 - we have only 1 person and 4 video frames.
 - The person is sized (300,50) and paced on leftTop=(100,201) rightBottom=(201,251)
 - S/he moves 6 pixels in the x and y directions each within the 4 frames. 
-- The person is properly detected in all the frames except the second one.
+- The person is properly detected in all the frames except the second one. The bounding box information is kept at zero for the second frame.
 - @suren3141 or @jameelhassan complete the part about the handshake ;-)
 
 ```
@@ -56,10 +56,10 @@ Consider an example graph where
 	"frames" : 4,
 	"nodes" : [
 		{
-			"xMin" : [100,102,104,106],
-			"yMin" : [201,203,205,206],
-			"xMax" : [400,402,404,406],
-			"yMax" : [251,253,255,256],
+			"xMin" : [100,0,104,106],
+			"yMin" : [201,0,205,206],
+			"xMax" : [400,0,404,406],
+			"yMax" : [251,0,255,256],
 			"detection" : [true, false, true, true],
 			"handshake" : [
 				{
