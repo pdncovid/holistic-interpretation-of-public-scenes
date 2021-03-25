@@ -40,7 +40,6 @@ if __name__=="__main__":
 
 	#>>> Naive scheduling>>>>>>
 
-	print(n)
 
 	for ITER in range(1):
 		for n in nn:

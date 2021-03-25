@@ -229,7 +229,6 @@ class Graph:
 	def init_from_json(self, file_name):
 		with open(file_name) as json_file:
 			data = json.load(json_file)
-			# print(data)
 
 		try:
 			N = data["N"]
