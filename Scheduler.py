@@ -18,7 +18,7 @@ if __name__=="__main__":
 	args=args.parse_args()
 
 
-	graph= Graph(saveGraphFileName=args.saveGraph,\
+	graph= Graph(save_name=args.saveGraph,\
 		time_series_length=args.timeSeriesLength)
 
 
@@ -34,12 +34,13 @@ if __name__=="__main__":
 		# n.connectToInput(cctv)
 		n.connectToGraph(graph)
 
-
 	
 	# for n in nn:
 	# 	cctv.connectComponent(n)
 
 	#>>> Naive scheduling>>>>>>
+
+	print(n)
 
 	for ITER in range(1):
 		for n in nn:

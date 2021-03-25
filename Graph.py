@@ -169,6 +169,7 @@ class Graph:
 		return len(self.nodes)
 
 	def add_person(self, p=None):
+		# @SUREN what is fed in as p here?
 		p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id()) if p is None else p
 
 		self.nodes.append(p)
@@ -228,6 +229,7 @@ class Graph:
 	def init_from_json(self, file_name):
 		with open(file_name) as json_file:
 			data = json.load(json_file)
+			# print(data)
 
 		try:
 			N = data["N"]
@@ -248,6 +250,7 @@ class Graph:
 			return
 
 		if self.time_series_length is None: self.time_series_length = time_series_length
+
 
 		for n in range(N):
 			p = self.add_person()
