@@ -9,7 +9,7 @@ from suren.util import eprint, stop, progress, Json
 
 
 try:
-	import networkx as nx
+	# import networkx as nx
 	import matplotlib.pyplot as plt
 	import matplotlib.cm as cm
 
@@ -39,14 +39,14 @@ class Graph:
 	@staticmethod
 	def plot_import():
 		try:
-			import networkx
+			# import networkx
 			import matplotlib.pyplot
 
-			return True
+			return None
 		except ImportError as e:
 			print(e)
 			# SHOW = False  # No idea if this would work when importing @all...maybe call as function?
-			return False
+			return e
 
 	def __repr__(self):
 		return "Graph with %d nodes" % self.n_nodes
@@ -85,8 +85,9 @@ class Graph:
 
 			return cmap
 
-		if not Graph.plot_import():
-			eprint("Network package not installed")
+
+		if Graph.plot_import() is not None:
+			eprint("Package not installed", Graph.plot_import())
 			return
 
 		# plt.figure()
@@ -322,19 +323,6 @@ class Graph:
 		for n in range(N):
 			p = self.add_person()
 			p.setParamsFromDict(data["nodes"][n])
-
-	def loadFromFile(self, fileName="graph.txt"):
-		# @gihan check why detection goes from False to 00000
-		with open(fileName) as json_file:
-			data = json.load(json_file)
-		# print("Finished reading")
-		N = data["N"]
-		for n in range(N):
-			p = Person()
-			p.setParamsFromDict(data["nodes"][n])
-			self.nodes.append(p)
-
-		print("Finished reading {} modes from {}".format(len(self.nodes), fileName))
 
 	def calculate_standing_locations(self):
 		for n in self.nodes:
