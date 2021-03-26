@@ -3,9 +3,12 @@ from NNHandler import NNHandler
 import numpy as np
 
 class NNHandler_yolo(NNHandler):
-	def __init__(self, textFileName="yoloOut.txt", N=256):
+	def __init__(self, textFileName=None, N=256):
 
-		print("Creating an Yolo handler")
+		super().__init__()
+
+		print("Creating an YOLO handler")
+
 		self.fileName=textFileName
 		self.file=open(self.fileName,mode='r')
 		self.inputBlockSize=N
