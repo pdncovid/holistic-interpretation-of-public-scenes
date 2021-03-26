@@ -27,7 +27,7 @@ if __name__=="__main__":
 		cctv.setInputFile(args.input)
 
 	nn=[NNHandler_yolo(textFileName=args.nnout_yolo),\
-	 NNHandler_handshake(graph,args.nnout_handshake)]
+	 NNHandler_handshake(args.nnout_handshake)]
 
 	for n in nn:
 		n.setInputBlockSize(32)
