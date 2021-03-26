@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 from collections import defaultdict
 
-from NNHandler_image import NNHandler_image
 from Node_Person import Person
 from suren.util import eprint, stop, progress, Json
 
@@ -51,56 +50,10 @@ class Graph:
 	def __repr__(self):
 		return "Graph with %d nodes" % self.n_nodes
 
-	def plot(self, window=10, show_cmap=True, img_handle=None):
-
-		def get_cmap(show=False):
-			colors = cm.hsv(np.linspace(0, .8, self.n_nodes))
-			window = 10
-
-			col_arr = np.ones((window, 4))
-
-			col_arr[:, -1] = np.power(.8, np.arange(window))[::-1]
-
-			arr1 = np.tile(colors, (window, 1, 1)).transpose((1, 0, 2))
-			# print(colors.shape, arr1.shape)
-			arr2 = np.tile(col_arr, (self.n_nodes, 1, 1))
-			# print(col_arr.shape, arr2.shape)
-
-			cmap = arr1 * arr2
-
-			# print(arr1[1, :, :], arr2[1, :, :])
-
-			# print(colors)
-
-			# stop()
-			if show:
-				x = np.tile(np.arange(cmap.shape[0]), (cmap.shape[1], 1))
-				y = np.tile(np.arange(cmap.shape[1]), (cmap.shape[0], 1)).transpose()
-				# print(x)
-				# print(y)
-				plt.figure()
-				plt.title("Colour map (Close to continue)")
-				plt.scatter(x.flatten(), y.flatten(), color=np.reshape(cmap, (-1, 4), order='F'))
-				plt.show()
-
-			return cmap
-
-
-		if Graph.plot_import() is not None:
-			eprint("Package not installed", Graph.plot_import())
-			return
-
-		# plt.figure()
-
-		cmap = get_cmap(show=show_cmap)
-
-		# G = nx.Graph()
+	def get_plot_points(self):
 		sc_x = []
 		sc_y = []
 		lines = []
-
-		ylim = [0, 0]
-		xlim = [0, 0]
 
 		for t in range(self.time_series_length):
 			# pos = {}
@@ -119,9 +72,6 @@ class Graph:
 				sc_tx.append(p_x)
 				sc_ty.append(p_y)
 
-				xlim[-1] = max(xlim[-1], p_x2)
-				ylim[-1] = max(ylim[-1], p_y2)
-
 				if p.params["handshake"][t]['person'] is not None:
 					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
 					line_t["%d_%d"%(n1, n2)].append([p_x, p_y])
@@ -139,100 +89,94 @@ class Graph:
 		sc_y = np.array(sc_y).transpose()
 		# lines = np.array(lines)			# lines is a variable size array
 
+		return sc_x, sc_y, lines
+
+	def get_cmap(self, show=False):
+		colors = cm.hsv(np.linspace(0, .8, self.n_nodes))
+		window = 10
+
+		col_arr = np.ones((window, 4))
+
+		col_arr[:, -1] = np.power(.8, np.arange(window))[::-1]
+
+		arr1 = np.tile(colors, (window, 1, 1)).transpose((1, 0, 2))
+		# print(colors.shape, arr1.shape)
+		arr2 = np.tile(col_arr, (self.n_nodes, 1, 1))
+		# print(col_arr.shape, arr2.shape)
+
+		cmap = arr1 * arr2
+
+		# print(arr1[1, :, :], arr2[1, :, :])
+
+		# print(colors)
+
+		# stop()
+		if show:
+			x = np.tile(np.arange(cmap.shape[0]), (cmap.shape[1], 1))
+			y = np.tile(np.arange(cmap.shape[1]), (cmap.shape[0], 1)).transpose()
+			# print(x)
+			# print(y)
+			plt.figure()
+			plt.title("Colour map (Close to continue)")
+			plt.scatter(x.flatten(), y.flatten(), color=np.reshape(cmap, (-1, 4), order='F'))
+			plt.show()
+
+		return cmap
+
+	def plot(self, window=10, show_cmap=True):
+
+		if Graph.plot_import() is not None:
+			eprint("Package not installed", Graph.plot_import())
+			return
+
+		# plt.figure()
+
+		cmap = self.get_cmap(show=show_cmap)
+
+		sc_x, sc_y, lines = self.get_plot_points()
+
 		print(sc_x.shape, sc_y.shape, cmap.shape)
 
 		# PLOT
+		ylim = [np.min(sc_y, axis=None)-5, np.max(sc_y, axis=None)+5]
+		xlim = [np.min(sc_x, axis=None)-5, np.max(sc_x, axis=None)+5]
 
-		if img_handle is None:
+		fig = plt.figure()
+		plt.xlim(xlim[0], xlim[1])
+		plt.ylim(ylim[0], ylim[1])
+		ax = plt.gca()
+		# plt.xlim((np.min(sc_x, axis=None))
 
-			fig = plt.figure()
-			plt.xlim(xlim[0], xlim[1])
-			plt.ylim(ylim[0], ylim[1])
-			ax = plt.gca()
-			# plt.xlim((np.min(sc_x, axis=None))
+		plt.ion()
 
-			plt.ion()
+		for t in range(self.time_series_length):
+			sc_x_ = sc_x[:, max(t + 1 - window, 0):t + 1]
+			sc_y_ = sc_y[:, max(t + 1 - window, 0):t + 1]
+			cmap_ = cmap[:, max(0, window - (t + 1)):, :]
 
-			for t in range(self.time_series_length):
-				sc_x_ = sc_x[:, max(t + 1 - window, 0):t + 1]
-				sc_y_ = sc_y[:, max(t + 1 - window, 0):t + 1]
-				cmap_ = cmap[:, max(0, window - (t + 1)):, :]
+			# print(sc_x_)
+			# print(sc_y_)
+			# print(cmap_)
 
-				# print(sc_x_)
-				# print(sc_y_)
-				# print(cmap_)
+			# print(sc_x_.shape, sc_y_.shape, cmap_.shape)
 
-				# print(sc_x_.shape, sc_y_.shape, cmap_.shape)
+			ax.scatter(sc_x_.flatten(), sc_y_.flatten(), color=np.reshape(cmap_, (-1, 4), order='C'))
 
-				ax.scatter(sc_x_.flatten(), sc_y_.flatten(), color=np.reshape(cmap_, (-1, 4), order='C'))
-
-				for l in lines[t]:
-					ax.plot(l[0], l[1])
-					plt.pause(.5)
+			for l in lines[t]:
+				ax.plot(l[0], l[1])
+				plt.pause(.5)
 
 
-				else:
-					plt.pause(.1)
+			else:
+				plt.pause(.1)
 
-				ax.clear()
-				ax.set_xlim(xlim[0], xlim[1])
-				ax.set_ylim(ylim[0], ylim[1])
+			ax.clear()
+			ax.set_xlim(xlim[0], xlim[1])
+			ax.set_ylim(ylim[0], ylim[1])
 
-				if (t + 1) % 20 == 0:
-					progress(t + 1, self.time_series_length, "drawing graph")
+			if (t + 1) % 20 == 0:
+				progress(t + 1, self.time_series_length, "drawing graph")
 
-		else:
-			cv2.namedWindow("plot")
-
-			print(cmap.shape)
-
-			cmap_ = np.array(cmap[:, -1, :-1]*255)[:, [2,1,0]]
-			# cmap_ = cv2.cvtColor(cmap_.reshape(1, -1, 3), cv2.COLOR_RGB2BGR).reshape(-1, 3)
-			print(cmap_)
-
-			# plt.figure()
-			# plt.scatter(np.arange(4), np.ones(4), color=cmap_)
-			# plt.show()
-
-			img_handle.open()
-			for t in range(self.time_series_length):
-				rgb = img_handle.read_frame(t)
-				rgb_ = rgb.copy()
-
-				sc_x_ = list(map(int, sc_x[:, t]))
-				sc_y_ = list(map(int, sc_y[:, t]))
-
-				for p in range(len(sc_x_)):
-					cv2.circle(rgb_, (sc_x_[p], sc_y_[p]), 1, tuple(cmap_[p]), 5)
-
-				for l in lines[t]:
-					print(l)
-					cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)), (255, 255, 255), 3)
-
-				if (t + 1) % 20 == 0:
-					progress(t + 1, self.time_series_length, "drawing graph")
-
-				# fig.canvas.draw()
-				#
-				# # convert canvas to image
-				# img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-				# img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-				# img = img.reshape(rgb.shape[::-1] + (3,))
-
-				# img is rgb, convert to opencv's default bgr
-				# img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-				# img_sctr = img.copy()
-				# print(img_sctr.shape, rgb.shape)
-
-				# img_ = np.hstack((img, img_sctr))
-
-				# display image with opencv or any operation you like
-				cv2.imshow("plot", rgb_)
-
-				k = cv2.waitKey(5) & 0xFF
-				if k == 27:
-					break
-			img_handle.close()
 
 	# plt.show(block=True)
 
@@ -277,8 +221,6 @@ class Graph:
 					for t in range(self.time_series_length):
 						print(type(node[param][t]))
 					# print(type(node["handshake"]))
-
-
 
 	def saveToFile(self, file_name=None):
 		if file_name is None: file_name = self.saveGraphFileName
@@ -334,13 +276,10 @@ class Graph:
 
 if __name__ == "__main__":
 	g = Graph()
-	# g.init_from_json('./data/vid-01-graph.json')
-	g.init_from_json('./data/vid-01-graph_handshake.json')
+	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
+	g.init_from_json('./data/vid-01-graph_handshake.json')	# Start from handshake
 
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	print(g.nodes[0].params)
 
-	img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
-	img_handle.init_from_json()
-
-	g.plot(img_handle=img_handle)
+	g.plot()
