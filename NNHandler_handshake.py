@@ -1,18 +1,19 @@
-from NNHandler import *
-# from yolo_handshake import YOLO_Handshake
-from NNHandler_image import NNHandler_image
-from suren.util import get_iou, Json
-import  numpy as np
+import numpy as np
+import json
 
+
+from NNHandler import NNHandler
+from suren.util import get_iou, Json
 from Graph import Graph
 
 
 class NNHandler_handshake(NNHandler):
 
-	def __init__(self, graph, handshake_file):
+	def __init__(self, handshake_file):
+
+		super().__init__()
 
 		print("Creating a Handshake handler")
-		self.graph = graph
 		self.handshake_file = handshake_file
 
 	def init_from_json(self, handshake_file=None):
@@ -22,7 +23,7 @@ class NNHandler_handshake(NNHandler):
 			data = json.load(json_file)
 
 		self.json_data = data
-		self.time_series_length = self.json_data["frames"]
+		self.time_series_length = data["frames"]
 
 		return self.json_data
 
@@ -55,8 +56,8 @@ class NNHandler_handshake(NNHandler):
 				if node.params["detection"][t]:
 					node_t.append([node.params["xMin"][t], node.params["xMax"][t], node.params["yMin"][t], node.params["yMax"][t]])
 					node_ind.append(ind)
-			# Next consider all YOLO bboxes at time t
-			
+
+			# Next consider all handshake boxes at time t
 			nbox = handshake_data[str(t)]["No of boxes"]
 
 			for bbox in handshake_data[str(t)]["bboxes"]:
@@ -93,32 +94,25 @@ class NNHandler_handshake(NNHandler):
 	# 	print("NN in action")
 
 	def runForBatch(self):
-
+		self.init_from_json()
 		self.update_handshake()
-		
-
 
 
 
 if __name__ == "__main__":
 	g = Graph()
+
 	g.init_from_json('./data/vid-01-graph.json')
 
+	nn_handle = NNHandler_handshake('./data/vid-01-handshake.json')
+	nn_handle.connectToGraph(g)
+	nn_handle.runForBatch()
+
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
-	print(g.nodes[0].params)
+	for p in g.nodes[0].params:
+		print(p, g.nodes[0].params[p])
 
-	# g.plot()
-	print()
-
-	nn_handshake = NNHandler_handshake(g, './data/vid-01-handshake.json')
-	nn_handshake.init_from_json()
-	nn_handshake.update_handshake()
-
-	print("Initiated handshake for %s nodes. Param example:"%g.n_nodes)
-	for param in g.nodes[0].params:
-		print(param, g.nodes[0].params[param])
-
-	g.saveToFile("./data/vid-01-graph_handshake.json")
+	g.saveToFile('./data/vid-01-graph_handshake.json')
 
 
 

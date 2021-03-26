@@ -6,7 +6,7 @@ from glob import glob
 from NNHandler import NNHandler
 from suren.util import get_iou, Json, eprint
 
-class NNHandler_image(NNHandler):
+class NNHandler_image():
     VID_FORMAT = ["avi"]
     IMG_FORMAT = ["jpg", "png"]
 
@@ -35,6 +35,7 @@ class NNHandler_image(NNHandler):
     def open(self):
         if self.format in NNHandler_image.VID_FORMAT:
             self.cap = cv2.VideoCapture(self.img_loc)
+            eprint("Frames will only be read linearly")
 
     def close(self):
         if self.format in NNHandler_image.VID_FORMAT:
@@ -45,7 +46,8 @@ class NNHandler_image(NNHandler):
 
     def read_frame(self, frame):
         if self.format in NNHandler_image.VID_FORMAT:
-            self.cap.set(1, frame - 1)
+            # raise NotImplementedError("Don't do this. It causes errors")
+            # self.cap.set(1, frame - 1)
             res, frame = self.cap.read()
 
             return frame
