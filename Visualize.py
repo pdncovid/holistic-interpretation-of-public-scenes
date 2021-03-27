@@ -184,6 +184,7 @@ if __name__=="__main__":
 
 		print("Dist",dist)
 
+	plt.tight_layout()
 
 	if False:#args.output==None:
 		plt.show()	
