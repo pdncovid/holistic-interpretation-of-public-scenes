@@ -1,0 +1,7 @@
+{
+	"input" : null,
+	"saveGraph" : "data/vid-03-graph.json",
+	"nnout_yolo" : "data/vid-03-yolo.txt",
+	"nnout_handshake" : "data/vid-03-handshake.json",
+	"timeSeriesLength" : 1873
+}
