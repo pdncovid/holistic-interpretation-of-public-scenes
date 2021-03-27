@@ -147,7 +147,3 @@ if __name__ == "__main__":
     vis = Visualizer(graph= g, yolo=None, handshake=hs_handler, img=img_handle)
     vis.plot()
 
-
-
-
-
