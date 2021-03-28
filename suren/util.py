@@ -88,7 +88,7 @@ def get_iou(bb1, bb2, mode=0):
     x_right = min(bb1[2], bb2[2])
     y_bottom = min(bb1[3], bb2[3])
 
-    # print(x_right, x_left, y_bottom, y_top)
+    print(x_right, x_left, y_bottom, y_top)
 
     if x_right < x_left or y_bottom < y_top:
         return 0.0

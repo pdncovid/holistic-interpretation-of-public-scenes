@@ -54,14 +54,14 @@ class NNHandler_handshake(NNHandler):
 			node_ind = []
 			for ind, node in enumerate(self.graph.nodes):
 				if node.params["detection"][t]:
-					node_t.append([node.params["xMin"][t], node.params["xMax"][t], node.params["yMin"][t], node.params["yMax"][t]])
+					node_t.append([node.params["xMin"][t], node.params["yMin"][t], node.params["xMax"][t], node.params["yMax"][t]])
 					node_ind.append(ind)
 
 			# Next consider all handshake boxes at time t
 			nbox = handshake_data[str(t)]["No of boxes"]
 
 			for bbox in handshake_data[str(t)]["bboxes"]:
-				bb_hs = [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]]
+				bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
 
 				conf = bbox["conf"]
 
@@ -83,10 +83,17 @@ class NNHandler_handshake(NNHandler):
 
 				p1, p2 = node_ind[ind1], node_ind[ind2]
 
+				print(t)
+				print(iou)
+				print(ind1, ind2)
+				print(p1, p2)
+				print()
+
+
 				# p1, p2 = node_ind[np.array([ind1, ind2])]
 
-				self.graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": conf}
-				self.graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": conf}
+				self.graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": conf, "iou":iou[ind1]}
+				self.graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": conf, "iou":iou[ind2]}
 
 		print("Updated the graph")
 
