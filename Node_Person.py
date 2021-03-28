@@ -25,7 +25,7 @@ class Person(Node):
 
 
 	def init_handshake(self):
-		self.params["handshake"]=[{"person":None,"confidence":None} for _ in range(self.time_series_length)]
+		self.params["handshake"]=[{"person":None,"confidence":None, "iou":None} for _ in range(self.time_series_length)]
 
 		# self.addParam("handshake")
 		# for t in range(self.time_series_length):	# @gihan : Why are there multiple time series lengths? Shouldn't this be global?
