@@ -38,6 +38,14 @@ class NNHandler_yolo(NNHandler):
 
 		print("This person is visible only from {} to {} frames".format(firstApperanceT,lastAppearanceT))
 
+	def init_dict(self, file_name=None):
+		if file_name is not None: raise NotImplementedError
+
+		data = {}
+		# self.json_data = data
+		# self.time_series_length = data["frames"]
+		return data
+
 
 	def runForBatch(self):
 		print("Running Yolo handler for batch....")		
