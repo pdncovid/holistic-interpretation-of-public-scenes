@@ -16,7 +16,7 @@ if __name__=="__main__":
 	args.add_argument("--nnout_handshake",type=str,dest="nnout_handshake",default=None)
 	args.add_argument("--timeSeriesLength",type=int,dest="timeSeriesLength",default=1000)
 	args.add_argument("--runFromConfigJsonFile",type=str,\
-		dest="runFromConfigJsonFile",default="scheduler-run-config.json")
+		dest="runFromConfigJsonFile",default="./args/scheduler-01.json")
 	args=args.parse_args()
 
 
