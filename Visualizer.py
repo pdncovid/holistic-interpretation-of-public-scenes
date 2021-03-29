@@ -84,7 +84,11 @@ class Visualizer:
 
             if self.hs_handle is not None:
                 if str(t) in self.hs_handle.json_data:
-                    for bbox in self.hs_handle.json_data[str(t)]["bboxes"]:
+                    if self.hs_handle.is_tracked:
+                        bb_dic = self.hs_handle.json_data[str(t)]
+                    else:
+                        bb_dic = self.hs_handle.json_data[str(t)]["bboxes"]
+                    for bbox in bb_dic:
                         x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
                         cv2.rectangle(rgb_, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
 
@@ -109,7 +113,7 @@ class Visualizer:
             # display image with opencv or any operation you like
             cv2.imshow("plot", rgb_)
 
-            k = cv2.waitKey(0) & 0xFF
+            k = cv2.waitKey(WAIT) & 0xFF
             if k == 27:
                 break
         img_handle.close()
@@ -150,13 +154,16 @@ if __name__ == "__main__":
     # yolo_handler.runForBatch()
     g.init_from_json(args.graph_file)
 
-    hs_handler = NNHandler_handshake(args.nnout_handshake)
+    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
     hs_handler.connectToGraph(g)
     hs_handler.runForBatch()
 
     img_handle = NNHandler_image(format="avi", img_loc=args.video_file)
-    img_handle.init_from_json()
+    # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
+    img_handle.runForBatch()
 
     vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
-    vis.plot()
+    vis.plot(WAIT=20)
 
