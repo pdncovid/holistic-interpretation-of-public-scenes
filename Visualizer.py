@@ -140,7 +140,3 @@ if __name__ == "__main__":
     vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
     vis.plot(WAIT=20)
 
-
-
-
-
