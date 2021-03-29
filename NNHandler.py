@@ -6,6 +6,7 @@ class NNHandler:
 		self.graph = graph
 		self.myInput = None
 		self.myId = None
+		self.time_series_length = None
 
 	def setInputBlockSize(self,N=32):
 		self.inputBlockSize=N
