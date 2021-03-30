@@ -163,6 +163,6 @@ if __name__ == "__main__":
     # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
     img_handle.runForBatch()
 
-    vis = Visualizer(graph= g, yolo=None, handshake=None, img=img_handle)
-    vis.plot(WAIT=25)
+    vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
+    vis.plot(WAIT=0)
 

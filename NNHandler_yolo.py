@@ -34,7 +34,8 @@ except:
 
 
 class NNHandler_yolo(NNHandler):
-	def __init__(self, textFileName=None, N=256, json_file=None):
+	def __init__(self, textFileName=None, N=256, json_file=None, is_tracked=True):
+		#TODO : @gihan - remove textFileName and everything related to it :)
 
 		super().__init__()
 
@@ -50,7 +51,7 @@ class NNHandler_yolo(NNHandler):
 			with open(self.fileName, 'r') as file:
 				self.allLines = file.readlines()
 
-		elif json_file is not None:
+		elif is_tracked or json_file is not None:
 			self.ftype = "json"
 
 
@@ -412,7 +413,7 @@ if __name__=="__main__":
 	#
 	# nn_yolo = NNHandler_yolo()
 	#
-	# # nn_yolo.create_tracker(img_handle)
-	# # nn_yolo.save_json('vid-01-yolo.json')
-	#
+	# nn_yolo.create_tracker(img_handle)
+	# nn_yolo.save_json('vid-01-yolo.json')
+
 	# nn_yolo.init_from_json('./data/vid-01-yolo.json')
