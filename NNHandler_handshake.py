@@ -320,9 +320,7 @@ class NNHandler_handshake(NNHandler):
 			print("Updated the graph")
 
 		else:
-
 			for t in handshake_frames:
-
 				# First take all the detected nodes at time t
 				node_t = []
 				node_ind = []
@@ -333,11 +331,10 @@ class NNHandler_handshake(NNHandler):
 						node_ind.append(ind)
 
 				# Next consider all handshake boxes at time t
-				nbox = handshake_data[str(t)]["No of boxes"]
+				# nbox = handshake_data[str(t)]["No of boxes"]
 
 				for bbox in handshake_data[str(t)]["bboxes"]:
 					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
-
 					conf = bbox["conf"]
 
 					# iou between bb_hs and bb_person (node_t)
@@ -358,7 +355,7 @@ class NNHandler_handshake(NNHandler):
 
 					p1, p2 = node_ind[ind1], node_ind[ind2]
 
-					# p1, p2 = node_ind[np.array([ind1, ind2])]
+					# print(t, p1, p2, iou)
 
 					self.graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": conf, "iou": iou[ind1]}
 					self.graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": conf, "iou": iou[ind2]}
@@ -377,7 +374,7 @@ if __name__ == "__main__":
 	g = Graph()
 	g.init_from_json('./data/vid-01-graph.json')
 
-	with_tracker=True
+	with_tracker=False
 
 	if with_tracker:
 
@@ -407,7 +404,6 @@ if __name__ == "__main__":
 
 			g.saveToFile('./data/vid-01-graph_handshake_track.json')
 
-
 	else:
 		nn_handle = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)
 
@@ -419,6 +415,7 @@ if __name__ == "__main__":
 		# init graph from json
 		try:
 			g.init_from_json('./data/vid-01-graph_handshake.json')
+			print("Loaded graph from : ./data/vid-01-graph_handshake.json")
 		except:
 			nn_handle.connectToGraph(g)
 			nn_handle.runForBatch()
@@ -428,4 +425,6 @@ if __name__ == "__main__":
 				print(p, g.nodes[0].params[p])
 
 			g.saveToFile('./data/vid-01-graph_handshake.json')
+
+	g.plot()
 
