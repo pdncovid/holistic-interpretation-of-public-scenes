@@ -9,7 +9,7 @@ class Person(Node):
 		:param time_series_length: Number of time samples
 		"""
 
-		super().__init__(initParams=initParams, time_series_length=time_series_length, idx=idx)
+		super().__init__(initParams=None, time_series_length=time_series_length, idx=idx)
 
 		self.location2D=isLocation2D
 		# self.type = 'Person'
@@ -17,7 +17,11 @@ class Person(Node):
 		self.init_pos()
 		self.init_handshake()
 
-		# print(self.params)
+		if initParams is not None:
+			self.setParamsFromDict(initParams)
+
+		# for par in self.params:
+		# 	print("NODE_PERSON", par, self.params[par])
 
 
 
@@ -28,7 +32,7 @@ class Person(Node):
 
 	def init_handshake(self):
 		# print("Initializing handshake")
-		self.params["handshake"]=[{"person":None,"confidence":None, "iou":None} for _ in range(self.time_series_length)]
+		self.params["handshake"]=[{"person":None,"confidence":None, "iou":None, "id":None} for _ in range(self.time_series_length)]
 
 		# self.addParam("handshake")
 		# for t in range(self.time_series_length):	# @gihan : Why are there multiple time series lengths? Shouldn't this be global?

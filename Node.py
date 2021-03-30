@@ -2,13 +2,15 @@
 
 class Node:
 
-    def __init__(self, initParams=None, time_series_length=100, idx=None):
-        initParams = {} if initParams is None else initParams
+    def __init__(self, initParams=None, time_series_length=None, idx=None):
 
         self.time_series_length = time_series_length
-        self.params = initParams
+        self.params = {}
         self.idx = idx          # id is inbuilt. Dont use
         self.type = None
+
+        if initParams is not None:
+            self.setParamsFromDict(initParams)
 
     def setType(self, ty):
         self.type = ty

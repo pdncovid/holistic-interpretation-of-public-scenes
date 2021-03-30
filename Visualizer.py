@@ -9,7 +9,7 @@ from NNHandler_handshake import NNHandler_handshake
 from NNHandler_image import NNHandler_image
 from NNHandler_yolo import NNHandler_yolo
 
-from suren.util import eprint, stop, progress, Json
+from suren.util import eprint, progress, Json
 try:
     # import networkx as nx
     import matplotlib.pyplot as plt
@@ -151,6 +151,7 @@ if __name__ == "__main__":
 
 
     yolo_handler = NNHandler_yolo(args.nnout_yolo)
+    # yolo_handler = NNHandler_yolo(json_file='./data/vid-01-yolo.json')
     # yolo_handler.connectToGraph(g)
     # yolo_handler.runForBatch()
     g.init_from_json(args.graph_file)
@@ -167,5 +168,6 @@ if __name__ == "__main__":
     # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
     img_handle.runForBatch()
 
-    vis = Visualizer(graph= g, yolo=args.nnout_yolo, handshake=None, img=img_handle)
+    vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
     vis.plot(WAIT=0)
+
