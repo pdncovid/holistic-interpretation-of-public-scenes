@@ -34,25 +34,26 @@ except:
 
 
 class NNHandler_yolo(NNHandler):
-	def __init__(self, textFileName=None, N=256, json_file=None, is_tracked=True):
+	def __init__(self, json_file=None, is_tracked=True):
 		#TODO : @gihan - remove textFileName and everything related to it :)
 
 		super().__init__()
 
 		print("Creating an YOLO handler")
 
-		self.fileName=textFileName
-		self.inputBlockSize=N
+		# self.fileName=textFileName
+		# self.inputBlockSize=N
 
-		self.ftype = "txt"
+		# self.ftype = "txt"
 		self.json_file = json_file
+		self.is_tracked = is_tracked
 
-		if self.fileName is not None:
-			with open(self.fileName, 'r') as file:
-				self.allLines = file.readlines()
+		# if self.fileName is not None:
+		# 	with open(self.fileName, 'r') as file:
+		# 		self.allLines = file.readlines()
 
-		elif is_tracked or json_file is not None:
-			self.ftype = "json"
+		# elif is_tracked or json_file is not None:
+		# 	self.ftype = "json"
 
 
 
@@ -276,14 +277,6 @@ class NNHandler_yolo(NNHandler):
 
 		print("This person is visible only from {} to {} frames".format(firstApperanceT,lastAppearanceT))
 
-	def init_dict(self, file_name=None):
-		if file_name is not None: raise NotImplementedError
-
-		data = {}
-		# self.json_data = data
-		# self.time_series_length = data["frames"]
-		return data
-
 	def update_graph_nodes(self):
 		if self.graph.time_series_length is None: self.graph.time_series_length = self.time_series_length
 
@@ -315,105 +308,91 @@ class NNHandler_yolo(NNHandler):
 			self.graph.add_person(p)
 
 
-
-
 	def runForBatch(self):
-		if self.ftype == "txt":
-			print("Running Yolo handler for batch....")
-			frames=[]
-			for l in self.allLines[1:]:
-				if l.split(" ")[0]=="Frame":
-					frames.append([])
-				elif l.split(" ")[0]=="FPS:":
-					pass
-				elif l.split(" ")[0]=="Tracker":
-					# print()
-					try:
-						a="Tracker ID:"
-						b="Class:"
-						c="BBox Coords (xmin, ymin, xmax, ymax):"
-						d="\n"
-						frames[-1].append(dict())
-						# print(frames[-1])
-						frames[-1][-1]["id"]=int(self.extractValForKey(l,a,b)[:-1])
-						frames[-1][-1]["class"]=self.extractValForKey(l,b,c)
-						frames[-1][-1]["bbox"]=list(map(int,self.extractValForKey(l,c,d)[1:-1].split(",")))
-					except:
-						break
-				else:
-					print("Unidentified line: ",l)
+		print("Running Yolo handler for batch....")
+		# if self.ftype == "txt":
+		# 	print("Running Yolo handler for batch....")
+		# 	frames=[]
+		# 	for l in self.allLines[1:]:
+		# 		if l.split(" ")[0]=="Frame":
+		# 			frames.append([])
+		# 		elif l.split(" ")[0]=="FPS:":
+		# 			pass
+		# 		elif l.split(" ")[0]=="Tracker":
+		# 			# print()
+		# 			try:
+		# 				a="Tracker ID:"
+		# 				b="Class:"
+		# 				c="BBox Coords (xmin, ymin, xmax, ymax):"
+		# 				d="\n"
+		# 				frames[-1].append(dict())
+		# 				# print(frames[-1])
+		# 				frames[-1][-1]["id"]=int(self.extractValForKey(l,a,b)[:-1])
+		# 				frames[-1][-1]["class"]=self.extractValForKey(l,b,c)
+		# 				frames[-1][-1]["bbox"]=list(map(int,self.extractValForKey(l,c,d)[1:-1].split(",")))
+		# 			except:
+		# 				break
+		# 		else:
+		# 			print("Unidentified line: ",l)
+		#
+		# 	print(len(frames))
+		# 	ids=[]
+		# 	for f in frames:
+		# 		for o in f:
+		# 			ids.append(o["id"])
+		# 	ids=sorted(set(ids))
+		#
+		# 	print("UniqueIDs ",ids)
+		#
+		#
+		# 	for i in range(len(ids)):
+		# 		self.graph.add_person()
+		# 		node=self.graph.getNode(i)
+		# 		# node.addParam("detection")
+		# 		for t in range(len(frames)):
+		# 			node.setParam("xMin",t,0)
+		# 			node.setParam("yMin",t,0)
+		# 			node.setParam("xMax",t,0)
+		# 			node.setParam("yMax",t,0)
+		# 			node.setParam("detection",t,False)
+		# 			for pt in range(len(frames[t])):
+		# 				if frames[t][pt]["id"]==ids[i]:
+		#
+		#
+		# 					node.setParam("xMin",t,frames[t][pt]["bbox"][0])
+		# 					node.setParam("xMax",t,frames[t][pt]["bbox"][2])
+		# 					node.setParam("yMin",t,frames[t][pt]["bbox"][1])
+		# 					node.setParam("yMax",t,frames[t][pt]["bbox"][3])
+		# 					node.setParam("detection",t,True)
+		#
+		#
+		# 	# self.graph.saveToFile(fileName="yoloExp.txt")
+		# 	# self.myInput()
+		#
+		#
+		# 	# print(self.allLines)
+		#
+		# 	print("Updated the graph")
 
-			print(len(frames))
-			ids=[]
-			for f in frames:
-				for o in f:
-					ids.append(o["id"])
-			ids=sorted(set(ids))
-
-			print("UniqueIDs ",ids)
-
-
-			for i in range(len(ids)):
-				self.graph.add_person()
-				node=self.graph.getNode(i)
-				# node.addParam("detection")
-				for t in range(len(frames)):
-					node.setParam("xMin",t,0)
-					node.setParam("yMin",t,0)
-					node.setParam("xMax",t,0)
-					node.setParam("yMax",t,0)
-					node.setParam("detection",t,False)
-					for pt in range(len(frames[t])):
-						if frames[t][pt]["id"]==ids[i]:
-
-
-							node.setParam("xMin",t,frames[t][pt]["bbox"][0])
-							node.setParam("xMax",t,frames[t][pt]["bbox"][2])
-							node.setParam("yMin",t,frames[t][pt]["bbox"][1])
-							node.setParam("yMax",t,frames[t][pt]["bbox"][3])
-							node.setParam("detection",t,True)
-
-
-			# self.graph.saveToFile(fileName="yoloExp.txt")
-			# self.myInput()
-
-
-			# print(self.allLines)
-
-			print("Updated the graph")
-
-		elif self.ftype == "json":
-			print("Running Yolo handler with json....")
-			self.init_from_json()
-			self.update_graph_nodes()
+		self.init_from_json()
+		self.update_graph_nodes()
 
 
 
 
 if __name__=="__main__":
+
+
+	# TEST
+	img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
+	img_handle.runForBatch()
+
 	nn_yolo = NNHandler_yolo()
+	try:
+		# To load YOLO + DSORT track from json
+		nn_yolo.init_from_json('./data/vid-01-yolo.json')
+	except:
+		# To create YOLO + DSORT track and save to json
+		nn_yolo.create_tracker(img_handle)
+		nn_yolo.save_json('vid-01-yolo.json')
 
-	print("Testing started >>>>>>")
-	a=nn_yolo.extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","Tracker ID:",", Class")
-	print(a)
-
-	a=nn_yolo.extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","BBox Coords (xmin, ymin, xmax, ymax):","\n")
-	print(a)
-
-	a=nn_yolo.extractValForKey("Tracker ID: 15, Class: person,  BBox Coords (xmin, ymin, xmax, ymax): (1154, 0, 1194, 75)\n","Class:",",  BBox")
-	print(a)
-
-
-	print(">>>>>> Testing ended")
-
-
-	# TEST SUREN
-	# img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
-	# img_handle.runForBatch()
-	#
-	# nn_yolo = NNHandler_yolo()
-	#
-	# nn_yolo.create_tracker(img_handle)
-	# nn_yolo.save_json('vid-01-yolo.json')
-
-	# nn_yolo.init_from_json('./data/vid-01-yolo.json')

@@ -114,9 +114,7 @@ class Visualizer:
             # display image with opencv or any operation you like
             cv2.imshow("plot", rgb_)
 
-            k = cv2.waitKey(WAIT) & 0xFF
-            if k == 'q':
-                break
+            if cv2.waitKey(WAIT) & 0xff == ord('q'): break
         img_handle.close()
     # cap.release()
 
