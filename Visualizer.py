@@ -8,7 +8,7 @@ from NNHandler_handshake import NNHandler_handshake
 from NNHandler_image import NNHandler_image
 from NNHandler_yolo import NNHandler_yolo
 
-from suren.util import eprint, stop, progress, Json
+from suren.util import eprint, progress, Json
 try:
     # import networkx as nx
     import matplotlib.pyplot as plt
@@ -147,15 +147,14 @@ if __name__ == "__main__":
 
     g = Graph()
 
-
-
     yolo_handler = NNHandler_yolo(args.nnout_yolo)
+    # yolo_handler = NNHandler_yolo(json_file='./data/vid-01-yolo.json')
     # yolo_handler.connectToGraph(g)
     # yolo_handler.runForBatch()
     g.init_from_json(args.graph_file)
 
-    # hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
-    hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
+    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
     hs_handler.connectToGraph(g)
     hs_handler.runForBatch()

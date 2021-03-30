@@ -2,27 +2,36 @@ import numpy as np
 import json
 import os, sys
 from PIL import Image
-import tensorflow as tf
-from tensorflow.python.saved_model import tag_constants
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
 
 from NNHandler import NNHandler
 from NNHandler_image import NNHandler_image, cv2
-from suren.util import get_iou, Json, eprint
 from Graph import Graph
 
-from deep_sort import preprocessing, nn_matching
-from deep_sort.detection import Detection
-from deep_sort.tracker import Tracker
-from tools import generate_detections as gdet
-import core.utils as utils
-# from core.yolov4 import filter_boxes
-from tensorflow.python.saved_model import tag_constants
+from suren.util import get_iou, Json, eprint
 
-from core.config import cfg
+# This is only needed if running YOLO / deepsort
+# Not needed if the values are loaded from file
+try:
+	import tensorflow as tf
+	from tensorflow.python.saved_model import tag_constants
+
+	sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
+
+	from deep_sort import preprocessing, nn_matching
+	from deep_sort.detection import Detection
+	from deep_sort.tracker import Tracker
+	from tools import generate_detections as gdet
+	import core.utils as utils
+	# from core.yolov4 import filter_boxes
+	from tensorflow.python.saved_model import tag_constants
+
+	from core.config import cfg
+except Exception as e:
+	print(e)
+	print("If YOLO isn't required, ignore this")
 
 
 # def import_tracker(name="deepsort"):
@@ -332,6 +341,8 @@ class NNHandler_handshake(NNHandler):
 
 				# Next consider all handshake boxes at time t
 				# nbox = handshake_data[str(t)]["No of boxes"]
+
+				# print(t, node_t)
 
 				for bbox in handshake_data[str(t)]["bboxes"]:
 					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
