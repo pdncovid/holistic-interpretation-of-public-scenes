@@ -40,7 +40,7 @@ class Visualizer:
             cmap = self.graph.get_cmap(show=True)
             sc_x, sc_y, lines = self.graph.get_plot_points()
 
-            print(sc_x.shape, sc_y.shape, cmap.shape)
+            # print(sc_x.shape, sc_y.shape, cmap.shape)
 
             print(cmap.shape)
 
@@ -113,7 +113,7 @@ class Visualizer:
             cv2.imshow("plot", rgb_)
 
             k = cv2.waitKey(WAIT) & 0xFF
-            if k == 27:
+            if k == 'q':
                 break
         img_handle.close()
     # cap.release()
@@ -128,15 +128,16 @@ if __name__ == "__main__":
     # yolo_handler.connectToGraph(g)
     # yolo_handler.runForBatch()
     g.init_from_json('./data/vid-01-graph.json')
+    print(g)
 
-    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json')        # This is without DSORT tracker and avg
-    hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
+    hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
     hs_handler.connectToGraph(g)
     hs_handler.runForBatch()
 
     img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
     img_handle.runForBatch()
 
-    vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
-    vis.plot(WAIT=20)
+    vis = Visualizer(graph= g, yolo=None, handshake=None, img=img_handle)
+    vis.plot(WAIT=0)
 
