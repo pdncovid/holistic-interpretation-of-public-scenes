@@ -132,9 +132,7 @@ class NNHandler_image(NNHandler):
 
             cv2.imshow('rgb', rgb)
 
-            k = cv2.waitKey(WAIT) & 0xff
-            if k == ord('q'):
-                break
+            if cv2.waitKey(WAIT) & 0xff == ord('q'): break
 
         cv2.destroyAllWindows()
         self.close()

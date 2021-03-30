@@ -194,6 +194,7 @@ class Graph:
 	def add_person(self, p=None):
 		# @SUREN what is fed in as p here? You can add a "pre-initialized" person or an "empty/new" person
 		if p is None: p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id())
+		elif p.idx is None: p.idx = self.get_nxt_id()
 
 		self.nodes.append(p)
 		self.n_person += 1
