@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from collections import defaultdict
+import argparse
 
 from Graph import Graph
 from NNHandler_handshake import NNHandler_handshake
@@ -18,44 +19,19 @@ except ImportError as e:
 
 class Visualizer:
     def __init__(self, graph=None, yolo=None, handshake=None, img=None):
+        """
+
+        :param graph: Graph
+        :param yolo: NNHandler_yolo
+        :param handshake: NNHandler_handshake
+        :param img: NNHandler_image
+        """
         self.graph = graph
         self.yolo_handle = yolo
         self.hs_handle = handshake
         self.img_handle = img
 
-    def plot(self):
-
-        def get_cmap(show=False):
-            colors = cm.hsv(np.linspace(0, .8, self.n_nodes))
-            window = 10
-
-            col_arr = np.ones((window, 4))
-
-            col_arr[:, -1] = np.power(.8, np.arange(window))[::-1]
-
-            arr1 = np.tile(colors, (window, 1, 1)).transpose((1, 0, 2))
-            # print(colors.shape, arr1.shape)
-            arr2 = np.tile(col_arr, (self.n_nodes, 1, 1))
-            # print(col_arr.shape, arr2.shape)
-
-            cmap = arr1 * arr2
-
-            # print(arr1[1, :, :], arr2[1, :, :])
-
-            # print(colors)
-
-            # stop()
-            if show:
-                x = np.tile(np.arange(cmap.shape[0]), (cmap.shape[1], 1))
-                y = np.tile(np.arange(cmap.shape[1]), (cmap.shape[0], 1)).transpose()
-                # print(x)
-                # print(y)
-                plt.figure()
-                plt.title("Colour map (Close to continue)")
-                plt.scatter(x.flatten(), y.flatten(), color=np.reshape(cmap, (-1, 4), order='F'))
-                plt.show()
-
-            return cmap
+    def plot(self, WAIT=20):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
@@ -73,8 +49,10 @@ class Visualizer:
             # cmap_ = cv2.cvtColor(cmap_.reshape(1, -1, 3), cv2.COLOR_RGB2BGR).reshape(-1, 3)
             print(cmap_)
 
-        # PLOT
+            for n, p in enumerate(self.graph.nodes):
+                p.params["col"] = cmap_[n]
 
+        # PLOT
         cv2.namedWindow("plot")
 
 
@@ -96,9 +74,24 @@ class Visualizer:
                     cv2.circle(rgb_, (sc_x_[p], sc_y_[p]), 1, tuple(cmap_[p]), 5)
 
                 for l in lines[t]:
-                    print(l)
                     cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)),
                              (255, 255, 255), 3)
+
+            if self.yolo_handle is not None:
+                for p in self.graph.nodes:
+                    x_min, y_min, x_max, y_max = map(int, [p.params["xMin"][t], p.params["yMin"][t], p.params["xMax"][t], p.params["yMax"][t]])
+                    cv2.rectangle(rgb_, (x_min, y_min), (x_max, y_max), p.params["col"], 2)
+
+            if self.hs_handle is not None:
+                if str(t) in self.hs_handle.json_data:
+                    if self.hs_handle.is_tracked:
+                        bb_dic = self.hs_handle.json_data[str(t)]
+                    else:
+                        bb_dic = self.hs_handle.json_data[str(t)]["bboxes"]
+                    for bbox in bb_dic:
+                        x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
+                        cv2.rectangle(rgb_, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
+
 
             if (t + 1) % 20 == 0:
                 progress(t + 1, self.graph.time_series_length, "drawing graph")
@@ -120,7 +113,7 @@ class Visualizer:
             # display image with opencv or any operation you like
             cv2.imshow("plot", rgb_)
 
-            k = cv2.waitKey(20) & 0xFF
+            k = cv2.waitKey(WAIT) & 0xFF
             if k == 27:
                 break
         img_handle.close()
@@ -130,20 +123,47 @@ class Visualizer:
 
 
 if __name__ == "__main__":
+    args=argparse.ArgumentParser()
+    args.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default=None)
+    args.add_argument("--nnout_handshake","-h",type=str,dest="nnout_handshake",default=None)
+    args.add_argument("--video_file","-v",type=str,dest="video_file",default=None)
+    args.add_argument("--graph_file","-g",type=str,dest="graph_file",default=None)
+    args.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
+
+    args.parse_args()
+
+    if None in [args.nnout_yolo, args.nnout_handshake,args.video_file,args.graph_file]:
+        print("Running from config file")
+
+        with open(args.config_file) as json_file:
+            data = json.load(json_file)
+            args = argparse.Namespace()
+            dic = vars(args)
+
+            for k in data.keys():
+                dic[k]=data[k]
+            print(args)
+
+
     g = Graph()
 
-    # yolo_handler = NNHandler_yolo('./data/vid-01-graph.json')
+
+
+    yolo_handler = NNHandler_yolo(args.nnout_yolo)
     # yolo_handler.connectToGraph(g)
     # yolo_handler.runForBatch()
-    g.init_from_json('./data/vid-01-graph.json')
+    g.init_from_json(args.graph_file)
 
-    hs_handler = NNHandler_handshake('./data/vid-01-handshake.json')
+    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
     hs_handler.connectToGraph(g)
     hs_handler.runForBatch()
 
-    img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
-    img_handle.init_from_json()
+    img_handle = NNHandler_image(format="avi", img_loc=args.video_file)
+    # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
+    img_handle.runForBatch()
 
-    vis = Visualizer(graph= g, yolo=None, handshake=hs_handler, img=img_handle)
-    vis.plot()
+    vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
+    vis.plot(WAIT=20)
 

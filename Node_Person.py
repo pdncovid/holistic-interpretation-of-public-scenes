@@ -25,7 +25,7 @@ class Person(Node):
 
 
 	def init_handshake(self):
-		self.params["handshake"]=[{"person":None,"confidence":None} for _ in range(self.time_series_length)]
+		self.params["handshake"]=[{"person":None,"confidence":None, "iou":None} for _ in range(self.time_series_length)]
 
 		# self.addParam("handshake")
 		# for t in range(self.time_series_length):	# @gihan : Why are there multiple time series lengths? Shouldn't this be global?
@@ -119,8 +119,8 @@ class Person(Node):
 
 							#Now we know t1----t2(exclusive) are false detections.
 							toFillCount=t2-t1
-							xStep=self.params["X"][t2]-self.params["X"][t1-1]
-							yStep=self.params["Y"][t2]-self.params["Y"][t1-1]
+							xStep=(self.params["X"][t2]-self.params["X"][t1-1])/toFillCount
+							yStep=(self.params["Y"][t2]-self.params["Y"][t1-1])/toFillCount
 							for tt in range(toFillCount):
 								self.setParam("X",t1+tt,\
 									self.params["X"][t1-1] + tt*xStep)
