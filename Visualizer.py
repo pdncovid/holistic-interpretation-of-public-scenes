@@ -123,26 +123,26 @@ class Visualizer:
 
 
 if __name__ == "__main__":
-    args=argparse.ArgumentParser()
-    args.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default=None)
-    args.add_argument("--nnout_handshake","-h",type=str,dest="nnout_handshake",default=None)
-    args.add_argument("--video_file","-v",type=str,dest="video_file",default=None)
-    args.add_argument("--graph_file","-g",type=str,dest="graph_file",default=None)
-    args.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph.json')
+    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.txt')
+    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
+    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./suren/temp/seq18.avi')
+    # parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
 
-    args.parse_args()
+    args = parser.parse_args()
 
-    if None in [args.nnout_yolo, args.nnout_handshake,args.video_file,args.graph_file]:
-        print("Running from config file")
-
-        with open(args.config_file) as json_file:
-            data = json.load(json_file)
-            args = argparse.Namespace()
-            dic = vars(args)
-
-            for k in data.keys():
-                dic[k]=data[k]
-            print(args)
+    # if None in [args.nnout_yolo, args.nnout_handshake,args.video_file,args.graph_file]:
+    #     print("Running from config file")
+    #
+    #     with open(args.config_file) as json_file:
+    #         data = json.load(json_file)
+    #         args = argparse.Namespace()
+    #         dic = vars(args)
+    #
+    #         for k in data.keys():
+    #             dic[k]=data[k]
+    #         print(args)
 
 
     g = Graph()
@@ -154,8 +154,8 @@ if __name__ == "__main__":
     # yolo_handler.runForBatch()
     g.init_from_json(args.graph_file)
 
-    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
-    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
+    # hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
+    hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
     hs_handler.connectToGraph(g)
     hs_handler.runForBatch()
@@ -165,5 +165,5 @@ if __name__ == "__main__":
     img_handle.runForBatch()
 
     vis = Visualizer(graph= g, yolo=None, handshake=None, img=img_handle)
-    vis.plot(WAIT=0)
+    vis.plot(WAIT=25)
 
