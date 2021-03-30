@@ -17,6 +17,8 @@ class Person(Node):
 		self.init_pos()
 		self.init_handshake()
 
+		# print(self.params)
+
 
 
 	# def setInitialLocation(self,X,Y,Z=None):
@@ -25,6 +27,7 @@ class Person(Node):
 
 
 	def init_handshake(self):
+		# print("Initializing handshake")
 		self.params["handshake"]=[{"person":None,"confidence":None, "iou":None} for _ in range(self.time_series_length)]
 
 		# self.addParam("handshake")

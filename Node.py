@@ -32,4 +32,6 @@ class Node:
 
 
     def setParamsFromDict(self, dic):
-        self.params = dic
+        for par in dic:
+            self.params[par] = dic[par]
+        # self.params = dic
