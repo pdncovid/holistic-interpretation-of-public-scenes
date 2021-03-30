@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from collections import defaultdict
 import argparse
+import json
 
 from Graph import Graph
 from NNHandler_handshake import NNHandler_handshake
@@ -129,6 +130,8 @@ if __name__ == "__main__":
     args.add_argument("--video_file","-v",type=str,dest="video_file",default=None)
     args.add_argument("--graph_file","-g",type=str,dest="graph_file",default=None)
     args.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
+    args.add_argument("--is_tracked", "-tr", type=str, dest="is_tracked", default=None)
+
 
     args.parse_args()
 
@@ -154,8 +157,8 @@ if __name__ == "__main__":
     # yolo_handler.runForBatch()
     g.init_from_json(args.graph_file)
 
-    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=True)
-    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
+    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.is_tracked)
+    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=args.is_tracked)        # This is without DSORT tracker and avg
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
     hs_handler.connectToGraph(g)
     hs_handler.runForBatch()
