@@ -1,6 +1,7 @@
 {
 	"nnout_yolo" : "./data/vid-01-yolo.txt",
-	"nnout_handshake" : "./data/vid-01-handshake.json",
+	"nnout_handshake" : "./data/vid-01-handshake_track.json",
 	"video_file" : "./suren/temp/seq18.avi",
 	"graph_file" : "./data/vid-01-graph.json",
+	"track" : true
 }

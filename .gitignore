@@ -7,3 +7,6 @@ __pycache__/
 .idea/*
 suren/temp/*
 visualizations/*
+tools/*
+deep_sort/*
+.DS_Store
