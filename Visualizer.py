@@ -19,7 +19,7 @@ except ImportError as e:
 
 
 class Visualizer:
-    def __init__(self, graph=None, yolo=None, handshake=None, img=None):
+    def __init__(self, graph=None, yolo=None, handshake=None, img=None, out_name=None):
         """
 
         :param graph: Graph
@@ -32,12 +32,15 @@ class Visualizer:
         self.hs_handle = handshake
         self.img_handle = img
 
+        self.out_name = out_name
+
     def plot(self, WAIT=20):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
             return
 
+        # Process and get all graph points till time t
         if self.graph is not None:
             cmap = self.graph.get_cmap(show=True)
             sc_x, sc_y, lines = self.graph.get_plot_points()
@@ -57,10 +60,16 @@ class Visualizer:
         cv2.namedWindow("plot")
 
 
-
         # plt.figure()
         # plt.scatter(np.arange(4), np.ones(4), color=cmap_)
         # plt.show()
+        if self.out_name is not None:
+            img_handle.open()
+            rgb = img_handle.read_frame(0)
+            img_handle.close()
+            h, w, _ = rgb.shape
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            out = cv2.VideoWriter(self.out_name, fourcc, 20.0, (w, h))
 
         img_handle.open()
         for t in range(self.graph.time_series_length):
@@ -111,11 +120,18 @@ class Visualizer:
 
             # img_ = np.hstack((img, img_sctr))
 
+            # save video
+            if self.out_name is not None:
+                out.write(rgb_)
+
             # display image with opencv or any operation you like
             cv2.imshow("plot", rgb_)
 
             if cv2.waitKey(WAIT) & 0xff == ord('q'): break
         img_handle.close()
+
+        if self.out_name is not None:
+            out.release()
     # cap.release()
 
     # plt.show(block=True)
@@ -129,9 +145,11 @@ if __name__ == "__main__":
     parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
     parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./suren/temp/seq18.avi')
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
-    parser.add_argument("--track", "-tr", type=str, dest="track", default=None)
+    parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
+    parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
 
     args = parser.parse_args()
+    print(args)
 
     if None in [args.nnout_yolo, args.nnout_handshake,args.video_file,args.graph_file, args.track]:
         print("Running from config file")
@@ -154,7 +172,7 @@ if __name__ == "__main__":
     # yolo_handler.runForBatch()
     g.init_from_json(args.graph_file)
 
-
+    # TODO : Save video @suren
     hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
@@ -166,6 +184,6 @@ if __name__ == "__main__":
     # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
     img_handle.runForBatch()
 
-    vis = Visualizer(graph= g, yolo=yolo_handler, handshake=hs_handler, img=img_handle)
+    vis = Visualizer(graph= g, yolo=None, handshake=None, img=img_handle, out_name=args.output)
     vis.plot(WAIT=0)
 
