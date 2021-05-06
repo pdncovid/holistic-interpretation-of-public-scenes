@@ -11,3 +11,4 @@ deep_sort/*
 .DS_Store
 suren/temp/*
 suren/mask/*
+suren/openpose/*

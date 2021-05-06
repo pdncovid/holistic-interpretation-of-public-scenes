@@ -70,6 +70,7 @@ class Graph:
 				p_y1 = p.params["yMin"][t]
 				p_x2 = p.params["xMax"][t]
 				p_y2 = p.params["yMax"][t]
+				#TODO : @Gihan - Do perspective transform here for (p_x, p_y)
 				p_x = (p_x1 + p_x2) / 2
 				p_y = (p_y1 + p_y2) / 2
 				# pos[n] = (p_x, p_y)
@@ -139,8 +140,10 @@ class Graph:
 
 		# plt.figure()
 
+		# colour map
 		cmap = self.get_cmap(show=show_cmap)
 
+		# scatter x, y and lines
 		sc_x, sc_y, lines = self.get_plot_points()
 
 		# print(sc_x.shape, sc_y.shape, cmap.shape)
