@@ -1,7 +1,7 @@
 import numpy as np
 import json
 import os, sys
-from PIL import Image
+# from PIL import Image
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
@@ -52,6 +52,17 @@ except Exception as e:
 
 
 class NNHandler_handshake(NNHandler):
+
+	@staticmethod
+	def plot(img, points, is_tracked):
+		if is_tracked:
+			bb_dic = points
+		else:
+			bb_dic = points["bboxes"]
+
+		for bbox in bb_dic:
+			x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
+			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
 
 	def __init__(self, handshake_file=None, is_tracked=False):
 

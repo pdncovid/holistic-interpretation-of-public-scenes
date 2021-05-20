@@ -56,7 +56,7 @@ class Visualizer:
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
 
-    def plot(self, WAIT=20, show_cmap=True, img=True, network=False):
+    def plot(self, WAIT=20, show_cmap=True):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
@@ -146,23 +146,17 @@ class Visualizer:
             if self.yolo_handle is not None and self.vid_bbox:
                 for p in self.graph.nodes:
                     x_min, y_min, x_max, y_max = map(int, [p.params["xMin"][t], p.params["yMin"][t], p.params["xMax"][t], p.params["yMax"][t]])
-                    cv2.rectangle(rgb_, (x_min, y_min), (x_max, y_max), p.params["col"], 2)
+                    NNHandler_yolo.plot(rgb_, (x_min, y_min, x_max, y_max), p.params["col"])
 
             # Plot info from openpose
             if self.openpose_handle is not None and self.vid_keypoints:
-                for p in self.openpose_handle.json_data[str(t)]:
-                    NNHandler_openpose.plot(rgb_, p['pose_keypoints_2d'])
+                NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
+
 
             # Plot info from graph
             if self.hs_handle is not None and self.vid_hbox:
                 if str(t) in self.hs_handle.json_data:
-                    if self.hs_handle.is_tracked:
-                        bb_dic = self.hs_handle.json_data[str(t)]
-                    else:
-                        bb_dic = self.hs_handle.json_data[str(t)]["bboxes"]
-                    for bbox in bb_dic:
-                        x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
-                        cv2.rectangle(rgb_, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
+                    NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
 
 
             if (t + 1) % 20 == 0:
@@ -214,7 +208,7 @@ if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph.json')
     parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.txt')
-    parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose.json')
+    parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
     parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
     parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./suren/temp/seq18.avi')
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
@@ -245,9 +239,8 @@ if __name__ == "__main__":
     # yolo_handler.connectToGraph(g)
     # yolo_handler.runForBatch()
 
-    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose)
+    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
     openpose_handler.init_from_json()
-    print(openpose_handler.json_data)
 
     hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
@@ -262,8 +255,10 @@ if __name__ == "__main__":
 
     vis = Visualizer(graph=g, yolo=yolo_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler, out_name=None)  #args.output)
 
-    vis.init_network()      # Plot pyplot graph
-    vis.init_vid(vid_scatter=False, vid_lines=False)        # Plot cv2 video
+    # Call this to plot pyplot graph
+    vis.init_network()
+    # Call this to plot cv2 video
+    vis.init_vid(vid_scatter=False, vid_lines=False)
 
     print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
 
