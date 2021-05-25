@@ -48,7 +48,11 @@ class Graph:
 			return e
 
 	def __repr__(self):
-		return "Graph with %d nodes" % self.n_nodes
+		rep = "Created Graph object with nodes = %d for frames = %d. Param example:\n" % (self.n_nodes, self.time_series_length)
+		for p in self.nodes[0].params:
+			rep += "\t" + str(p) + " " + str(self.nodes[0].params[p]) + "\n"
+
+		return rep
 
 	def get_plot_points(self):
 		sc_x = []
@@ -75,13 +79,17 @@ class Graph:
 				if p.params["handshake"][t]['person'] is not None:
 					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
 					line_t["%d_%d"%(n1, n2)].append([p_x, p_y])
+					# print(t, n1, n2, p_x, p_y)
 
 			sc_x.append(sc_tx)
 			sc_y.append(sc_ty)
 
+			# print("XXX", line_t)
+
 			# @suren : find a better way to implement variable size array
 			try: line_t = np.array([line_t[l] for l in line_t]).transpose((0, 2, 1))
 			except ValueError: line_t = []
+
 
 			lines.append(line_t)
 
@@ -135,7 +143,7 @@ class Graph:
 
 		sc_x, sc_y, lines = self.get_plot_points()
 
-		print(sc_x.shape, sc_y.shape, cmap.shape)
+		# print(sc_x.shape, sc_y.shape, cmap.shape)
 
 		# PLOT
 		ylim = [np.min(sc_y, axis=None)-5, np.max(sc_y, axis=None)+5]
@@ -164,7 +172,7 @@ class Graph:
 
 			for l in lines[t]:
 				ax.plot(l[0], l[1])
-				plt.pause(.5)
+				plt.pause(.3)
 
 
 			else:
@@ -184,8 +192,9 @@ class Graph:
 		return len(self.nodes)
 
 	def add_person(self, p=None):
-		# @SUREN what is fed in as p here?
-		p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id()) if p is None else p
+		# @SUREN what is fed in as p here? You can add a "pre-initialized" person or an "empty/new" person
+		if p is None: p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id())
+		elif p.idx is None: p.idx = self.get_nxt_id()
 
 		self.nodes.append(p)
 		self.n_person += 1

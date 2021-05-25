@@ -7,6 +7,9 @@ class NNHandler:
 		self.myInput = None
 		self.myId = None
 
+		self.time_series_length = None
+		self.json_data = None
+
 	def setInputBlockSize(self,N=32):
 		self.inputBlockSize=N
 	
@@ -23,7 +26,7 @@ class NNHandler:
 	def runForBatch(self):
 		raise NotImplementedError
 
-	def init_from_json(self):
+	def init_from_json(self, file_name=None):
 		# Read json file
 		pass
 		# raise NotImplementedError
