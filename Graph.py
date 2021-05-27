@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from Node_Person import Person
 from suren.util import eprint, stop, progress, Json
-
+from sklearn.cluster import SpectralClustering
 
 try:
 	# import networkx as nx
@@ -35,6 +35,20 @@ class Graph:
 
 		self.BIG_BANG = 0  # HUH -_-
 
+		self.PROJECTED_SPACE_H=1000
+		self.PROJECTED_SPACE_W=1000
+
+		self.REFERENCE_POINTS=[[60,1080],[1850,1080],[1450,450],[920,450]]
+		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
+		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
+        self.DEST=np.float32(self.DEST)
+        self.transMatrix=cv.getPerspectiveTransform(self.REFERENCE_POINTS,self.DEST)
+	
+	def project(self,x,y):
+		projected=np.dot(self.transMatrix, np.array([x,y,1]))
+		projected=[projected[0]/projected[2],projected[1]/projected[2]]
+		return projected
+
 	@staticmethod
 	def plot_import():
 		try:
@@ -48,7 +62,11 @@ class Graph:
 			return e
 
 	def __repr__(self):
-		return "Graph with %d nodes" % self.n_nodes
+		rep = "Created Graph object with nodes = %d for frames = %d. Param example:\n" % (self.n_nodes, self.time_series_length)
+		for p in self.nodes[0].params:
+			rep += "\t" + str(p) + " " + str(self.nodes[0].params[p]) + "\n"
+
+		return rep
 
 	def get_plot_points(self):
 		sc_x = []
@@ -75,13 +93,17 @@ class Graph:
 				if p.params["handshake"][t]['person'] is not None:
 					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
 					line_t["%d_%d"%(n1, n2)].append([p_x, p_y])
+					# print(t, n1, n2, p_x, p_y)
 
 			sc_x.append(sc_tx)
 			sc_y.append(sc_ty)
 
+			# print("XXX", line_t)
+
 			# @suren : find a better way to implement variable size array
 			try: line_t = np.array([line_t[l] for l in line_t]).transpose((0, 2, 1))
 			except ValueError: line_t = []
+
 
 			lines.append(line_t)
 
@@ -135,7 +157,7 @@ class Graph:
 
 		sc_x, sc_y, lines = self.get_plot_points()
 
-		print(sc_x.shape, sc_y.shape, cmap.shape)
+		# print(sc_x.shape, sc_y.shape, cmap.shape)
 
 		# PLOT
 		ylim = [np.min(sc_y, axis=None)-5, np.max(sc_y, axis=None)+5]
@@ -158,133 +180,28 @@ class Graph:
 			# print(sc_y_)
 			# print(cmap_)
 
-			# print(sc_x_.shape, sc_y_.shape, cmap_.shape)
+			# print(sc_x_.shape, sc_y_.shape, 
 
-			ax.scatter(sc_x_.flatten(), sc_y_.flatten(), color=np.reshape(cmap_, (-1, 4), order='C'))
+	def generateFloorMap(self):
 
-			for l in lines[t]:
-				ax.plot(l[0], l[1])
-				plt.pause(.5)
+		self.floorMap=[]
+		for n in range(len(self.nodes)):
+			X=self.nodes[n].params["X"]
+			Y=self.nodes[n].params["Y"]
+			temp=[]
+			for t in range(len(X)):
+				temp.append(self.project(X[t],Y[t]))
+			self.floorMap.append(temp)
 
+	def findClusters(self):
+		N=len(self.nodes)
+		T=self.time_series_length
+		self.groupProbability=np.zeros((N,N,self.time_series_length),np.float)
+		clusters=[]
+		for t in range(T):
+			clusteringAtT = SpectralClustering(n_clusters=2,assign_labels='discretize',random_state=0).fit(self.floorMap[:,t])
+			cc=np,max(clusteringAtT.labels)
+			#Look at the labels and populate the matrix.
+			
 
-			else:
-				plt.pause(.1)
-
-			ax.clear()
-			ax.set_xlim(xlim[0], xlim[1])
-			ax.set_ylim(ylim[0], ylim[1])
-
-			if (t + 1) % 20 == 0:
-				progress(t + 1, self.time_series_length, "drawing graph")
-
-
-	# plt.show(block=True)
-
-	def get_nxt_id(self):
-		return len(self.nodes)
-
-	def add_person(self, p=None):
-		# @SUREN what is fed in as p here?
-		p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id()) if p is None else p
-
-		self.nodes.append(p)
-		self.n_person += 1
-		self.n_nodes = len(self.nodes)
-
-		return p
-
-	# def addNode(self,time):
-	# 	print("GRAPH: adding (person) node")
-	# 	self.nodes.append(Person())
-	# 	return len(self.nodes)-1
-
-	# def addNode2(self,node):
-	# 	'''
-	# 	Merge this with addNode()
-	# 	'''
-	# 	print("GRAPH: adding (general) node")
-	# 	self.nodes.append(node)
-	# 	return len(self.nodes)-1
-
-	def getNode(self, idx):
-		return self.nodes[idx]
-
-	def make_jsonable(self, data):
-		for node in data["nodes"]:
-			for param in node:
-				print(param, node[param])
-				if param == "handshake":
-					for t in range(self.time_series_length):
-						print(type(node[param][t]['person']))
-						print(type(node[param][t]['confidence']))
-
-				else:
-					for t in range(self.time_series_length):
-						print(type(node[param][t]))
-					# print(type(node["handshake"]))
-
-	def saveToFile(self, file_name=None):
-		if file_name is None: file_name = self.saveGraphFileName
-
-		data = {"N": len(self.nodes), "frames": self.time_series_length, "nodes": []}
-		for n in self.nodes:
-			data["nodes"].append(n.getParamsDict())
-
-		# self.make_jsonable(data)
-
-		js = Json(file_name)
-		js.write(data)
-
-		# with open(file_name, 'w') as outfile:
-		# 	json.dump(data, outfile)
-		print("Finished writing all nodes to {}".format(file_name))
-
-	def init_from_json(self, file_name):
-		with open(file_name) as json_file:
-			data = json.load(json_file)
-
-		try:
-			N = data["N"]
-			assert len(data["nodes"]) == N, "No of nodes not equal to N"
-		except Exception as e:
-			eprint(e)
-			N = len(data["nodes"])
-
-		try:
-			time_series_length = data["frames"]
-			assert len(data["nodes"][0]["detection"]) == time_series_length, "No of nodes not equal to N"
-		except Exception as e:
-			eprint(e)
-			time_series_length = len(data["nodes"][0]["detection"])
-
-		if N == 0:
-			eprint("No nodes :(")
-			return
-
-		if self.time_series_length is None: self.time_series_length = time_series_length
-
-
-		for n in range(N):
-			p = self.add_person()
-			p.setParamsFromDict(data["nodes"][n])
-
-	def calculate_standing_locations(self):
-		for n in self.nodes:
-			n.calculate_standing_locations()
-
-	def interpolate_undetected_timestamps(self):
-		for n in self.nodes:
-			n.interpolate_undetected_timestamps()
-
-
-
-
-if __name__ == "__main__":
-	g = Graph()
-	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
-	g.init_from_json('./data/vid-01-graph_handshake.json')	# Start from handshake
-
-	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
-	print(g.nodes[0].params)
-
-	g.plot()
+		self.groupProbability=np,mean(self.groupProbability,axis=-1)
