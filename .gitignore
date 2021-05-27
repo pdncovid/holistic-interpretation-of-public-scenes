@@ -5,8 +5,10 @@ __pycache__/
 *.jpg
 *.png
 .idea/*
-suren/temp/*
 visualizations/*
 tools/*
 deep_sort/*
 .DS_Store
+suren/temp/*
+suren/mask/*
+suren/openpose/*
