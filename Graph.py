@@ -199,9 +199,21 @@ class Graph:
 		self.groupProbability=np.zeros((N,N,self.time_series_length),np.float)
 		clusters=[]
 		for t in range(T):
-			clusteringAtT = SpectralClustering(n_clusters=2,assign_labels='discretize',random_state=0).fit(self.floorMap[:,t])
-			cc=np,max(clusteringAtT.labels)
-			#Look at the labels and populate the matrix.
+			
+			'''This part is a load of crap to get a small thing done>>> start'''
+			clusteringAtT = SpectralClustering(n_clusters=5,assign_labels='discretize',random_state=0).fit(self.floorMap[:,t])
+			noOfClusters=np,max(clusteringAtT.labels)
+			for c in range(noOfClusters+1):
+				peopleIncluster=[]
+				for j in range(clusteringAtT.labels):
+					if clusteringAtT.labels[j]==c:
+						peopleIncluster.append(j)
+
+				for a, b in zip(peopleIncluster, peopleIncluster[1:]):
+    				self.groupProbability[a,b,t]=1.0
+    				self.groupProbability[b,a,t]=1.0
+			'''<<<< end'''
 			
 
 		self.groupProbability=np,mean(self.groupProbability,axis=-1)
+
