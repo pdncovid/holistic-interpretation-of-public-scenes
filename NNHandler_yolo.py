@@ -34,6 +34,12 @@ except:
 
 
 class NNHandler_yolo(NNHandler):
+
+	@staticmethod
+	def plot(img, points, col):
+		x_min, y_min, x_max, y_max = points
+		cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
+
 	def __init__(self, json_file=None, is_tracked=True):
 		#TODO : @gihan - remove textFileName and everything related to it :)
 
