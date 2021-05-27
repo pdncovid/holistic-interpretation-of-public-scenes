@@ -47,11 +47,6 @@ class Person(Node):
 		self.params["detection"]=[False for _ in range(self.time_series_length)]
 
 
-
-
-
-
-	
 	def calculate_standing_locations(self):
 		if not "X" in self.params.keys():
 			self.addParam("X")
