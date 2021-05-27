@@ -320,7 +320,7 @@ class Graph:
 	'''
 
 	def calculateThreatLevelForFrame(self, t):
-		return 0
+    return 0
 
 
 if __name__ == "__main__":
