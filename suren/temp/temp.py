@@ -1,25 +1,29 @@
 from suren.util import  Json
 import json
-import networkx as nx
+# import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import time
 
-# with open('./nn-outputs/yoloOut.txt') as file:
-#     data = file.read()
-#     data = json.dump
+n = int(input())
 
+if n == 0:
+    while 1:
+        pass
 
-plt.ion()
-x = np.arange(0, 4*np.pi, 0.1)
-y = [np.sin(i) for i in x]
-plt.plot(x, y, 'g-', linewidth=1.5, markersize=4)
-plt.draw()
-time.sleep(1)
-plt.plot(x, [i**2 for i in y], 'g-', linewidth=1.5, markersize=4)
-plt.pause(1)
-plt.plot(x, [i**2*i+0.25 for i in y], 'r-', linewidth=1.5, markersize=4) 
-plt.pause(1)
+arr = []
+for x in range(n):
+    a = [int(i) for i in input().strip().split()]
+    
 
-plt.show(block=True)
+    if x > 0:
+        a[0] += arr[0]
+        a[-1] += arr[-1]
+        for j in range(1, x):
+            a[j] += max(arr[j - 1:j + 1])
 
+    arr = a[:]
+
+    print(arr)
+
+print(max(arr))
