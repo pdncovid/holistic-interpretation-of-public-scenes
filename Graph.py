@@ -201,7 +201,7 @@ class Graph:
 		for t in range(T):
 			
 			'''This part is a load of crap to get a small thing done>>> start'''
-			clusteringAtT = SpectralClustering(n_clusters=5,assign_labels='discretize',random_state=0).fit(self.floorMap[:,t])
+			clusteringAtT = SpectralClustering(n_clusters=5,assign_labels='discretize',random_state=0).fit(self.floorMap[:,:,t])
 			noOfClusters=np,max(clusteringAtT.labels)
 			for c in range(noOfClusters+1):
 				peopleIncluster=[]
@@ -220,5 +220,6 @@ class Graph:
 
 
 	def calculateThreatLevelForFrame(self,t):
+		
 		return 0
 
