@@ -214,6 +214,11 @@ class Graph:
     				self.groupProbability[b,a,t]=1.0
 			'''<<<< end'''
 			
-
+		#A better logic other than mean is needed.
 		self.groupProbability=np,mean(self.groupProbability,axis=-1)
+
+
+
+	def calculateThreatLevelForFrame(self,t):
+		return 0
 
