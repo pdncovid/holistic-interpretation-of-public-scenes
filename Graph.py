@@ -320,13 +320,14 @@ class Graph:
 	'''
 
 	def calculateThreatLevelForFrame(self, t):
-    return 0
+		return 0
 
 
 if __name__ == "__main__":
 	g = Graph()
 	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
+	g.calculate_standing_locations()
 	g.generateFloorMap()
 
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
