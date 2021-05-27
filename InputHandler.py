@@ -6,6 +6,7 @@ class InputHandler:
 
 
 
+
 	def setInputFile(self,fileName):
 		self.inputSet=True
 		self.videoIn=cv.VideoCapture(fileName)
@@ -13,7 +14,9 @@ class InputHandler:
 		self.buffer=[]
 		self.noConnectedComponents=0
 		self.connectedCoponentBlockSizes=[]
-		self.connectComponentNextFrame=[]		
+		self.connectComponentNextFrame=[]
+
+				
 		# readOneFrameToBuffer(self)
 		
 	def readOneFrameToBuffer(self):
