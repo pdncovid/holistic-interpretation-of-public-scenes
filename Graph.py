@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from Node_Person import Person
 from suren.util import eprint, stop, progress, Json
-# from sklearn.cluster import SpectralClustering
+from sklearn.cluster import SpectralClustering
 
 try:
 	# import networkx as nx
@@ -292,7 +292,6 @@ class Graph:
 				temp.append(self.project(X[t], Y[t]))
 			self.floorMap.append(temp)
 
-	'''
 	def findClusters(self):
 		N = len(self.nodes)
 		T = self.time_series_length
@@ -317,7 +316,6 @@ class Graph:
 
 		# A better logic other than mean is needed.
 		self.groupProbability = np.mean(self.groupProbability, axis=-1)
-	'''
 
 	def calculateThreatLevelForFrame(self, t):
 		return 0
@@ -329,9 +327,9 @@ if __name__ == "__main__":
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
 	g.calculate_standing_locations()
 	g.generateFloorMap()
-
+	g.findClusters()
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
-	print(g.nodes[0].params)
+	# print(g.nodes[0].params)
 
 
 
