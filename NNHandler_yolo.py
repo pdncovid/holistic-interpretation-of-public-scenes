@@ -1,3 +1,4 @@
+import argparse
 import json
 import numpy as np
 import os
@@ -388,17 +389,35 @@ class NNHandler_yolo(NNHandler):
 
 if __name__=="__main__":
 
+	img_loc = "./suren/temp/seq18.avi"
+	json_loc = "./data/vid-01-yolo.json"
+
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument("--nnout_yolo", "-y", type=str, dest="nnout_yolo", default=json_loc)
+	parser.add_argument("--video_file", "-v", type=str, dest="video_file", default=img_loc)
+	parser.add_argument("--overwrite", "-ow", type=bool, dest="overwrite", default=False)
+
+	args = parser.parse_args()
 
 	# TEST
-	img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
+	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
 	nn_yolo = NNHandler_yolo()
 	try:
-		# To load YOLO + DSORT track from json
-		nn_yolo.init_from_json('./data/vid-01-yolo.json')
+		if os.path.exists(json_loc):
+			if args.overwrite:
+				raise Exception("Overwriting json : %s"%json_loc)
+
+			# To load YOLO + DSORT track from json
+			nn_yolo.init_from_json(json_loc)
+
+		else:
+			raise Exception("Json does not exists : %s"%json_loc)
 	except:
 		# To create YOLO + DSORT track and save to json
 		nn_yolo.create_tracker(img_handle)
-		nn_yolo.save_json('vid-01-yolo.json')
+		nn_yolo.save_json(json_loc)
+
 
