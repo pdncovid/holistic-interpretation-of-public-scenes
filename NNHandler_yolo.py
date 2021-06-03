@@ -401,23 +401,23 @@ if __name__=="__main__":
 	args = parser.parse_args()
 
 	# TEST
-	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
+	img_handle = NNHandler_image(format="avi", img_loc=args.img_loc)
 	img_handle.runForBatch()
 
 	nn_yolo = NNHandler_yolo()
 	try:
-		if os.path.exists(json_loc):
+		if os.path.exists(args.json_loc):
 			if args.overwrite:
-				raise Exception("Overwriting json : %s"%json_loc)
+				raise Exception("Overwriting json : %s"%args.json_loc)
 
 			# To load YOLO + DSORT track from json
-			nn_yolo.init_from_json(json_loc)
+			nn_yolo.init_from_json(args.json_loc)
 
 		else:
-			raise Exception("Json does not exists : %s"%json_loc)
+			raise Exception("Json does not exists : %s"%args.json_loc)
 	except:
 		# To create YOLO + DSORT track and save to json
 		nn_yolo.create_tracker(img_handle)
-		nn_yolo.save_json(json_loc)
+		nn_yolo.save_json(args.json_loc)
 
 
