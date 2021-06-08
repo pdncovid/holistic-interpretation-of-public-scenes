@@ -1,3 +1,4 @@
+import argparse
 import json
 import numpy as np
 import os
@@ -10,7 +11,7 @@ from NNHandler_image import NNHandler_image, cv2
 
 from Node_Person import Person
 
-from suren.util import Json
+from suren.util import Json, eprint
 
 # This is only needed if running YOLO / deepsort
 # Not needed if the values are loaded from file
@@ -29,8 +30,8 @@ try:
 	from tensorflow.python.saved_model import tag_constants
 
 	from core.config import cfg
-except:
-	pass
+except Exception as e:
+	eprint("Cannot run YOLO:", e)
 
 
 class NNHandler_yolo(NNHandler):
@@ -40,7 +41,7 @@ class NNHandler_yolo(NNHandler):
 		x_min, y_min, x_max, y_max = points
 		cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
 
-	def __init__(self, json_file=None, is_tracked=True):
+	def __init__(self, json_file=None, is_tracked=True, vis=True, verbose=True):
 		#TODO : @gihan - remove textFileName and everything related to it :)
 
 		super().__init__()
@@ -50,17 +51,10 @@ class NNHandler_yolo(NNHandler):
 		# self.fileName=textFileName
 		# self.inputBlockSize=N
 
-		# self.ftype = "txt"
 		self.json_file = json_file
 		self.is_tracked = is_tracked
-
-		# if self.fileName is not None:
-		# 	with open(self.fileName, 'r') as file:
-		# 		self.allLines = file.readlines()
-
-		# elif is_tracked or json_file is not None:
-		# 	self.ftype = "json"
-
+		self.visualize = vis
+		self.verbose = verbose
 
 
 	def create_tracker(self, img_handle):
@@ -211,28 +205,25 @@ class NNHandler_yolo(NNHandler):
 							(255, 255, 255), 2)
 
 				# if enable info flag then print details about each track
-				print("Tracker ID: {}, Class: {},  BBox Coords (xmin, ymin, xmax, ymax): {}".format(str(track.track_id),
-																									class_name, (
-																										int(bbox[0]),
-																										int(bbox[1]),
-																										int(bbox[2]),
-																										int(bbox[3]))))
+				if self.verbose:
+					print("Tracker ID: {}, Class: {},  BBox Coords (xmin, ymin, xmax, ymax): {}".format(
+						str(track.track_id), class_name, (int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3]))))
 
 				person_t.append({
 					"x1": bbox[0], "y1": bbox[1], "x2": bbox[2], "y2": bbox[3], "id": track.track_id
 				})
 
-			# calculate frames per second of running detections
 			result = np.asarray(frame)
 			result = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-			cv2.imshow("Output Video", result)
-
-			if cv2.waitKey(20) & 0xFF == ord('q'): break
+			if self.visualize:
+				cv2.imshow("Output Video", result)
+				if cv2.waitKey(20) & 0xFF == ord('q'): break
 
 			if len(person_t) > 0: tracked_person[t] = person_t
 
-		cv2.destroyAllWindows()
+		if self.visualize:
+			cv2.destroyAllWindows()
 
 		self.time_series_length = frame_num
 		self.json_data = tracked_person
@@ -388,17 +379,41 @@ class NNHandler_yolo(NNHandler):
 
 if __name__=="__main__":
 
+	img_loc = "./suren/temp/seq18.avi"
+	json_loc = "./data/vid-01-yolo.json"
+
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument("--nnout_yolo", "-y", type=str, dest="nnout_yolo", default=json_loc)
+	parser.add_argument("--video_file", "-v", type=str, dest="video_file", default=img_loc)
+	parser.add_argument("--overwrite", "-ow", action="store_true", dest="overwrite")
+	parser.add_argument("--visualize", "--vis", action="store_true", dest="visualize")
+	parser.add_argument("--verbose", "--verb", action="store_true", dest="verbose")
+
+	args = parser.parse_args()
+
+	img_loc = args.video_file
+	json_loc = args.nnout_yolo
+
 
 	# TEST
-	img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
+	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-	nn_yolo = NNHandler_yolo()
+	nn_yolo = NNHandler_yolo(vis=args.visualize)
 	try:
-		# To load YOLO + DSORT track from json
-		nn_yolo.init_from_json('./data/vid-01-yolo.json')
+		if os.path.exists(json_loc):
+			if args.overwrite:
+				raise Exception("Overwriting json : %s"%json_loc)
+
+			# To load YOLO + DSORT track from json
+			nn_yolo.init_from_json(json_loc)
+
+		else:
+			raise Exception("Json does not exists : %s"%json_loc)
 	except:
 		# To create YOLO + DSORT track and save to json
 		nn_yolo.create_tracker(img_handle)
-		nn_yolo.save_json('vid-01-yolo.json')
+		nn_yolo.save_json(json_loc)
+
 

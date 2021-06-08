@@ -13,3 +13,4 @@ suren/temp/*
 suren/mask/*
 suren/openpose/*
 suren/temp/temp.py
+data/videos/*
