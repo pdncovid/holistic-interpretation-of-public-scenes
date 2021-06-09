@@ -1,0 +1,4 @@
+{
+	"reference_points":[[60,500],[1200,800],[1500,450],[500,300]],
+	"group_radius_threshold":100.0
+}
