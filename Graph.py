@@ -50,6 +50,7 @@ class Graph:
 		self.PROJECTED_SPACE_W=1000
 
 		self.REFERENCE_POINTS=[[60,1080],[1850,1080],[1450,450],[920,450]]
+		#This should be taken from camera orientation JSON
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
 		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
 		self.DEST=np.float32(self.DEST)
@@ -300,7 +301,7 @@ class Graph:
 	def findClusters(self,METHOD="NAIVE"):
 		N = len(self.nodes)
 		T = self.time_series_length
-		DIST_THRESH=1.0
+		DIST_THRESH=100.0#This should be taken from the camera orientation json.
 		
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
 		#There is a lot for me to do on this array. 
