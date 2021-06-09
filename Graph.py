@@ -352,12 +352,13 @@ class Graph:
 
 
 	def calculateThreatLevelForFrame(self, t):
-		P=4#HARD_CODED
+		DISTANCE_TAU=40000.0#Hardcoded value
+		P=len(self.nodes)
 		threatLevel=0.0
 		for p1 in range(P):
 			for p2 in range(P):
 				if p1!=p2:
-					d=np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])
+					d=np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
 					i=0.0#get from graph self.nodes @Jameel
 					m=0.0#get from graph self.nodes @Suren
 					g=self.groupProbability[p1,p2]
