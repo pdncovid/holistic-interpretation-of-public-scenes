@@ -52,6 +52,9 @@ except Exception as e:
 
 
 class NNHandler_handshake(NNHandler):
+	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
+	model_filename = yolo_dir + 'model_data/mars-small128.pb'
+	weigths_filename = yolo_dir + '/checkpoints/yolov4-fullshake_best'
 
 	@staticmethod
 	def plot(img, points, is_tracked):
@@ -102,13 +105,9 @@ class NNHandler_handshake(NNHandler):
 		"""
 
 		# if not import_tracker(): raise Exception("Couldn't create tracker")
-		yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-		if not os.path.exists(yolo_dir): raise Exception("Couldn't find yolo_directory : %s" % (yolo_dir))
-
-		model_filename = yolo_dir + 'model_data/mars-small128.pb'
-		if not os.path.exists(model_filename): raise Exception("Couldn't find model : %s" % (model_filename))
-		weigths_filename = yolo_dir + '/checkpoints/yolov4-fullshake_best'
-		if not os.path.exists(weigths_filename): raise Exception("Couldn't find weights : %s" % (weigths_filename))
+		if not os.path.exists(self.yolo_dir): raise Exception("Couldn't find yolo_directory : %s" % (self.yolo_dir))
+		if not os.path.exists(self.model_filename): raise Exception("Couldn't find model : %s" % (self.model_filename))
+		if not os.path.exists(self.weigths_filename): raise Exception("Couldn't find weights : %s" % (self.weigths_filename))
 
 		tracked_handshake = {}
 
@@ -122,20 +121,19 @@ class NNHandler_handshake(NNHandler):
 		input_size = 416
 
 		# initialize deep sort
-		encoder = gdet.create_box_encoder(model_filename, batch_size=1)
+		encoder = gdet.create_box_encoder(self.model_filename, batch_size=1)
 		# calculate cosine distance metric
 		metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
 		# initialize tracker
 		tracker = Tracker(metric, n_init=2)
 
-		saved_model_loaded = tf.saved_model.load(weigths_filename, tags=[tag_constants.SERVING])
+		saved_model_loaded = tf.saved_model.load(self.weigths_filename, tags=[tag_constants.SERVING])
 		infer = saved_model_loaded.signatures['serving_default']
 
 		frame_num = 0
 		img_handle.open()
 		for t in range(img_handle.time_series_length):
-			if t == 1000:
-				break
+			# if t == 1000: break
 
 			frame = img_handle.read_frame(t)
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -242,12 +240,9 @@ class NNHandler_handshake(NNHandler):
 							(255, 255, 255), 2)
 
 				# if enable info flag then print details about each track
-				print("Tracker ID: {}, Class: {},  BBox Coords (xmin, ymin, xmax, ymax): {}".format(str(track.track_id),
-																									class_name, (
-																										int(bbox[0]),
-																										int(bbox[1]),
-																										int(bbox[2]),
-																										int(bbox[3]))))
+				if self.verbose:
+					print("Tracker ID: {}, Class: {},  BBox Coords (xmin, ymin, xmax, ymax): {}".format(
+						str(track.track_id), class_name, (int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3]))))
 
 				handshake_t.append({
 					"x1": bbox[0], "y1": bbox[1], "x2": bbox[2], "y2": bbox[3], "id": track.track_id

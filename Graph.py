@@ -86,8 +86,11 @@ class Graph:
 
 				#TODO : @Gihan - Do perspective transform here for (p_x, p_y)
 
+
 				p_x = (p_x1 + p_x2) / 2
 				p_y = (p_y1 + p_y2) / 2
+				p_x, p_y = self.project(p_x, p_y)
+
 				# pos[n] = (p_x, p_y)
 				sc_tx.append(p_x)
 				sc_ty.append(p_y)
@@ -320,7 +323,7 @@ class Graph:
 	'''
 
 	def calculateThreatLevelForFrame(self, t):
-    return 0
+		return 0
 
 
 if __name__ == "__main__":
