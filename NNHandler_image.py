@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import json
 import cv2
 from glob import glob
@@ -11,6 +12,7 @@ class NNHandler_image(NNHandler):
     VID_FORMAT = ["avi"]
     IMG_FORMAT = ["jpg", "png"]
 
+
     def __init__(self, format, img_loc=None, json_file=None):
 
         super().__init__()
@@ -20,9 +22,21 @@ class NNHandler_image(NNHandler):
         self.img_loc = img_loc
         self.json_file = json_file
 
+        print(self)
+
         self.cap = None
         self.json_data = None
         self.time_series_length = None
+
+    def __repr__(self):
+        lines = []
+        if self.img_loc is not None:
+            lines.append("\t [*] Image location : %s"%self.img_loc)
+        if self.json_file is not None:
+            lines.append("\t [*] Json location : %s" % self.json_file)
+        if self.time_series_length is not None:
+            lines.append("\t [*] Frames : {}".format(self.time_series_length))
+        return "\n".join(lines)
 
     def count_frames(self, path):
         if self.format in NNHandler_image.VID_FORMAT:
@@ -68,13 +82,15 @@ class NNHandler_image(NNHandler):
             return cv2.imread(self.json_data[str(frame)])
 
     def init_from_img_loc(self, img_loc=None, show=False):
+        img_loc = self.img_loc if img_loc is None else img_loc
+        assert os.path.exists(img_loc), "Source image/video does not exist in path : %s"%img_loc
+
         if self.format in NNHandler_image.VID_FORMAT:
 
-            self.time_series_length = self.count_frames(self.img_loc)
+            self.time_series_length = self.count_frames(img_loc)
             self.json_data = None
 
-            if show:
-                self.show()
+            if show: self.show()
 
             return self.json_data
 
@@ -84,15 +100,9 @@ class NNHandler_image(NNHandler):
             n_frames = len(img_names)
 
             self.time_series_length = n_frames
+            self.json_data = {i: img for (i, img) in enumerate(img_names)}
 
-            data = {}
-            for i, img in enumerate(img_names):
-                data[i] = img
-
-            self.json_data = data
-
-            if show:
-                self.show()
+            if show: self.show()
 
             return self.json_data
 
@@ -100,6 +110,9 @@ class NNHandler_image(NNHandler):
             raise NotImplementedError
 
     def init_from_json(self, json_file=None, show=False):
+        json_file = self.json_file if json_file is None else json_file
+        assert os.path.exists(json_file), "Json file does not exist in path : %s"%json_file
+
         if self.format in NNHandler_image.VID_FORMAT:
             raise Exception("No json for Videos : %s" % self.format)
 
@@ -112,8 +125,7 @@ class NNHandler_image(NNHandler):
             self.time_series_length = data.pop("frames")
             self.json_data = data
 
-            if show:
-                self.show()
+            if show: self.show()
 
             return self.json_data
 
@@ -155,13 +167,17 @@ class NNHandler_image(NNHandler):
             raise NotImplementedError
 
     def runForBatch(self):
-        if self.img_loc is None:
+        if self.img_loc is None and self.json_file is None:
+            raise ValueError("Both img_loc and json_file cannot be None")
+
+        elif self.img_loc is None and self.json_file is not None:
             self.init_from_json()
         else:
             self.init_from_img_loc()
 
-            if self.json_file is not None:
-                self.write_json()
+            if self.json_file is not None: self.write_json()
+
+        print("Read %s file with %d frames" %(self.format, self.time_series_length))
 
 
 if __name__ == "__main__":

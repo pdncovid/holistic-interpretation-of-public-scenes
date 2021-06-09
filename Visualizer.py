@@ -210,7 +210,7 @@ if __name__ == "__main__":
     parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.txt')
     parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
     parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
-    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./suren/temp/seq18.avi')
+    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
     parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
@@ -231,13 +231,13 @@ if __name__ == "__main__":
     #         print(args)
 
     g = Graph()
-    g.init_from_json(args.graph_file)
+    g.init_from_json(None)
 
 
     yolo_handler = NNHandler_yolo(args.nnout_yolo)
     # yolo_handler = NNHandler_yolo(json_file='./data/vid-01-yolo.json')
-    # yolo_handler.connectToGraph(g)
-    # yolo_handler.runForBatch()
+    yolo_handler.connectToGraph(g)
+    yolo_handler.runForBatch()
 
     # openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
     # openpose_handler.init_from_json()
