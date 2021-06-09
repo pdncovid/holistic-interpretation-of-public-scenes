@@ -352,7 +352,20 @@ class Graph:
 
 
 	def calculateThreatLevelForFrame(self, t):
-		return 0
+		P=4#HARD_CODED
+		threatLevel=0.0
+		for p1 in range(P):
+			for p2 in range(P):
+				if p1!=p2:
+					d=np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])
+					i=0.0#get from graph self.nodes @Jameel
+					m=0.0#get from graph self.nodes @Suren
+					g=self.groupProbability[p1,p2]
+					EPS_m=2.0
+					EPS_g=2.0
+					threatOfPair=(d+i)*(EPS_m-m)*(EPS_g-g)
+					threatLevel+=threatOfPair
+		return threatLevel
 
 
 if __name__ == "__main__":
@@ -363,6 +376,10 @@ if __name__ == "__main__":
 	g.findClusters()
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	# print(g.nodes[0].params)
+
+
+	for tim in range(1000):
+		print("threat(tim={}) = {}".format(tim,g.calculateThreatLevelForFrame(tim)))
 
 
 
