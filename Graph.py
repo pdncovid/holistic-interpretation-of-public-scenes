@@ -362,7 +362,7 @@ class Graph:
 			for p2 in range(P):
 				if p1!=p2:
 					d=np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
-					i=0.0#get from graph self.nodes @Jameel
+					i=self.node[p1].params[0.0#get from graph self.nodes @Jameel
 					m=0.0#get from graph self.nodes @Suren
 					g=self.groupProbability[p1,p2]
 					EPS_m=2.0
