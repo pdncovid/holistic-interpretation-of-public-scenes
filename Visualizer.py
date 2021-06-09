@@ -8,7 +8,7 @@ from Graph import Graph
 from NNHandler_handshake import NNHandler_handshake
 from NNHandler_image import NNHandler_image
 from NNHandler_yolo import NNHandler_yolo
-from NNHandler_openpose import NNHandler_openpose
+# from NNHandler_openpose import NNHandler_openpose
 
 from suren.util import eprint, progress, Json
 
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     print(args)
-
+    args.nnout_openpose=None
     # if None in [args.nnout_yolo, args.nnout_handshake, args.video_file, args.graph_file, args.track]:
     #     print("Running from config file")
     #
@@ -239,8 +239,8 @@ if __name__ == "__main__":
     # yolo_handler.connectToGraph(g)
     # yolo_handler.runForBatch()
 
-    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
-    openpose_handler.init_from_json()
+    # openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
+    # openpose_handler.init_from_json()
 
     hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
     img_handle.runForBatch()
 
-    vis = Visualizer(graph=g, yolo=yolo_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler, out_name=None)  #args.output)
+    vis = Visualizer(graph=g, yolo=yolo_handler, handshake=hs_handler, img=img_handle, openpose=None, out_name=None)  #args.output)
 
     # Call this to plot pyplot graph
     vis.init_network()
