@@ -301,7 +301,7 @@ class Graph:
 	def findClusters(self,METHOD="NAIVE"):
 		N = len(self.nodes)
 		T = self.time_series_length
-		DIST_THRESH=100.0#This should be taken from the camera orientation json.
+		DIST_THRESH=2000.0#This should be taken from the camera orientation json.
 		
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
 		#There is a lot for me to do on this array. 
@@ -311,49 +311,42 @@ class Graph:
 			for p1 in range(N):
 				for p2 in range(N):
 					if p1<=p2:
+						if not self.nodes[p1].params["neverDetected"] and not self.nodes[p2].params["neverDetected"]:
+							t1=max(self.nodes[p1].params["detectionStartT"],self.nodes[p2].params["detectionStartT"])
+							t2=max(self.nodes[p1].params["detectionEndTExclusive"],self.nodes[p2].params["detectionEndTExclusive"])
+							self.pairDetectionProbability[p1,p2,t1:t2]=1.00
 						
-						self.pairDetectionProbability[p1,p2,:]=1.00
-						
+
+						tempDistDeleteThisVariableLater=[]
 						for t in range(T):
 							dist=np.sqrt(np.sum(np.power(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:],2)))
+							tempDistDeleteThisVariableLater.append(dist)
 							if dist<DIST_THRESH:
 								self.groupProbability[p1,p2,t]=1.0
 							else:
 								self.groupProbability[p1,p2,t]=0.0
+						# print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater)
+						print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater[t1:t2])						
 					else:
 						self.groupProbability[p1,p2,:]=self.groupProbability[p2,p1,:]
+						self.pairDetectionProbability[p1,p2,:]=self.pairDetectionProbability[p2,p1,:]
 
 
 
 
 		if METHOD=="SPECTRAL":
-
-			clusters = []
-			# print("AAA")
-			for t in range(T):
-				print(t)
-				print(self.floorMap[:][t])
-				""" This part is a load of crap to get a small thing done>>> start """
-				clusteringAtT = SpectralClustering(n_clusters=2, assign_labels='discretize', random_state=0).fit(self.floorMap[t][:])
-				# print("aaa")
-				noOfClusters = np, max(clusteringAtT.labels)
-				for c in range(noOfClusters + 1):
-					peopleIncluster = []
-					for j in range(clusteringAtT.labels):
-						if clusteringAtT.labels[j] == c:
-							peopleIncluster.append(j)
-
-					for a, b in zip(peopleIncluster, peopleIncluster[1:]):
-						self.groupProbability[a, b, t] = 1.0
-						self.groupProbability[b, a, t] = 1.0
-				""" <<<< end """
+			print("THIS METHOD WAS REMOVED!!!")
+			""" <<<< end """
 
 
-		# A better logic other than mean is needed.
-		self.groupProbability = np.sum(self.groupProbability, axis=-1)
+		# (a,b,c) are temporary variables
+		a = self.groupProbability*self.pairDetectionProbability
+		b = np.sum(a,-1)
+		c = np.sum(self.pairDetectionProbability,-1)
+		self.groupProbability = b/c
 
 		print(self.groupProbability)
-		self.groupProbability = self.groupProbability > 100
+		self.groupProbability = self.groupProbability > 0.4
 
 		print(self.groupProbability)
 
