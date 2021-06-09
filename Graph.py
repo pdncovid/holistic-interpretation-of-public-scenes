@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from Node_Person import Person
 from suren.util import eprint, stop, progress, Json
-# from sklearn.cluster import SpectralClustering
+from sklearn.cluster import SpectralClustering
 
 try:
 	# import networkx as nx
@@ -50,6 +50,7 @@ class Graph:
 		self.PROJECTED_SPACE_W=1000
 
 		self.REFERENCE_POINTS=[[60,1080],[1850,1080],[1450,450],[920,450]]
+		#This should be taken from camera orientation JSON
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
 		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
 		self.DEST=np.float32(self.DEST)
@@ -282,45 +283,90 @@ class Graph:
 			n.interpolate_undetected_timestamps()
 
 	def generateFloorMap(self):
-
-		self.floorMap = []
+		self.calculate_standing_locations()
+		self.interpolate_undetected_timestamps()
+		N=len(self.nodes)
+		T=self.time_series_length
+		self.floorMapNTXY = np.zeros((N,T,2),dtype=np.float32)
 		for n in range(len(self.nodes)):
 			X = self.nodes[n].params["X"]
 			Y = self.nodes[n].params["Y"]
-			temp = []
-			for t in range(len(X)):
-				temp.append(self.project(X[t], Y[t]))
-			self.floorMap.append(temp)
+			for t in range(T):
+				projected=self.project(X[t], Y[t])
+				self.floorMapNTXY[n,t,0]=projected[0]
+				self.floorMapNTXY[n,t,1]=projected[1]
+		print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
 
-	'''
-	def findClusters(self):
+
+	def findClusters(self,METHOD="NAIVE"):
 		N = len(self.nodes)
 		T = self.time_series_length
+		DIST_THRESH=2000.0#This should be taken from the camera orientation json.
+		
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
-		clusters = []
-		for t in range(T):
+		#There is a lot for me to do on this array. 
+		self.pairDetectionProbability = np.zeros((N, N, self.time_series_length), np.float)
 
-			""" This part is a load of crap to get a small thing done>>> start """
-			clusteringAtT = SpectralClustering(n_clusters=5, assign_labels='discretize', random_state=0).fit(
-				self.floorMap[:, t])
-			noOfClusters = np, max(clusteringAtT.labels)
-			for c in range(noOfClusters + 1):
-				peopleIncluster = []
-				for j in range(clusteringAtT.labels):
-					if clusteringAtT.labels[j] == c:
-						peopleIncluster.append(j)
+		if METHOD=="NAIVE":
+			for p1 in range(N):
+				for p2 in range(N):
+					if p1<=p2:
+						if not self.nodes[p1].params["neverDetected"] and not self.nodes[p2].params["neverDetected"]:
+							t1=max(self.nodes[p1].params["detectionStartT"],self.nodes[p2].params["detectionStartT"])
+							t2=max(self.nodes[p1].params["detectionEndTExclusive"],self.nodes[p2].params["detectionEndTExclusive"])
+							self.pairDetectionProbability[p1,p2,t1:t2]=1.00
+						
 
-				for a, b in zip(peopleIncluster, peopleIncluster[1:]):
-					self.groupProbability[a, b, t] = 1.0
-					self.groupProbability[b, a, t] = 1.0
+						tempDistDeleteThisVariableLater=[]
+						for t in range(T):
+							dist=np.sqrt(np.sum(np.power(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:],2)))
+							tempDistDeleteThisVariableLater.append(dist)
+							if dist<DIST_THRESH:
+								self.groupProbability[p1,p2,t]=1.0
+							else:
+								self.groupProbability[p1,p2,t]=0.0
+						# print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater)
+						print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater[t1:t2])						
+					else:
+						self.groupProbability[p1,p2,:]=self.groupProbability[p2,p1,:]
+						self.pairDetectionProbability[p1,p2,:]=self.pairDetectionProbability[p2,p1,:]
+
+
+
+
+		if METHOD=="SPECTRAL":
+			print("THIS METHOD WAS REMOVED!!!")
 			""" <<<< end """
 
-		# A better logic other than mean is needed.
-		self.groupProbability = np.mean(self.groupProbability, axis=-1)
-	'''
+
+		# (a,b,c) are temporary variables
+		a = self.groupProbability*self.pairDetectionProbability
+		b = np.sum(a,-1)
+		c = np.sum(self.pairDetectionProbability,-1)
+		self.groupProbability = b/c
+
+		print(self.groupProbability)
+		self.groupProbability = self.groupProbability > 0.4
+
+		print(self.groupProbability)
+
 
 	def calculateThreatLevelForFrame(self, t):
-    return 0
+		DISTANCE_TAU=40000.0#Hardcoded value
+		P=len(self.nodes)
+		threatLevel=0.0
+		for p1 in range(P):
+			for p2 in range(P):
+				if p1!=p2:
+					d=np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
+					i=0.0#get from graph self.nodes @Jameel
+					m=0.0#get from graph self.nodes @Suren
+					g=self.groupProbability[p1,p2]
+					EPS_m=2.0
+					EPS_g=2.0
+					threatOfPair=(d+i)*(EPS_m-m)*(EPS_g-g)
+					threatLevel+=threatOfPair
+		return threatLevel
 
 
 if __name__ == "__main__":
@@ -328,9 +374,13 @@ if __name__ == "__main__":
 	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
 	g.generateFloorMap()
-
+	g.findClusters()
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
-	print(g.nodes[0].params)
+	# print(g.nodes[0].params)
+
+
+	for tim in range(1000):
+		print("threat(tim={}) = {}".format(tim,g.calculateThreatLevelForFrame(tim)))
 
 
 
