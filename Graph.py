@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from Node_Person import Person
 from suren.util import eprint, stop, progress, Json
-# from sklearn.cluster import SpectralClustering
+from sklearn.cluster import SpectralClustering
 
 try:
 	# import networkx as nx
@@ -282,45 +282,83 @@ class Graph:
 			n.interpolate_undetected_timestamps()
 
 	def generateFloorMap(self):
-
-		self.floorMap = []
+		self.calculate_standing_locations()
+		self.interpolate_undetected_timestamps()
+		N=len(self.nodes)
+		T=self.time_series_length
+		self.floorMapNTXY = np.zeros((N,T,2),dtype=np.float32)
 		for n in range(len(self.nodes)):
 			X = self.nodes[n].params["X"]
 			Y = self.nodes[n].params["Y"]
-			temp = []
-			for t in range(len(X)):
-				temp.append(self.project(X[t], Y[t]))
-			self.floorMap.append(temp)
+			for t in range(T):
+				projected=self.project(X[t], Y[t])
+				self.floorMapNTXY[n,t,0]=projected[0]
+				self.floorMapNTXY[n,t,1]=projected[1]
+		print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
 
-	'''
-	def findClusters(self):
+
+	def findClusters(self,METHOD="NAIVE"):
 		N = len(self.nodes)
 		T = self.time_series_length
+		DIST_THRESH=1.0
+		
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
-		clusters = []
-		for t in range(T):
+		#There is a lot for me to do on this array. 
+		self.pairDetectionProbability = np.zeros((N, N, self.time_series_length), np.float)
 
-			""" This part is a load of crap to get a small thing done>>> start """
-			clusteringAtT = SpectralClustering(n_clusters=5, assign_labels='discretize', random_state=0).fit(
-				self.floorMap[:, t])
-			noOfClusters = np, max(clusteringAtT.labels)
-			for c in range(noOfClusters + 1):
-				peopleIncluster = []
-				for j in range(clusteringAtT.labels):
-					if clusteringAtT.labels[j] == c:
-						peopleIncluster.append(j)
+		if METHOD=="NAIVE":
+			for p1 in range(N):
+				for p2 in range(N):
+					if p1<=p2:
+						
+						self.pairDetectionProbability[p1,p2,:]=1.00
+						
+						for t in range(T):
+							dist=np.sqrt(np.sum(np.power(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:],2)))
+							if dist<DIST_THRESH:
+								self.groupProbability[p1,p2,t]=1.0
+							else:
+								self.groupProbability[p1,p2,t]=0.0
+					else:
+						self.groupProbability[p1,p2,:]=self.groupProbability[p2,p1,:]
 
-				for a, b in zip(peopleIncluster, peopleIncluster[1:]):
-					self.groupProbability[a, b, t] = 1.0
-					self.groupProbability[b, a, t] = 1.0
-			""" <<<< end """
+
+
+
+		if METHOD=="SPECTRAL":
+
+			clusters = []
+			# print("AAA")
+			for t in range(T):
+				print(t)
+				print(self.floorMap[:][t])
+				""" This part is a load of crap to get a small thing done>>> start """
+				clusteringAtT = SpectralClustering(n_clusters=2, assign_labels='discretize', random_state=0).fit(self.floorMap[t][:])
+				# print("aaa")
+				noOfClusters = np, max(clusteringAtT.labels)
+				for c in range(noOfClusters + 1):
+					peopleIncluster = []
+					for j in range(clusteringAtT.labels):
+						if clusteringAtT.labels[j] == c:
+							peopleIncluster.append(j)
+
+					for a, b in zip(peopleIncluster, peopleIncluster[1:]):
+						self.groupProbability[a, b, t] = 1.0
+						self.groupProbability[b, a, t] = 1.0
+				""" <<<< end """
+
 
 		# A better logic other than mean is needed.
-		self.groupProbability = np.mean(self.groupProbability, axis=-1)
-	'''
+		self.groupProbability = np.sum(self.groupProbability, axis=-1)
+
+		print(self.groupProbability)
+		self.groupProbability = self.groupProbability > 100
+
+		print(self.groupProbability)
+
 
 	def calculateThreatLevelForFrame(self, t):
-    return 0
+		return 0
 
 
 if __name__ == "__main__":
@@ -328,9 +366,9 @@ if __name__ == "__main__":
 	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
 	g.generateFloorMap()
-
+	g.findClusters()
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
-	print(g.nodes[0].params)
+	# print(g.nodes[0].params)
 
 
 
