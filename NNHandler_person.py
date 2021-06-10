@@ -18,7 +18,7 @@ try:
 	import tensorflow as tf
 	from tensorflow.python.saved_model import tag_constants
 
-	sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
+	sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
 
 	from deep_sort import preprocessing, nn_matching
 	from deep_sort.detection import Detection
