@@ -303,8 +303,10 @@ class Graph:
 	def findClusters(self,METHOD="NAIVE"):
 		N = len(self.nodes)
 		T = self.time_series_length
-		DIST_THRESH=2000.0#This should be taken from the camera orientation json.
-		
+		DIST_THRESH=300.0#This should be taken from the camera orientation json.
+		TIME_THRESH=0.2
+
+
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
 		#There is a lot for me to do on this array. 
 		self.pairDetectionProbability = np.zeros((N, N, self.time_series_length), np.float)
@@ -348,7 +350,7 @@ class Graph:
 		self.groupProbability = b/c
 
 		print(self.groupProbability)
-		self.groupProbability = self.groupProbability > 0.4
+		self.groupProbability = self.groupProbability > TIME_THRESH
 
 		print(self.groupProbability)
 
@@ -390,7 +392,7 @@ class Graph:
 						threatLevel += threatOfPair
 
 						self.pairT[t,p1,p2]=threatOfPair
-			self.frameThreatLevel=threatLevel
+			self.frameThreatLevel[t]=threatLevel
 		print("Finished calculating threat level")
 		return 0
 
