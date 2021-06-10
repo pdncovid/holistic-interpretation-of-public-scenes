@@ -13,6 +13,7 @@ parser.add_argument("--output", "-o", type=str, dest="output", help="Output fold
 parser.add_argument("--suffix", "-s", type=str, dest="suffix", help="Suffix added to json as : vidName_suffix.json")
 parser.add_argument("--file", "-f", type=str, dest="file", help="Python file to be run")
 parser.add_argument("--ftype", "-e", type=str, dest="ftype", default="mp4", help="Extension of video file")
+parser.add_argument("--verbose", "-v", action="store_true", dest="verbose")
 
 args = parser.parse_args()
 
@@ -22,6 +23,7 @@ suffix = args.suffix
 py_file = args.file
 
 src_files = list(map(lambda x:x.replace("\\", "/"), glob(src + "/*.%s"%args.ftype)))
+if args.verbose: print("source files :", src_files)
 
 for file in src_files:
     file_name = file.split("/")[-1].rstrip(".%s"%args.ftype)
