@@ -26,10 +26,11 @@ try:
 	from deep_sort.tracker import Tracker
 	from tools import generate_detections as gdet
 	import core.utils as utils
-	# from core.yolov4 import filter_boxes
-	from tensorflow.python.saved_model import tag_constants
 
-	from core.config import cfg
+	# NOT NEEDED in this code
+	# from core.yolov4 import filter_boxes
+	# from core.config import cfg
+
 except Exception as e:
 	eprint("Cannot run YOLO:", e)
 
@@ -169,6 +170,7 @@ class NNHandler_yolo(NNHandler):
 
 			# print(boxes, pred_conf)
 
+			# WTF : why a loop above???
 			boxes, scores, classes, valid_detections = tf.image.combined_non_max_suppression(
 				boxes=tf.reshape(boxes, (tf.shape(boxes)[0], -1, 1, 4)),
 				scores=tf.reshape(
@@ -203,7 +205,11 @@ class NNHandler_yolo(NNHandler):
 			# Give class names
 			if self.class_names is None: self.class_names = ["class_%d"%i for i in range(np.max(classes, axis=None))]
 			# names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
-			names = [self.class_names[int(i)] for i in classes]
+			try:
+				names = [self.class_names[int(i)] for i in classes]
+			except:
+				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+				eprint("[xx]", classes)
 
 			# encode yolo detections and feed to tracker
 			features = encoder(frame, bboxes)
