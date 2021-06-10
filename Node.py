@@ -29,10 +29,6 @@ class Node:
         return self.params[paramName][t]
 
 
-    def getParamsDict(self):
-        return self.params
-
-
     def setParamsFromDict(self, dic):
         for par in dic:
             self.params[par] = dic[par]

@@ -2,23 +2,20 @@
 import json
 
 class NNHandler:
-	def __init__(self, graph=None):
-		self.graph = graph
-		self.myInput = None
-		self.myId = None
+	def __init__(self):
 
 		self.time_series_length = None
 		self.json_data = None
 
-	def setInputBlockSize(self,N=32):
-		self.inputBlockSize=N
+	# def setInputBlockSize(self,N=32):
+	# 	self.inputBlockSize=N
 	
-	def getInputBlockSize(self):
-		return self.inputBlockSize
+	# def getInputBlockSize(self):
+	# 	return self.inputBlockSize
 
-	def connectToInput(self,inputHandlerInstance):
-		self.myInput = inputHandlerInstance
-		self.myId = inputHandlerInstance.connectComponent(self.inputBlockSize)
+	# def connectToInput(self,inputHandlerInstance):
+	# 	self.myInput = inputHandlerInstance
+	# 	self.myId = inputHandlerInstance.connectComponent(self.inputBlockSize)
 
 	def connectToGraph(self,gr):
 		self.graph = gr

@@ -7,8 +7,8 @@ import json
 from Graph import Graph
 from NNHandler_handshake import NNHandler_handshake
 from NNHandler_image import NNHandler_image
-from NNHandler_yolo import NNHandler_yolo
-# from NNHandler_openpose import NNHandler_openpose
+from NNHandler_person import NNHandler_person
+from NNHandler_openpose import NNHandler_openpose
 
 from suren.util import eprint, progress, Json
 
@@ -21,9 +21,9 @@ except ImportError as e:
 
 
 class Visualizer:
-    def __init__(self, graph=None, yolo=None, handshake=None, img=None, openpose=None, out_name=None):
+    def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None, out_name=None):
         self.graph = graph
-        self.yolo_handle = yolo
+        self.person_handle = person
         self.hs_handle = handshake
         self.img_handle = img
         self.openpose_handle = openpose
@@ -94,8 +94,8 @@ class Visualizer:
         if self.plot_network and self.graph is not None:
             fig = plt.figure()
             ax = plt.gca()
-            ax.set_xlim(xlim[0], xlim[1])
-            ax.set_ylim(ylim[0], ylim[1])
+            # ax.set_xlim(xlim[0], xlim[1])
+            # ax.set_ylim(ylim[0], ylim[1])
             plt.ion()
 
         # plt.figure()
@@ -143,20 +143,25 @@ class Visualizer:
                                      (255, 255, 255), 3)
 
             # Plot info from yolo
-            if self.yolo_handle is not None and self.vid_bbox:
+            if self.person_handle is not None and self.vid_bbox:
                 for p in self.graph.nodes:
                     x_min, y_min, x_max, y_max = map(int, [p.params["xMin"][t], p.params["yMin"][t], p.params["xMax"][t], p.params["yMax"][t]])
-                    NNHandler_yolo.plot(rgb_, (x_min, y_min, x_max, y_max), p.params["col"])
+                    NNHandler_person.plot(rgb_, (x_min, y_min, x_max, y_max), p.params["col"])
 
             # Plot info from openpose
             if self.openpose_handle is not None and self.vid_keypoints:
                 NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
 
 
-            # Plot info from graph
+            # Plot info from handshake
             if self.hs_handle is not None and self.vid_hbox:
                 if str(t) in self.hs_handle.json_data:
                     NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
+
+            # Plot info from graph
+            if self.graph is not None:
+                if str(t) in self.graph.threatLevel:
+                    cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100), 0, 0.75, (255, 255, 255), 2)
 
 
             if (t + 1) % 20 == 0:
@@ -191,8 +196,8 @@ class Visualizer:
             # Plot network
             if self.plot_network:
                 ax.clear()
-                ax.set_xlim(xlim[0], xlim[1])
-                ax.set_ylim(ylim[0], ylim[1])
+                # ax.set_xlim(xlim[0], xlim[1])
+                # ax.set_ylim(ylim[0], ylim[1])
 
         img_handle.close()
 
@@ -206,18 +211,22 @@ class Visualizer:
 if __name__ == "__main__":
 
     parser=argparse.ArgumentParser()
-    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph.json')
-    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.txt')
+    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
+    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/labels/DEEE/yolo/cctv1-yolo.json')
+    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/labels/DEEE/handshake/cctv1.json')
+    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/DEEE/cctv1.mp4')
+    # parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
+    # parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json')
+    # parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
+    # parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
     parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
-    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
-    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
     parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
 
     args = parser.parse_args()
     print(args)
-    args.nnout_openpose=None
+
     # if None in [args.nnout_yolo, args.nnout_handshake, args.video_file, args.graph_file, args.track]:
     #     print("Running from config file")
     #
@@ -230,30 +239,39 @@ if __name__ == "__main__":
     #             dic[k]=data[k]
     #         print(args)
 
-    g = Graph()
-    g.init_from_json(None)
 
+    img_handle = NNHandler_image(format="avi", img_loc=args.video_file)
+    img_handle.runForBatch()
 
-    yolo_handler = NNHandler_yolo(args.nnout_yolo)
-    # yolo_handler = NNHandler_yolo(json_file='./data/vid-01-yolo.json')
-    yolo_handler.connectToGraph(g)
-    yolo_handler.runForBatch()
-
-    # openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
-    # openpose_handler.init_from_json()
+    person_handler = NNHandler_person(args.nnout_yolo)
+    person_handler.init_from_json()
 
     hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
+    hs_handler.init_from_json()
+
+    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
+    openpose_handler.init_from_json()
+    openpose_handler = None
+
+
+
+    g = Graph()
+    # g.init_from_json(args.graph_file)
+    # g.run_gihan()
+
+    if g.state["people"] < 2:
+        person_handler.connectToGraph(g)
+        person_handler.runForBatch()
+
+    if g.state["handshake"] < 3:
+        hs_handler.connectToGraph(g)
+        hs_handler.runForBatch()
+
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
 
-    hs_handler.connectToGraph(g)
-    hs_handler.runForBatch()
 
-    img_handle = NNHandler_image(format="avi", img_loc=args.video_file)
-    # img_handle = NNHandler_image(format="avi", img_loc="./suren/temp/seq18.avi")
-    img_handle.runForBatch()
-
-    vis = Visualizer(graph=g, yolo=yolo_handler, handshake=hs_handler, img=img_handle, openpose=None, out_name=None)  #args.output)
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler, out_name=None)  #args.output)
 
     # Call this to plot pyplot graph
     vis.init_network()

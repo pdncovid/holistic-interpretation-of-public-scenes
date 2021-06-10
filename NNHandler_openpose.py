@@ -11,7 +11,6 @@ from NNHandler_image import NNHandler_image, cv2
 from Graph import Graph
 
 from suren.util import get_iou, Json, eprint
-from suren.temp.sort_master.sort import Sort, iou_batch
 
 # This is only needed if running YOLO / deepsort
 # Not needed if the values are loaded from file
@@ -48,7 +47,9 @@ def import_tracker(name="sort"):
 			return False
 
 	elif name == "sort":
-		from suren.temp.sort_master import sort		# TODO : Make this path independent
+
+		sys.path.append(os.path.relpath('./suren/temp/sort_master'))
+		import sort, iou_batch		# TODO : Make this path independent
 
 	else:
 		raise NotImplementedError

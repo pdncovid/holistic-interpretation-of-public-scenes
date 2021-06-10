@@ -1,6 +1,10 @@
 import subprocess
 import argparse
 from glob import glob
+'''
+Usage : python dataset_labeling_script.py -i ./videos/DEEE -o ./labels/DEEE -suffix yolo --file ../NNhandler_yolo.py --ftype mp4
+'''
+
 
 parser = argparse.ArgumentParser()
 
