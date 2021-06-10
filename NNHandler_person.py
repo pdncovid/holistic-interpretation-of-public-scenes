@@ -19,6 +19,7 @@ try:
 	from tensorflow.python.saved_model import tag_constants
 
 	sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
+	print(sys.path)
 
 	from deep_sort import preprocessing, nn_matching
 	from deep_sort.detection import Detection
