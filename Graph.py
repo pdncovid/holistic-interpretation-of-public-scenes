@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from Node_Person import Person
 from suren.util import eprint, stop, progress, Json
-from sklearn.cluster import SpectralClustering
+# from sklearn.cluster import SpectralClustering
 
 try:
 	# import networkx as nx
@@ -41,15 +41,25 @@ class Graph:
 
 		self.n_nodes = 0
 		self.n_person = 0
-		self.nodes = []
+		self.nodes = []			# arr with n_nodes number of Person Objects
+
+		self.state = {
+			"people" : 0, 		# 1 - people bbox, 2 - tracking id
+			"handshake" : 0, 	# 1 - hs only, 2 - with tracking id, 3 - person info
+			"cluster" : 0,
+			"mask" : 0
+		}
+
 		self.saveGraphFileName = save_name
 
 		self.BIG_BANG = 0  # HUH -_-
+		self.threatLevel = None
 
 		self.PROJECTED_SPACE_H=1000
 		self.PROJECTED_SPACE_W=1000
 
-		self.REFERENCE_POINTS=[[60,1080],[1850,1080],[1450,450],[920,450]]
+		self.REFERENCE_POINTS=[[50, 450], [550, 450], [500, 100], [100, 100]]
+
 		#This should be taken from camera orientation JSON
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
 		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
@@ -153,8 +163,8 @@ class Graph:
 		ylim = [np.min(sc_y, axis=None) - 5, np.max(sc_y, axis=None) + 5]
 		xlim = [np.min(sc_x, axis=None) - 5, np.max(sc_x, axis=None) + 5]
 		fig = plt.figure()
-		plt.xlim(xlim[0], xlim[1])
-		plt.ylim(ylim[0], ylim[1])
+		# plt.xlim(xlim[0], xlim[1])
+		# plt.ylim(ylim[0], ylim[1])
 		ax = plt.gca()
 		# plt.xlim((np.min(sc_x, axis=None))
 		plt.ion()
@@ -179,8 +189,8 @@ class Graph:
 				plt.pause(.1)
 
 			ax.clear()
-			ax.set_xlim(xlim[0], xlim[1])
-			ax.set_ylim(ylim[0], ylim[1])
+			# ax.set_xlim(xlim[0], xlim[1])
+			# ax.set_ylim(ylim[0], ylim[1])
 
 			if (t + 1) % 20 == 0:
 				progress(t + 1, self.time_series_length, "drawing graph")
@@ -190,8 +200,7 @@ class Graph:
 	def get_nxt_id(self):
 		return len(self.nodes)
 
-	def add_person(self, p=None):
-		# @SUREN what is fed in as p here? You can add a "pre-initialized" person or an "empty/new" person
+	def add_person(self, p : Person = None):
 		if p is None:
 			p = Person(time_series_length=self.time_series_length, idx=self.get_nxt_id())
 		elif p.idx is None:
@@ -206,14 +215,6 @@ class Graph:
 	# def addNode(self,time):
 	# 	print("GRAPH: adding (person) node")
 	# 	self.nodes.append(Person())
-	# 	return len(self.nodes)-1
-
-	# def addNode2(self,node):
-	# 	'''
-	# 	Merge this with addNode()
-	# 	'''
-	# 	print("GRAPH: adding (general) node")
-	# 	self.nodes.append(node)
 	# 	return len(self.nodes)-1
 
 	def getNode(self, idx):
@@ -236,17 +237,15 @@ class Graph:
 	def saveToFile(self, file_name=None):
 		if file_name is None: file_name = self.saveGraphFileName
 
-		data = {"N": len(self.nodes), "frames": self.time_series_length, "nodes": []}
-		for n in self.nodes:
-			data["nodes"].append(n.getParamsDict())
-
-		# self.make_jsonable(data)
+		data = {
+			"N": len(self.nodes),
+			"frames": self.time_series_length,
+			"nodes": [n.params for n in self.nodes]
+		}
 
 		js = Json(file_name)
 		js.write(data)
 
-		# with open(file_name, 'w') as outfile:
-		# 	json.dump(data, outfile)
 		print("Finished writing all nodes to {}".format(file_name))
 
 	def init_from_json(self, file_name):
@@ -262,7 +261,7 @@ class Graph:
 
 		try:
 			time_series_length = data["frames"]
-			assert len(data["nodes"][0]["detection"]) == time_series_length, "No of nodes not equal to N"
+			assert len(data["nodes"][0]["detection"]) == time_series_length, "Time series length not equal"
 		except Exception as e:
 			eprint(e)
 			time_series_length = len(data["nodes"][0]["detection"])
@@ -355,23 +354,30 @@ class Graph:
 
 
 	def calculateThreatLevelForFrame(self, t):
-		DISTANCE_TAU=40000.0#Hardcoded value
+		DISTANCE_TAU = 40000.0#Hardcoded value
 		P=len(self.nodes)
-		threatLevel=0.0
+		threatLevel = 0.0
 		for p1 in range(P):
+			interact = self.nodes[p1].params["handshake"][t]
+
 			for p2 in range(P):
-				if p1!=p2:
-					d=np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
-					i=self.node[p1].params[0.0#get from graph self.nodes @Jameel
-					m=0.0#get from graph self.nodes @Suren
-					g=self.groupProbability[p1,p2]
-					EPS_m=2.0
-					EPS_g=2.0
-					threatOfPair=(d+i)*(EPS_m-m)*(EPS_g-g)
-					threatLevel+=threatOfPair
+				if p1 != p2:
+					d = np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
+					i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
+					m = 0.0 #get from graph self.nodes @Suren
+					g = 1.0 #self.groupProbability[p1,p2]
+					EPS_m = 2.0
+					EPS_g = 2.0
+					threatOfPair = (d+i)*(EPS_m-m)*(EPS_g-g)
+					threatLevel += threatOfPair
 		return threatLevel
 
+	def run_gihan(self):
+		# @Gihan TODO : Rename
+		self.generateFloorMap()
+		self.findClusters()
 
+		self.threatLevel = {str(t) : self.calculateThreatLevelForFrame(t) for t in range(self.time_series_length)}
 
 if __name__ == "__main__":
 	g = Graph()
@@ -382,9 +388,11 @@ if __name__ == "__main__":
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	# print(g.nodes[0].params)
 
+	g.threatLevel = [g.calculateThreatLevelForFrame(i) for i in range(1000)]
 
-	for tim in range(1000):
-		print("threat(tim={}) = {}".format(tim,g.calculateThreatLevelForFrame(tim)))
+	# for tim in range(1000):
+	# 	print("threat(tim={}) = {}".format(tim,g.calculateThreatLevelForFrame(tim)))
+
 
 
 

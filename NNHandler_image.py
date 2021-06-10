@@ -31,11 +31,11 @@ class NNHandler_image(NNHandler):
     def __repr__(self):
         lines = []
         if self.img_loc is not None:
-            lines.append("\t [*] Image location : %s"%self.img_loc)
+            lines.append("\t[*] Image location : %s"%self.img_loc)
         if self.json_file is not None:
-            lines.append("\t [*] Json location : %s" % self.json_file)
+            lines.append("\t[*] Json location : %s" % self.json_file)
         if self.time_series_length is not None:
-            lines.append("\t [*] Frames : {}".format(self.time_series_length))
+            lines.append("\t[*] Frames : {}".format(self.time_series_length))
         return "\n".join(lines)
 
     def count_frames(self, path):
@@ -177,7 +177,7 @@ class NNHandler_image(NNHandler):
 
             if self.json_file is not None: self.write_json()
 
-        print("Read %s file with %d frames" %(self.format, self.time_series_length))
+        print("\t[f] Read %s file with %d frames" %(self.format, self.time_series_length))
 
 
 if __name__ == "__main__":
