@@ -353,46 +353,59 @@ class Graph:
 		print(self.groupProbability)
 
 
-	def calculateThreatLevelForFrame(self, t):
+	def calculateThreatLevel(self):
 		DISTANCE_TAU = 40000.0#Hardcoded value
 		P=len(self.nodes)
-		threatLevel = 0.0
-		for p1 in range(P):
-			interact = self.nodes[p1].params["handshake"][t]
+		T=self.time_series_length
 
-			for p2 in range(P):
-				if p1 != p2:
-					d = np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
-					i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
-					m = 0.0 #get from graph self.nodes @Suren
-					g = 1.0 #self.groupProbability[p1,p2]
-					EPS_m = 2.0
-					EPS_g = 2.0
-					threatOfPair = (d+i)*(EPS_m-m)*(EPS_g-g)
-					threatLevel += threatOfPair
-		return threatLevel
 
-	def run_gihan(self):
-		# @Gihan TODO : Rename
+		self.pairD=np.zeros((T,P,P),dtype=np.float32)
+		self.pairI=np.zeros((T,P,P),dtype=np.float32)
+		self.pairM=np.zeros((T,P,P),dtype=np.float32)
+		self.pairG=np.zeros((T,P,P),dtype=np.float32)
+		self.pairT=np.zeros((T,P,P),dtype=np.float32)
+		self.frameThreatLevel=np.zeros((T),dtype=np.float32)
+
+		for t in range(T):
+			threatLevel = 0.0
+
+
+			for p1 in range(P):
+				interact = self.nodes[p1].params["handshake"][t]
+
+				for p2 in range(P):
+					if p1 != p2:
+						d = np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
+						i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
+						m = 0.0 #get from graph self.nodes @Suren
+						g = self.groupProbability[p1,p2]
+						self.pairD[t,p1,p2]=d
+						self.pairI[t,p1,p2]=i
+						self.pairM[t,p1,p2]=m
+						self.pairG[t,p1,p2]=g
+
+						EPS_m = 2.0
+						EPS_g = 2.0
+						threatOfPair = (d+i)*(EPS_m-m)*(EPS_g-g)
+						threatLevel += threatOfPair
+
+						self.pairT[t,p1,p2]=threatOfPair
+			self.frameThreatLevel=threatLevel
+		print("Finished calculating threat level")
+		return 0
+
+	def fullyAnalyzeGraph(self):
 		self.generateFloorMap()
 		self.findClusters()
+		self.calculateThreatLevel()
 
-		self.threatLevel = {str(t) : self.calculateThreatLevelForFrame(t) for t in range(self.time_series_length)}
 
 if __name__ == "__main__":
 	g = Graph()
 	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
-	g.generateFloorMap()
-	g.findClusters()
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
-	# print(g.nodes[0].params)
-
-	g.threatLevel = [g.calculateThreatLevelForFrame(i) for i in range(1000)]
-
-	# for tim in range(1000):
-	# 	print("threat(tim={}) = {}".format(tim,g.calculateThreatLevelForFrame(tim)))
-
+	g.fullyAnalyzeGraph()
 
 
 
