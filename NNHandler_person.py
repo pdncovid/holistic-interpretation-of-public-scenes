@@ -12,32 +12,10 @@ from Node_Person import Person
 
 from suren.util import Json, eprint
 
-# This is only needed if running YOLO / deepsort
-# Not needed if the values are loaded from file
-try:
-	import tensorflow as tf
-	from tensorflow.python.saved_model import tag_constants
-
-	sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
-	print(sys.path)
-
-	from deep_sort import preprocessing, nn_matching
-	from deep_sort.detection import Detection
-	from deep_sort.tracker import Tracker
-	from tools import generate_detections as gdet
-	import core.utils as utils
-	# from core.yolov4 import filter_boxes
-	from tensorflow.python.saved_model import tag_constants
-
-	from core.config import cfg
-except Exception as e:
-	eprint("Cannot run YOLO:", e)
-
 
 class NNHandler_person(NNHandler_yolo):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
-	weigths_filename = yolo_dir + '/checkpoints/yolov4-416'
+
+	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-416'
 
 	class_names = ["person"]
 

@@ -16,10 +16,10 @@ from suren.util import Json, eprint
 # This is only needed if running YOLO / deepsort
 # Not needed if the values are loaded from file
 try:
+	sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
+
 	import tensorflow as tf
 	from tensorflow.python.saved_model import tag_constants
-
-	sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
 
 	from deep_sort import preprocessing, nn_matching
 	from deep_sort.detection import Detection
@@ -33,10 +33,27 @@ try:
 except Exception as e:
 	eprint("Cannot run YOLO:", e)
 
+# def import_tracker(name="deepsort"):
+# 	if name == "deepsort":
+# 		try:
+#
+# 			from deep_sort.tracker import Tracker, nn_matching
+# 			from deep_sort.detection import Detection
+# 			from deep_sort.tracker import Tracker
+# 			from tools import generate_detections as gdet
+# 			return True
+# 		except:
+# 			eprint("Deepsort not installed.")
+# 			return False
+#
+# 	else:
+# 		raise NotImplementedError
+
 
 class NNHandler_yolo(NNHandler):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
+	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/model/yolov4-deepsort"
+
+	model_filename = yolo_dir + '/model_data/mars-small128.pb'
 	weigths_filename = yolo_dir + '/checkpoints/yolov4-416'
 
 	class_names = None
@@ -49,6 +66,28 @@ class NNHandler_yolo(NNHandler):
 	iou_thresh = .45
 	score_thresh = .5
 	input_size = 416
+
+	@staticmethod
+	def YOLO_import():
+		# This is only needed if running YOLO / deepsort
+		# Not needed if the values are loaded from file
+		try:
+			sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
+
+			import tensorflow as tf
+			from tensorflow.python.saved_model import tag_constants
+
+			from deep_sort import preprocessing, nn_matching
+			from deep_sort.detection import Detection
+			from deep_sort.tracker import Tracker
+			from tools import generate_detections as gdet
+			import core.utils as utils
+			# from core.yolov4 import filter_boxes
+			from tensorflow.python.saved_model import tag_constants
+
+			from core.config import cfg
+		except Exception as e:
+			eprint("Cannot run YOLO:", e)
 
 	@staticmethod
 	def plot(img, points, col):
