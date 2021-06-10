@@ -159,7 +159,7 @@ class Visualizer:
                     NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
 
             # Plot info from graph
-            if self.graph is not None:
+            if self.graph is not None and self.graph.threatLevel is not None:
                 if str(t) in self.graph.threatLevel:
                     cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100), 0, 0.75, (255, 255, 255), 2)
 

@@ -135,8 +135,8 @@ if __name__=="__main__":
 	parser.add_argument("--tracked", "-t", type=bool, dest="tracked", default=True)
 
 	args = parser.parse_args()
-	args.overwrite = True
-	args.verbose=True
+	# args.overwrite = True
+	# args.verbose=True
 
 	img_loc = args.input_file
 	json_loc = args.output_file
@@ -145,7 +145,7 @@ if __name__=="__main__":
 	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose)
+	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose, debug=True)
 	try:
 		if os.path.exists(json_loc):
 			if args.overwrite:

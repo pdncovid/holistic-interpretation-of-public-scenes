@@ -113,6 +113,7 @@ class NNHandler_yolo(NNHandler):
 			frame_num += 1
 
 			if self.verbose: print('Frame #: ', frame_num)
+			if t < 1000: continue
 
 			frame_size = frame.shape[:2]
 			image_data = cv2.resize(frame, (input_size, input_size))
@@ -162,7 +163,8 @@ class NNHandler_yolo(NNHandler):
 
 			# Give class names
 			if self.class_names is None: self.class_names = ["class_%d"%i for i in range(np.max(classes, axis=None))]
-			names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+			# names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+			names = [self.class_names[int(i)] for i in classes]
 
 			# encode yolo detections and feed to tracker
 			features = encoder(frame, bboxes)
