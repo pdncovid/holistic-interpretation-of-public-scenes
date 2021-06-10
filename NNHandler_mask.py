@@ -92,8 +92,8 @@ class NNHandler_mask(NNHandler_yolo):
 	def __repr__(self):
 		lines = []
 		if self.json_file is not None:
-			lines.append("\t [*] Json location : %s" % self.json_file)
-		lines.append("\t [*] Tracked : {}".format(self.is_tracked))
+			lines.append("\t[*] Json location : %s" % self.json_file)
+		lines.append("\t[*] Tracked : {}".format(self.is_tracked))
 		return "\n".join(lines)
 
 	def runForBatch(self):

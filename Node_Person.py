@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod 
 from Node import *
+
 class Person(Node):
 
 	def __init__(self, isLocation2D=True, initParams=None, time_series_length=None, idx=None):
