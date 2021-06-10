@@ -12,7 +12,7 @@ parser.add_argument("--input", "-i", type=str, dest="input", help="Input folder"
 parser.add_argument("--output", "-o", type=str, dest="output", help="Output folder")
 parser.add_argument("--suffix", "-s", type=str, dest="suffix", help="Suffix added to json as : vidName_suffix.json")
 parser.add_argument("--file", "-f", type=str, dest="file", help="Python file to be run")
-parser.add_argument("--ftype", "-f", type=str, dest="ftype", default="mp4", help="Extension of video file")
+parser.add_argument("--ftype", "-e", type=str, dest="ftype", default="mp4", help="Extension of video file")
 
 args = parser.parse_args()
 
