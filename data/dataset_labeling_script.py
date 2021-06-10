@@ -23,7 +23,7 @@ suffix = args.suffix
 py_file = args.file
 
 src_files = list(map(lambda x:x.replace("\\", "/"), glob(src + "/*.%s"%args.ftype)))
-if args.verbose: print("source files :", src_files)
+if args.verbose: print("source files :" + "\n\t\t" + "\n\t\t".join(src_files))
 
 for file in src_files:
     file_name = file.split("/")[-1].rstrip(".%s"%args.ftype)
