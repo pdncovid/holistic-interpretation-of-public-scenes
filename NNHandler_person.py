@@ -101,8 +101,8 @@ class NNHandler_person(NNHandler_yolo):
 
 if __name__=="__main__":
 
-	json_loc = "./data/labels/DEEE/yolo/cctv2-yolo.json"
-	img_loc = "./data/videos/DEEE/cctv2.mp4"
+	json_loc = "./data/labels/DEEE/yolo/cctv3-yolo.json"
+	img_loc = "./data/videos/DEEE/cctv3.mp4"
 
 	parser = argparse.ArgumentParser()
 
@@ -114,7 +114,7 @@ if __name__=="__main__":
 	parser.add_argument("--tracked", "-t", type=bool, dest="tracked", default=True)
 
 	args = parser.parse_args()
-	# args.overwrite = True
+	args.overwrite = True
 	args.verbose=True
 
 	img_loc = args.input_file
