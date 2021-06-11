@@ -27,39 +27,46 @@ if __name__=="__main__":
 	print("pairT",g.pairT.shape)
 	print("frameThreatLevel",g.frameThreatLevel.shape)
 
+	print("pairD",g.pairD)
+	print("pairI",g.pairI)
+	print("pairM",g.pairM)
+	print("pairG",g.pairG)
+	print("pairT",g.pairT)
 
 
-	for t in range(1000):#range(g.time_series_length):
+
+
+	for t in range(100):#range(g.time_series_length):
 		'''
 			There is a big memory leak in this approach. Do you know how to fix?
 		'''
 
 		# plt.figure()
-		plt.matshow(g.pairD[t])
+		plt.matshow(g.pairD[t,:,:])
 		plt.colorbar()
-		plt.savefig("{}g-{:04d}".format(args.outputPrefix,t))
-		plt.clf()
+		plt.savefig("{}d-{:04d}".format(args.outputPrefix,t))
+		plt.close()
 
 		# plt.figure()
-		plt.matshow(g.pairI[t])
+		plt.matshow(g.pairI[t,:,:],vmin=0, vmax=1)
 		plt.colorbar()
 		plt.savefig("{}i-{:04d}".format(args.outputPrefix,t))		
-		plt.clf()
+		plt.close()
 
 		# plt.figure()
-		plt.matshow(g.pairM[t])
+		plt.matshow(g.pairM[t,:,:],vmin=0, vmax=1)
 		plt.colorbar()
 		plt.savefig("{}m-{:04d}".format(args.outputPrefix,t))		
-		plt.clf()
+		plt.close()
 
 		# plt.figure()
-		plt.matshow(g.pairG[t])
+		plt.matshow(g.pairG[t,:,:],vmin=0, vmax=1)
 		plt.colorbar()
 		plt.savefig("{}g-{:04d}".format(args.outputPrefix,t))		
-		plt.clf()
+		plt.close()
 
 		# plt.figure()
-		plt.matshow(g.pairT[t])
+		plt.matshow(g.pairT[t,:,:])
 		plt.colorbar()
 		plt.savefig("{}t-{:04d}".format(args.outputPrefix,t))		
-		plt.clf()
+		plt.close()
