@@ -2,7 +2,8 @@ import subprocess
 import argparse
 from glob import glob
 '''
-Usage : python dataset_labeling_script.py -i ./videos/DEEE -o ./labels/DEEE -suffix yolo --file ../NNhandler_yolo.py --ftype mp4
+Usage : 
+python dataset_labeling_script.py -i ./videos/DEEE -o ./labels/DEEE --suffix yolo -f ../NNHandler_person.py -e mp4
 '''
 
 

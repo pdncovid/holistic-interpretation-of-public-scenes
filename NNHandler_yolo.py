@@ -153,7 +153,7 @@ class NNHandler_yolo(NNHandler):
 			frame_num += 1
 
 			if self.verbose: print('Frame #: ', frame_num)
-			if t < 1000: continue
+			# if t < 1000: continue
 
 			frame_size = frame.shape[:2]
 			image_data = cv2.resize(frame, (input_size, input_size))

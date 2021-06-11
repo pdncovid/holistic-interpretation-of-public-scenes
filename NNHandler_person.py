@@ -101,8 +101,8 @@ class NNHandler_person(NNHandler_yolo):
 
 if __name__=="__main__":
 
-	json_loc = "./data/labels/DEEE/yolo/cctv1-yolo.json"
-	img_loc = "./data/videos/DEEE/cctv1.mp4"
+	json_loc = "./data/labels/DEEE/yolo/cctv2-yolo.json"
+	img_loc = "./data/videos/DEEE/cctv2.mp4"
 
 	parser = argparse.ArgumentParser()
 
@@ -115,7 +115,7 @@ if __name__=="__main__":
 
 	args = parser.parse_args()
 	# args.overwrite = True
-	# args.verbose=True
+	args.verbose=True
 
 	img_loc = args.input_file
 	json_loc = args.output_file
@@ -124,7 +124,7 @@ if __name__=="__main__":
 	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose, debug=True)
+	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose, debug=False)
 	try:
 		if os.path.exists(json_loc):
 			if args.overwrite:
