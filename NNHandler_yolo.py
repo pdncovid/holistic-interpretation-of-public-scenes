@@ -16,7 +16,7 @@ from suren.util import Json, eprint
 # This is only needed if running YOLO / deepsort
 # Not needed if the values are loaded from file
 try:
-	# sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
+	sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
 
 	import tensorflow as tf
 	from tensorflow.python.saved_model import tag_constants
