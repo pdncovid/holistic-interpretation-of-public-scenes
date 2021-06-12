@@ -12,48 +12,11 @@ from Graph import Graph
 
 from suren.util import get_iou, Json, eprint
 
-# This is only needed if running YOLO / deepsort
-# Not needed if the values are loaded from file
-try:
-	import tensorflow as tf
-	from tensorflow.python.saved_model import tag_constants
-
-	sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
-
-	from deep_sort import preprocessing, nn_matching
-	from deep_sort.detection import Detection
-	from deep_sort.tracker import Tracker
-	from tools import generate_detections as gdet
-	import core.utils as utils
-	# from core.yolov4 import filter_boxes
-	from tensorflow.python.saved_model import tag_constants
-
-	from core.config import cfg
-except Exception as e:
-	print(e)
-	print("If YOLO isn't required, ignore this")
-
-
-# def import_tracker(name="deepsort"):
-# 	if name == "deepsort":
-# 		try:
-#
-# 			from deep_sort.tracker import Tracker, nn_matching
-# 			from deep_sort.detection import Detection
-# 			from deep_sort.tracker import Tracker
-# 			from tools import generate_detections as gdet
-# 			return True
-# 		except:
-# 			eprint("Deepsort not installed.")
-# 			return False
-#
-# 	else:
-# 		raise NotImplementedError
-
 
 class NNHandler_handshake(NNHandler_yolo):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
+	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/model/yolov4-deepsort"
+
+	model_filename = yolo_dir + '/model_data/mars-small128.pb'
 	weigths_filename = yolo_dir + '/checkpoints/yolov4-fullshake_best'
 
 	class_names =  ["Handshake"]

@@ -1,3 +1,6 @@
 [submodule "submodules/sort"]
 	path = submodules/sort
 	url = https://github.com/pdncovid/sort
+[submodule "submodules/yolov4-deepsort"]
+	path = submodules/yolov4-deepsort
+	url = https://github.com/pdncovid/yolov4-deepsort

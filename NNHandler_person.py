@@ -12,31 +12,10 @@ from Node_Person import Person
 
 from suren.util import Json, eprint
 
-# This is only needed if running YOLO / deepsort
-# Not needed if the values are loaded from file
-try:
-	import tensorflow as tf
-	from tensorflow.python.saved_model import tag_constants
-
-	sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
-
-	from deep_sort import preprocessing, nn_matching
-	from deep_sort.detection import Detection
-	from deep_sort.tracker import Tracker
-	from tools import generate_detections as gdet
-	import core.utils as utils
-	# from core.yolov4 import filter_boxes
-	from tensorflow.python.saved_model import tag_constants
-
-	from core.config import cfg
-except Exception as e:
-	eprint("Cannot run YOLO:", e)
-
 
 class NNHandler_person(NNHandler_yolo):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
-	weigths_filename = yolo_dir + '/checkpoints/yolov4-416'
+
+	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-416'
 
 	class_names = ["person"]
 
@@ -122,8 +101,8 @@ class NNHandler_person(NNHandler_yolo):
 
 if __name__=="__main__":
 
-	json_loc = "./data/labels/DEEE/yolo/cctv1-yolo.json"
-	img_loc = "./data/videos/DEEE/cctv1.mp4"
+	json_loc = "./data/labels/DEEE/yolo/cctv3-yolo.json"
+	img_loc = "./data/videos/DEEE/cctv3.mp4"
 
 	parser = argparse.ArgumentParser()
 
@@ -145,7 +124,7 @@ if __name__=="__main__":
 	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose)
+	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose, debug=False)
 	try:
 		if os.path.exists(json_loc):
 			if args.overwrite:
