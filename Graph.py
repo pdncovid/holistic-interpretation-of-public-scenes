@@ -57,14 +57,10 @@ class Graph:
 
 		self.PROJECTED_SPACE_H=1000
 		self.PROJECTED_SPACE_W=1000
-
-		self.REFERENCE_POINTS=[[50, 450], [550, 450], [500, 100], [100, 100]]
-
-		#This should be taken from camera orientation JSON
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
-		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
-		self.DEST=np.float32(self.DEST)
-		self.transMatrix= cv2.getPerspectiveTransform(self.REFERENCE_POINTS,self.DEST)
+
+
+
 
 	def __repr__(self):
 		rep = "Created Graph object with nodes = %d for frames = %d. Param example:\n" % (
@@ -248,6 +244,21 @@ class Graph:
 
 		print("Finished writing all nodes to {}".format(file_name))
 
+	def getCameraInfoFromJson(self,fileName):
+		with open(fileName) as json_file:
+			data = json.load(json_file)
+
+		self.REFERENCE_POINTS=data["reference_points"]
+		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
+		self.DEST=np.float32(self.DEST)
+		self.transMatrix= cv2.getPerspectiveTransform(self.REFERENCE_POINTS,self.DEST)
+
+		self.GROUP_DIST_THRESH=data["group_radius_threshold"]
+		self.GROUP_TIME_THRESH=data["group_time_threshold"]
+
+
+
+
 	def init_from_json(self, file_name):
 		with open(file_name) as json_file:
 			data = json.load(json_file)
@@ -303,8 +314,8 @@ class Graph:
 	def findClusters(self,METHOD="NAIVE"):
 		N = len(self.nodes)
 		T = self.time_series_length
-		DIST_THRESH=2000.0#This should be taken from the camera orientation json.
-		
+
+
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
 		#There is a lot for me to do on this array. 
 		self.pairDetectionProbability = np.zeros((N, N, self.time_series_length), np.float)
@@ -323,7 +334,7 @@ class Graph:
 						for t in range(T):
 							dist=np.sqrt(np.sum(np.power(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:],2)))
 							tempDistDeleteThisVariableLater.append(dist)
-							if dist<DIST_THRESH:
+							if dist<self.GROUP_DIST_THRESH:
 								self.groupProbability[p1,p2,t]=1.0
 							else:
 								self.groupProbability[p1,p2,t]=0.0
@@ -348,13 +359,13 @@ class Graph:
 		self.groupProbability = b/c
 
 		print(self.groupProbability)
-		self.groupProbability = self.groupProbability > 0.4
+		self.groupProbability = self.groupProbability > self.GROUP_TIME_THRESH
 
 		print(self.groupProbability)
 
 
 	def calculateThreatLevel(self):
-		DISTANCE_TAU = 40000.0#Hardcoded value
+		g.DISTANCE_TAU = 400.0#Hardcoded value
 		P=len(self.nodes)
 		T=self.time_series_length
 
@@ -375,7 +386,8 @@ class Graph:
 
 				for p2 in range(P):
 					if p1 != p2:
-						d = np.exp(-1.0*np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])/DISTANCE_TAU)
+						d=np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])
+						d = np.exp(-1.0*d/self.DISTANCE_TAU)
 						i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
 						m = 0.0 #get from graph self.nodes @Suren
 						g = self.groupProbability[p1,p2]
@@ -390,7 +402,7 @@ class Graph:
 						threatLevel += threatOfPair
 
 						self.pairT[t,p1,p2]=threatOfPair
-			self.frameThreatLevel=threatLevel
+			self.frameThreatLevel[t]=threatLevel
 		print("Finished calculating threat level")
 		return 0
 
@@ -406,6 +418,8 @@ if __name__ == "__main__":
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
 	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	g.fullyAnalyzeGraph()
+
+	print(g.pairD)
 
 
 
