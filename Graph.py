@@ -47,7 +47,8 @@ class Graph:
 			"people" : 0, 		# 1 - people bbox, 2 - tracking id
 			"handshake" : 0, 	# 1 - hs only, 2 - with tracking id, 3 - person info
 			"cluster" : 0,
-			"mask" : 0
+			"mask" : 0,
+			"floor" : 0			# 1 - Floor map generated with X,Y
 		}
 
 		self.saveGraphFileName = save_name
@@ -74,6 +75,26 @@ class Graph:
 		projected=[projected[0]/projected[2],projected[1]/projected[2]]
 		return projected
 
+	def get_plot_lim(self, sc_x=None, sc_y=None):
+		if sc_x is not None and sc_y is not None:
+			y_lim = [np.min(sc_y, axis=None) - 5, np.max(sc_y, axis=None) + 5]
+			x_lim = [np.min(sc_x, axis=None) - 5, np.max(sc_x, axis=None) + 5]
+
+		else:
+
+			# @GIHAN. TODO : Put 4 endpoints here
+			x_min = 0
+			x_max = 0
+			y_min = 0
+			y_max = 0
+			x_lim = [x_min, x_max]
+			y_lim = [y_min, y_max]
+
+			raise NotImplementedError
+
+
+		return x_lim,y_lim
+
 
 	def get_plot_points(self):
 		sc_x = []
@@ -84,18 +105,22 @@ class Graph:
 			sc_tx, sc_ty = [], []
 			line_t = defaultdict(list)
 			for n, p in enumerate(self.nodes):
-				# print(n, p.params)
-				# if p.params["detection"][t]:
-				p_x1 = p.params["xMin"][t]
-				p_y1 = p.params["yMin"][t]
-				p_x2 = p.params["xMax"][t]
-				p_y2 = p.params["yMax"][t]
+				# # print(n, p.params)
+				# # if p.params["detection"][t]:
+				# p_x1 = p.params["xMin"][t]
+				# p_y1 = p.params["yMin"][t]
+				# p_x2 = p.params["xMax"][t]
+				# p_y2 = p.params["yMax"][t]
+				#
+				# #TODO : @Gihan - Do perspective transform here for (p_x, p_y)
+				#
+				#
+				# p_x = (p_x1 + p_x2) / 2
+				# p_y = (p_y1 + p_y2) / 2
+				# p_x, p_y = self.project(p_x, p_y)
 
-				#TODO : @Gihan - Do perspective transform here for (p_x, p_y)
-
-
-				p_x = (p_x1 + p_x2) / 2
-				p_y = (p_y1 + p_y2) / 2
+				p_x = p.params["X"][t]
+				p_y = p.params["Y"][t]
 				p_x, p_y = self.project(p_x, p_y)
 
 				# pos[n] = (p_x, p_y)
@@ -118,7 +143,7 @@ class Graph:
 			lines.append(line_t)
 		sc_x = np.array(sc_x).transpose()
 		sc_y = np.array(sc_y).transpose()
-		# lines = np.array(lines)			# lines is a variable size array
+
 		return sc_x, sc_y, lines
 
 	def get_cmap(self, show=False):
@@ -145,6 +170,7 @@ class Graph:
 			plt.show()
 		return cmap
 
+	# Plot with moving points
 	def plot(self, window=10, show_cmap=True):
 		if Graph.plot_import() is not None:
 			eprint("Package not installed", Graph.plot_import())
@@ -156,21 +182,18 @@ class Graph:
 		sc_x, sc_y, lines = self.get_plot_points()
 		# print(sc_x.shape, sc_y.shape, cmap.shape)
 		# PLOT
-		ylim = [np.min(sc_y, axis=None) - 5, np.max(sc_y, axis=None) + 5]
-		xlim = [np.min(sc_x, axis=None) - 5, np.max(sc_x, axis=None) + 5]
+		xlim, ylim = self.get_plot_lim(sc_x, sc_y)
+
 		fig = plt.figure()
-		# plt.xlim(xlim[0], xlim[1])
-		# plt.ylim(ylim[0], ylim[1])
+		plt.xlim(xlim[0], xlim[1])
+		plt.ylim(ylim[0], ylim[1])
+
 		ax = plt.gca()
-		# plt.xlim((np.min(sc_x, axis=None))
 		plt.ion()
 		for t in range(self.time_series_length):
 			sc_x_ = sc_x[:, max(t + 1 - window, 0):t + 1]
 			sc_y_ = sc_y[:, max(t + 1 - window, 0):t + 1]
 			cmap_ = cmap[:, max(0, window - (t + 1)):, :]
-			# print(sc_x_)
-			# print(sc_y_)
-			# print(cmap_)
 
 			# print(sc_x_.shape, sc_y_.shape, cmap_.shape)
 
@@ -185,8 +208,8 @@ class Graph:
 				plt.pause(.1)
 
 			ax.clear()
-			# ax.set_xlim(xlim[0], xlim[1])
-			# ax.set_ylim(ylim[0], ylim[1])
+			ax.set_xlim(xlim[0], xlim[1])
+			ax.set_ylim(ylim[0], ylim[1])
 
 			if (t + 1) % 20 == 0:
 				progress(t + 1, self.time_series_length, "drawing graph")
@@ -295,29 +318,40 @@ class Graph:
 		for n in self.nodes:
 			n.interpolate_undetected_timestamps()
 
-	def generateFloorMap(self):
-		self.calculate_standing_locations()
-		self.interpolate_undetected_timestamps()
-		N=len(self.nodes)
-		T=self.time_series_length
-		self.floorMapNTXY = np.zeros((N,T,2),dtype=np.float32)
-		for n in range(len(self.nodes)):
+	def generateFloorMap(self, verbose=False):
+
+		assert self.state["people"] == 2, "Floor map cannot be generated without people bbox"
+
+		for n in self.nodes:
+			n.calculate_standing_locations()
+
+		for n in self.nodes:
+			n.interpolate_undetected_timestamps()
+
+		# Floor map N x T with X and Y points.
+		self.floorMapNTXY = np.zeros((self.n_nodes, self.time_series_length, 2),dtype=np.float32)
+
+		for n in range(self.n_nodes):
 			X = self.nodes[n].params["X"]
 			Y = self.nodes[n].params["Y"]
-			for t in range(T):
+			for t in range(self.time_series_length):
+
 				projected=self.project(X[t], Y[t])
 				self.floorMapNTXY[n,t,0]=projected[0]
 				self.floorMapNTXY[n,t,1]=projected[1]
-		print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
+
+		if verbose:
+			print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
 
 
 	def findClusters(self,METHOD="NAIVE"):
-		N = len(self.nodes)
+		N = self.n_nodes
 		T = self.time_series_length
 
 
 		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
-		#There is a lot for me to do on this array. 
+
+		#There is a lot for me to do on this array.
 		self.pairDetectionProbability = np.zeros((N, N, self.time_series_length), np.float)
 
 		if METHOD=="NAIVE":
@@ -365,7 +399,7 @@ class Graph:
 
 
 	def calculateThreatLevel(self):
-		g.DISTANCE_TAU = 400.0#Hardcoded value
+		self.DISTANCE_TAU = 400.0  #Hardcoded value
 		P=len(self.nodes)
 		T=self.time_series_length
 
