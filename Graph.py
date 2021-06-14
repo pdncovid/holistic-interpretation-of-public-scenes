@@ -257,6 +257,7 @@ class Graph:
 		self.GROUP_TIME_THRESH=data["group_time_threshold"]
 
 
+		self.DISTANCE_TAU = data["distance_tau"]
 
 
 	def init_from_json(self, file_name):
@@ -365,7 +366,6 @@ class Graph:
 
 
 	def calculateThreatLevel(self):
-		g.DISTANCE_TAU = 400.0#Hardcoded value
 		P=len(self.nodes)
 		T=self.time_series_length
 
@@ -415,10 +415,12 @@ class Graph:
 if __name__ == "__main__":
 	g = Graph()
 	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
+	
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
-	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
+	g.getCameraInfoFromJson('./data/camera-orientation/jsons/deee.json')
 	g.fullyAnalyzeGraph()
 
+	# print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	print(g.pairD)
 
 
