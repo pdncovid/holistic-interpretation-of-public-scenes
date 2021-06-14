@@ -16,27 +16,45 @@ from suren.util import Json, eprint
 # This is only needed if running YOLO / deepsort
 # Not needed if the values are loaded from file
 try:
+	sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort")
+
 	import tensorflow as tf
 	from tensorflow.python.saved_model import tag_constants
-
-	sys.path.append(os.path.relpath('./suren/temp/yolov4-deepsort-master'))
 
 	from deep_sort import preprocessing, nn_matching
 	from deep_sort.detection import Detection
 	from deep_sort.tracker import Tracker
 	from tools import generate_detections as gdet
 	import core.utils as utils
-	# from core.yolov4 import filter_boxes
-	from tensorflow.python.saved_model import tag_constants
 
-	from core.config import cfg
+	# NOT NEEDED in this code
+	# from core.yolov4 import filter_boxes
+	# from core.config import cfg
+
 except Exception as e:
 	eprint("Cannot run YOLO:", e)
 
+# def import_tracker(name="deepsort"):
+# 	if name == "deepsort":
+# 		try:
+#
+# 			from deep_sort.tracker import Tracker, nn_matching
+# 			from deep_sort.detection import Detection
+# 			from deep_sort.tracker import Tracker
+# 			from tools import generate_detections as gdet
+# 			return True
+# 		except:
+# 			eprint("Deepsort not installed.")
+# 			return False
+#
+# 	else:
+# 		raise NotImplementedError
+
 
 class NNHandler_yolo(NNHandler):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
+	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/model/yolov4-deepsort"
+
+	model_filename = yolo_dir + '/model_data/mars-small128.pb'
 	weigths_filename = yolo_dir + '/checkpoints/yolov4-416'
 
 	class_names = None
@@ -49,6 +67,10 @@ class NNHandler_yolo(NNHandler):
 	iou_thresh = .45
 	score_thresh = .5
 	input_size = 416
+
+	@staticmethod
+	def YOLO_import():
+		raise NotImplementedError
 
 	@staticmethod
 	def plot(img, points, col):
@@ -113,6 +135,7 @@ class NNHandler_yolo(NNHandler):
 			frame_num += 1
 
 			if self.verbose: print('Frame #: ', frame_num)
+			# if t < 1000: continue
 
 			frame_size = frame.shape[:2]
 			image_data = cv2.resize(frame, (input_size, input_size))
@@ -129,6 +152,7 @@ class NNHandler_yolo(NNHandler):
 
 			# print(boxes, pred_conf)
 
+			# WTF : why a loop above???
 			boxes, scores, classes, valid_detections = tf.image.combined_non_max_suppression(
 				boxes=tf.reshape(boxes, (tf.shape(boxes)[0], -1, 1, 4)),
 				scores=tf.reshape(
@@ -162,7 +186,12 @@ class NNHandler_yolo(NNHandler):
 
 			# Give class names
 			if self.class_names is None: self.class_names = ["class_%d"%i for i in range(np.max(classes, axis=None))]
-			names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+			# names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+			try:
+				names = [self.class_names[int(i)] for i in classes]
+			except:
+				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+				eprint("[xx]", classes)
 
 			# encode yolo detections and feed to tracker
 			features = encoder(frame, bboxes)
@@ -281,7 +310,7 @@ class NNHandler_yolo(NNHandler):
 
 
 
-
+'''
 if __name__=="__main__":
 
 	img_loc = "./suren/temp/seq18.avi"
@@ -321,4 +350,4 @@ if __name__=="__main__":
 		nn_yolo.create_yolo(img_handle)
 		nn_yolo.save_json(json_loc)
 
-
+'''
