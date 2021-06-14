@@ -301,15 +301,15 @@ class Graph:
 		self.interpolate_undetected_timestamps()
 		N=len(self.nodes)
 		T=self.time_series_length
-		self.floorMapNTXY = np.zeros((N,T,2),dtype=np.float32)
+		self.projectedFloorMapNTXY = np.zeros((N,T,2),dtype=np.float32)
 		for n in range(len(self.nodes)):
 			X = self.nodes[n].params["X"]
 			Y = self.nodes[n].params["Y"]
 			for t in range(T):
 				projected=self.project(X[t], Y[t])
-				self.floorMapNTXY[n,t,0]=projected[0]
-				self.floorMapNTXY[n,t,1]=projected[1]
-		print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
+				self.projectedFloorMapNTXY[n,t,0]=projected[0]
+				self.projectedFloorMapNTXY[n,t,1]=projected[1]
+		print("Finished creating floormap {} ".format(self.projectedFloorMapNTXY.shape))
 
 
 	def findClusters(self,METHOD="NAIVE"):
@@ -333,7 +333,7 @@ class Graph:
 
 						tempDistDeleteThisVariableLater=[]
 						for t in range(T):
-							dist=np.sqrt(np.sum(np.power(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:],2)))
+							dist=np.sqrt(np.sum(np.power(self.projectedFloorMapNTXY[p1,t,:]-self.projectedFloorMapNTXY[p2,t,:],2)))
 							tempDistDeleteThisVariableLater.append(dist)
 							if dist<self.GROUP_DIST_THRESH:
 								self.groupProbability[p1,p2,t]=1.0
@@ -386,7 +386,7 @@ class Graph:
 
 				for p2 in range(P):
 					if p1 != p2:
-						d=np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])
+						d=np.linalg.norm(self.projectedFloorMapNTXY[p1,t,:]-self.projectedFloorMapNTXY[p2,t,:])
 						d = np.exp(-1.0*d/self.DISTANCE_TAU)
 						i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
 						m = 0.0 #get from graph self.nodes @Suren
