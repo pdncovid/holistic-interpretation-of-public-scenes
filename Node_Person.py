@@ -54,9 +54,9 @@ class Person(Node):
 
 	
 	def calculate_standing_locations(self):
-		if not "X" in self.params.keys():
+		if "X" not in self.params.keys():
 			self.addParam("X")
-		if not "Y" in self.params.keys():
+		if "Y" not in self.params.keys():
 			self.addParam("Y")
 
 		# pointOnFloorX=(frames[t][pt]["bbox"][0]+frames[t][pt]["bbox"][2])/2
@@ -67,9 +67,9 @@ class Person(Node):
 		# node.setParam("detection",t,True)
 
 		for t in range(self.time_series_length):
-			X=int((self.params["xMin"][t]+self.params["xMax"][t])/2)
-			self.setParam("X",t,X)
-			self.setParam("Y",t,self.params["yMax"][t])
+			X = int((self.params["xMin"][t] + self.params["xMax"][t])/2)
+			self.setParam("X", t, X)
+			self.setParam("Y", t, self.params["yMax"][t])
 
 	def calculate_detected_time_period(self):
 		print("DEBUG: running person calc")
