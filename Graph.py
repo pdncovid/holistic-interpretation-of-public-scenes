@@ -11,9 +11,10 @@ try:
 	# import networkx as nx
 	import matplotlib.pyplot as plt
 	import matplotlib.cm as cm
+	from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 except ImportError as e:
-	print(e)
+	eprint(e)
 
 
 # SHOW = False  # No idea if this would work when importing @all...maybe call as function?
@@ -26,7 +27,9 @@ class Graph:
 	def plot_import():
 		try:
 			# import networkx
-			import matplotlib.pyplot
+			import matplotlib.pyplot as plt
+			import matplotlib.cm as cm
+			from mpl_toolkits.axes_grid1 import make_axes_locatable
 			return None
 		except ImportError as e:
 			print(e)
@@ -48,7 +51,7 @@ class Graph:
 			"handshake" : 0, 	# 1 - hs only, 2 - with tracking id, 3 - person info
 			"cluster" : 0,
 			"mask" : 0,
-			"floor" : 0			# 1 - Floor map generated with X,Y
+			"floor" : 0			# 1 - X, Y points only, 2 - Projected Floor maps generated with X,Y
 		}
 
 		self.saveGraphFileName = save_name
@@ -59,6 +62,8 @@ class Graph:
 		self.PROJECTED_SPACE_H=1000
 		self.PROJECTED_SPACE_W=1000
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
+
+		self.projectedFloorMapNTXY = None
 
 
 
@@ -97,6 +102,9 @@ class Graph:
 
 
 	def get_plot_points(self):
+
+		assert self.state["floor"] >= 1, "Need X, Y points to plot graph"
+
 		sc_x = []
 		sc_y = []
 		lines = []
@@ -170,7 +178,7 @@ class Graph:
 			plt.show()
 		return cmap
 
-	# Plot with moving points
+	# Plot with moving points... don't use this. Visualizer has a better implementation.
 	def plot(self, window=10, show_cmap=True):
 		if Graph.plot_import() is not None:
 			eprint("Package not installed", Graph.plot_import())
@@ -257,8 +265,9 @@ class Graph:
 		if file_name is None: file_name = self.saveGraphFileName
 
 		data = {
-			"N": len(self.nodes),
+			"N": self.n_nodes,
 			"frames": self.time_series_length,
+			"state": self.state,
 			"nodes": [n.params for n in self.nodes]
 		}
 
@@ -278,7 +287,6 @@ class Graph:
 
 		self.GROUP_DIST_THRESH=data["group_radius_threshold"]
 		self.GROUP_TIME_THRESH=data["group_time_threshold"]
-
 
 		self.DISTANCE_TAU = data["distance_tau"]
 
@@ -311,26 +319,27 @@ class Graph:
 			p = self.add_person()
 			p.setParamsFromDict(data["nodes"][n])
 
-	def calculate_standing_locations(self):
-		for n in self.nodes:
-			n.calculate_standing_locations()
+	# def calculate_standing_locations(self):
+	# 	for n in self.nodes:
+	# 		n.calculate_standing_locations()
 
-	def interpolate_undetected_timestamps(self):
-		for n in self.nodes:
-			n.interpolate_undetected_timestamps()
+	# def interpolate_undetected_timestamps(self):
+	# 	for n in self.nodes:
+	# 		n.interpolate_undetected_timestamps()
 
 	def generateFloorMap(self, verbose=False):
 
 		assert self.state["people"] == 2, "Floor map cannot be generated without people bbox"
 
-		for n in self.nodes:
-			n.calculate_standing_locations()
+		if self.state["floor"] < 1:
+			for n in self.nodes:
+				n.calculate_standing_locations()
 
 		for n in self.nodes:
 			n.interpolate_undetected_timestamps()
 
 		# Floor map N x T with X and Y points.
-		self.floorMapNTXY = np.zeros((self.n_nodes, self.time_series_length, 2),dtype=np.float32)
+		self.projectedFloorMapNTXY = np.zeros((self.n_nodes, self.time_series_length, 2),dtype=np.float32)
 
 		for n in range(self.n_nodes):
 			X = self.nodes[n].params["X"]
@@ -338,26 +347,25 @@ class Graph:
 			for t in range(self.time_series_length):
 
 				projected=self.project(X[t], Y[t])
-				self.floorMapNTXY[n,t,0]=projected[0]
-				self.floorMapNTXY[n,t,1]=projected[1]
+				self.projectedFloorMapNTXY[n,t,0]=projected[0]
+				self.projectedFloorMapNTXY[n,t,1]=projected[1]
+
+		self.state["floor"] = 2
 
 		if verbose:
 			print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
 
 
 	def findClusters(self,METHOD="NAIVE"):
-		N = self.n_nodes
-		T = self.time_series_length
 
-
-		self.groupProbability = np.zeros((N, N, self.time_series_length), np.float)
+		self.groupProbability = np.zeros((self.n_nodes, self.n_nodes, self.time_series_length), np.float32)
 
 		#There is a lot for me to do on this array.
-		self.pairDetectionProbability = np.zeros((N, N, self.time_series_length), np.float)
+		self.pairDetectionProbability = np.zeros((self.n_nodes, self.n_nodes, self.time_series_length), np.float32)
 
 		if METHOD=="NAIVE":
-			for p1 in range(N):
-				for p2 in range(N):
+			for p1 in range(self.n_nodes):
+				for p2 in range(self.n_nodes):
 					if p1<=p2:
 						if not self.nodes[p1].params["neverDetected"] and not self.nodes[p2].params["neverDetected"]:
 							t1=max(self.nodes[p1].params["detectionStartT"],self.nodes[p2].params["detectionStartT"])
@@ -366,7 +374,7 @@ class Graph:
 						
 
 						tempDistDeleteThisVariableLater=[]
-						for t in range(T):
+						for t in range(self.time_series_length):
 							dist=np.sqrt(np.sum(np.power(self.projectedFloorMapNTXY[p1,t,:]-self.projectedFloorMapNTXY[p2,t,:],2)))
 							tempDistDeleteThisVariableLater.append(dist)
 							if dist<self.GROUP_DIST_THRESH:
@@ -444,6 +452,67 @@ class Graph:
 		self.generateFloorMap()
 		self.findClusters()
 		self.calculateThreatLevel()
+
+	def gihan_init(self, fig, ax):
+		vals = {
+			"d" : (self.pairD[0, :, :], "Distance"),
+			"i" : (self.pairI[0, :, :], "Interaction"),
+			"m" : (self.pairM[0, :, :], "Mask"),
+			"g" : (self.pairG[0, :, :], "Group")
+		}
+
+		if len(ax) == 2:
+			ax = [ax[i][j] for i in range(2) for j in range(2)]
+
+		for col, ind in zip(ax, vals):
+			col.title.set_text(vals[ind][1])
+			im = col.matshow(vals[ind][0], vmin=0, vmax=1)
+			divider = make_axes_locatable(col)
+			cax = divider.append_axes('right', size='5%', pad=0.05)
+			fig.colorbar(im, cax=cax, orientation='vertical')
+
+	def threat_image(self, fig, out_name, t):
+		fig.clf()
+		ax = fig.add_axes([0, 0, 1, 1])
+		im = ax.matshow(self.pairT[t, :, :])
+		divider = make_axes_locatable(ax)
+		cax = divider.append_axes('right', size='5%', pad=0.05)
+		fig.colorbar(im, cax=cax, orientation='vertical')
+		fig.savefig("{}T-{:04d}".format(out_name, t))
+
+	def gihan_images(self, fig, ax, out_name, t, concat=True):
+
+		vals = {
+			"d" : (self.pairD[t, :, :], "Distance"),
+			"i" : (self.pairI[t, :, :], "Interaction"),
+			"m" : (self.pairM[t, :, :], "Mask"),
+			"g" : (self.pairG[t, :, :], "Group")
+		}
+
+		if len(ax) == 2:
+			ax = [ax[i][j] for i in range(2) for j in range(2)]
+
+		if concat:
+			for col, ind in zip(ax, vals):
+				col.title.set_text(vals[ind][1])
+				col.matshow(vals[ind][0], vmin=0, vmax=1)
+
+			fig.savefig("{}dimg-{:04d}".format(out_name, t))
+			for col in ax:
+				col.clear()
+
+
+		else:
+			raise NotImplementedError
+
+
+
+		# plt.figure()
+		# plt.matshow(self.pairI[t, :, :], vmin=0, vmax=1)
+		# plt.colorbar()
+		# plt.savefig("{}i-{:04d}".format(out_name, t))
+		# plt.close()
+
 
 
 if __name__ == "__main__":

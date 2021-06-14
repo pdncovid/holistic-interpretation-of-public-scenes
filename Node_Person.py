@@ -121,8 +121,7 @@ class Person(Node):
 							print("DEBUG INTERPOLATION (before): ",t1,t2)
 							# print("DEBUG INTERPOLATION: ",self.params["detection"])
 							for a in range(t1-2,t2+2):
-								print(a, self.params["detection"][a],\
-									self.params["X"][a],self.params["Y"][a])
+								print(a, self.params["detection"][a], self.params["X"][a],self.params["Y"][a])
 
 
 							#Now we know t1----t2(exclusive) are false detections.
@@ -130,23 +129,17 @@ class Person(Node):
 							xStep=(self.params["X"][t2]-self.params["X"][t1-1])/toFillCount
 							yStep=(self.params["Y"][t2]-self.params["Y"][t1-1])/toFillCount
 							for tt in range(toFillCount):
-								self.setParam("X",t1+tt,\
-									self.params["X"][t1-1] + tt*xStep)
-								self.setParam("Y",t1+tt,\
-									self.params["Y"][t1-1] + tt*yStep)
+								self.setParam("X",t1+tt, self.params["X"][t1-1] + tt*xStep)
+								self.setParam("Y",t1+tt, self.params["Y"][t1-1] + tt*yStep)
 								self.setParam("interpolated",t1+tt,True)
 							
 							print("DEBUG INTERPOLATION (after): ",t1,t2)
 							# print("DEBUG INTERPOLATION: ",self.params["detection"])
 							for a in range(t1-2,t2+2):
-								print(a, self.params["detection"][a],\
-									self.params["X"][a],self.params["Y"][a])
+								print(a, self.params["detection"][a], self.params["X"][a],self.params["Y"][a])
 
 
 							t1=t2
-
-
-
 							break
 
 
