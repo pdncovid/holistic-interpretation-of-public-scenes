@@ -280,6 +280,7 @@ class Graph:
 		self.GROUP_TIME_THRESH=data["group_time_threshold"]
 
 
+		self.DISTANCE_TAU = data["distance_tau"]
 
 
 	def init_from_json(self, file_name):
@@ -366,7 +367,7 @@ class Graph:
 
 						tempDistDeleteThisVariableLater=[]
 						for t in range(T):
-							dist=np.sqrt(np.sum(np.power(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:],2)))
+							dist=np.sqrt(np.sum(np.power(self.projectedFloorMapNTXY[p1,t,:]-self.projectedFloorMapNTXY[p2,t,:],2)))
 							tempDistDeleteThisVariableLater.append(dist)
 							if dist<self.GROUP_DIST_THRESH:
 								self.groupProbability[p1,p2,t]=1.0
@@ -399,7 +400,6 @@ class Graph:
 
 
 	def calculateThreatLevel(self):
-		self.DISTANCE_TAU = 400.0  #Hardcoded value
 		P=len(self.nodes)
 		T=self.time_series_length
 
@@ -420,7 +420,7 @@ class Graph:
 
 				for p2 in range(P):
 					if p1 != p2:
-						d=np.linalg.norm(self.floorMapNTXY[p1,t,:]-self.floorMapNTXY[p2,t,:])
+						d=np.linalg.norm(self.projectedFloorMapNTXY[p1,t,:]-self.projectedFloorMapNTXY[p2,t,:])
 						d = np.exp(-1.0*d/self.DISTANCE_TAU)
 						i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
 						m = 0.0 #get from graph self.nodes @Suren
@@ -449,10 +449,12 @@ class Graph:
 if __name__ == "__main__":
 	g = Graph()
 	# g.init_from_json('./data/vid-01-graph.json')		# Start from yolo
+	
 	g.init_from_json('./data/vid-01-graph_handshake.json')  # Start from handshake
-	print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
+	g.getCameraInfoFromJson('./data/camera-orientation/jsons/deee.json')
 	g.fullyAnalyzeGraph()
 
+	# print("Created graph with nodes = %d for frames = %d. Param example:" % (g.n_nodes, g.time_series_length))
 	print(g.pairD)
 
 

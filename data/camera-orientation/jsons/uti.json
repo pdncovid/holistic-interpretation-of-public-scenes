@@ -1,5 +1,7 @@
 {
 	"reference_points":[[50,450],[550,450],[500,100],[100,100]],
 	"group_radius_threshold":100.0,
-	"group_time_threshold":0.2
+	"group_time_threshold":0.2,
+	"distance_tau":400.0
+
 }
