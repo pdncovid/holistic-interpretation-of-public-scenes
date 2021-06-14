@@ -3,4 +3,5 @@
 	"group_radius_threshold":100.0,
 	"group_time_threshold":0.2,
 	"distance_tau":400.0
+
 }
