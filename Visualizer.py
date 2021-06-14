@@ -21,19 +21,19 @@ except ImportError as e:
 
 
 class Visualizer:
-    def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None, out_name=None):
+    def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None):
         self.graph = graph
         self.person_handle = person
         self.hs_handle = handshake
         self.img_handle = img
         self.openpose_handle = openpose
 
-        self.out_name = out_name
-
         # Scatter plot components
         self.plot_network = False
+        self.network_show = False
         self.network_scatter = False
         self.network_lines = False
+        self.plot_out = None
 
         # Img/Video components
         self.plot_vid = False
@@ -42,13 +42,17 @@ class Visualizer:
         self.vid_scatter = False
         self.vid_lines = False
         self.vid_keypoints = False
+        self.vid_out = None
 
-    def init_network(self, network_scatter=True, network_lines=True):
+    def init_network(self, plot_out, network_scatter=True, network_lines=True, network_show=False):
+        self.plot_out  = plot_out
         self.plot_network = True
+        self.network_show = network_show
         self.network_scatter = network_scatter
         self.network_lines = network_lines
 
-    def init_vid(self, vid_bbox=True, vid_hbox=True, vid_scatter=True, vid_lines=True, vid_keypoints=True):
+    def init_vid(self, vid_out, vid_bbox=True, vid_hbox=True, vid_scatter=True, vid_lines=True, vid_keypoints=True):
+        self.vid_out = vid_out
         self.plot_vid = True
         self.vid_bbox = vid_bbox
         self.vid_hbox = vid_hbox
@@ -66,13 +70,13 @@ class Visualizer:
         if self.graph is not None:
             # colour map
             cmap = self.graph.get_cmap(show=show_cmap)
+
             # scatter x, y and lines
             sc_x, sc_y, lines = self.graph.get_plot_points()
 
-            # print(sc_x.shape, sc_y.shape, cmap.shape)
+            xlim, ylim = self.graph.get_plot_lim(sc_x, sc_y)
 
-            ylim = [np.min(sc_y, axis=None) - 5, np.max(sc_y, axis=None) + 5]
-            xlim = [np.min(sc_x, axis=None) - 5, np.max(sc_x, axis=None) + 5]
+            # print(sc_x.shape, sc_y.shape, cmap.shape)
 
             print(cmap.shape)
 
@@ -89,25 +93,30 @@ class Visualizer:
         if self.plot_vid:
             cv2.namedWindow("plot")
 
+            # SAVE VIDEO
+            if self.vid_out is not None:
+                img_handle.open()
+                rgb = img_handle.read_frame(0)
+                img_handle.close()
+                h, w, _ = rgb.shape
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                vid_out = cv2.VideoWriter(self.vid_out, fourcc, 20.0, (w, h))
+
 
         # PLOT Network
         if self.plot_network and self.graph is not None:
             fig = plt.figure()
             ax = plt.gca()
-            # ax.set_xlim(xlim[0], xlim[1])
-            # ax.set_ylim(ylim[0], ylim[1])
-            plt.ion()
+            ax.set_xlim(xlim[0], xlim[1])
+            ax.set_ylim(ylim[0], ylim[1])
+
+            if self.network_show:
+                plt.ion()
 
         # plt.figure()
         # plt.scatter(np.arange(4), np.ones(4), color=cmap_)
         # plt.show()
-        if self.out_name is not None:
-            img_handle.open()
-            rgb = img_handle.read_frame(0)
-            img_handle.close()
-            h, w, _ = rgb.shape
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            out = cv2.VideoWriter(self.out_name, fourcc, 20.0, (w, h))
+
 
         img_handle.open()
         for t in range(self.graph.time_series_length):
@@ -116,13 +125,13 @@ class Visualizer:
 
             # Plot info from graph
             if self.graph is not None:
-                sc_x_ = list(map(int, sc_x[:, t]))
-                sc_y_ = list(map(int, sc_y[:, t]))
+                sc_x_t = list(map(int, sc_x[:, t]))
+                sc_y_t = list(map(int, sc_y[:, t]))
 
                 # Plot network
                 if self.plot_network:
                     if self.network_scatter:
-                        ax.scatter(sc_x_, sc_y_, color=cmap_network)
+                        ax.scatter(sc_x_t, sc_y_t, color=cmap_network)
 
                     if self.network_lines:
                         for l in lines[t]:
@@ -134,8 +143,8 @@ class Visualizer:
                 # Plot video
                 if self.plot_vid:
                     if self.vid_scatter:
-                        for p in range(len(sc_x_)):
-                            cv2.circle(rgb_, (sc_x_[p], sc_y_[p]), 1, tuple(cmap_vid[p]), 5)
+                        for p in range(len(sc_x_t)):
+                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p]), 5)
 
                     if self.vid_lines:
                         for l in lines[t]:
@@ -182,8 +191,11 @@ class Visualizer:
             # img_ = np.hstack((img, img_sctr))
 
             # save video
-            if self.out_name is not None:
-                out.write(rgb_)
+            if self.vid_out is not None:
+                vid_out.write(rgb_)
+
+
+
 
             # display image with opencv or any operation you like
             cv2.imshow("plot", rgb_)
@@ -201,8 +213,8 @@ class Visualizer:
 
         img_handle.close()
 
-        if self.out_name is not None:
-            out.release()
+        if self.vid_out is not None:
+            vid_out.release()
     # cap.release()
 
     # plt.show(block=True)
@@ -211,14 +223,14 @@ class Visualizer:
 if __name__ == "__main__":
 
     parser=argparse.ArgumentParser()
-    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
-    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/labels/DEEE/yolo/cctv1-yolo.json')
-    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/labels/DEEE/handshake/cctv1.json')
-    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/DEEE/cctv1.mp4')
     # parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
-    # parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json')
-    # parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
-    # parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
+    # parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/labels/DEEE/yolo/cctv1-yolo.json')
+    # parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/labels/DEEE/handshake/cctv1.json')
+    # parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/DEEE/cctv1.mp4')
+    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
+    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json')
+    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
+    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
     parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
     parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
@@ -256,6 +268,7 @@ if __name__ == "__main__":
 
 
     g = Graph()
+    g.getCameraInfoFromJson("./data/camera-orientation/jsons/uti.json")
     # g.init_from_json(args.graph_file)
     # g.run_gihan()
 
@@ -267,16 +280,20 @@ if __name__ == "__main__":
         hs_handler.connectToGraph(g)
         hs_handler.runForBatch()
 
+    if g.state["floor"]  < 1:
+        g.generateFloorMap()
+
+
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
 
 
-    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler, out_name=None)  #args.output)
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler)  #args.output)
 
     # Call this to plot pyplot graph
-    vis.init_network()
+    vis.init_network(None)
     # Call this to plot cv2 video
-    vis.init_vid(vid_scatter=False, vid_lines=False)
+    vis.init_vid(None, vid_scatter=False, vid_lines=False)
 
     print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
 
