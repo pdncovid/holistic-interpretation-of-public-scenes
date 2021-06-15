@@ -101,7 +101,7 @@ if __name__ == "__main__":
 	img_loc = args.input
 	json_loc = args.output
 
-	args.visualize=True
+	args.visualize=False
 	args.verbose=True
 	args.tracker=False
 
@@ -110,8 +110,7 @@ if __name__ == "__main__":
 	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-
-	nn_handle = NNHandler_mask(mask_file=json_loc, is_tracked=args.tracker)
+	nn_handle = NNHandler_mask(mask_file=json_loc, is_tracked=args.tracker, vis=args.visualize)
 
 	try:
 		if os.path.exists(json_loc):
@@ -126,7 +125,7 @@ if __name__ == "__main__":
 	except:
 		# To create YOLO mask + DSORT track and save to json
 		nn_handle.create_yolo(img_handle)
-		# nn_handle.save_json()
+		nn_handle.save_json()
 
 
 	# g = Graph()
