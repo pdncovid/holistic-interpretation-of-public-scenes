@@ -34,9 +34,7 @@ from suren.util import get_iou, Json, eprint
 
 
 class NNHandler_mask(NNHandler_yolo):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
-	weigths_filename = yolo_dir + 'checkpoints/yolov4-obj_best'
+	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-obj_best'
 
 	# Definition of the parameters
 	max_cosine_distance = 0.4
