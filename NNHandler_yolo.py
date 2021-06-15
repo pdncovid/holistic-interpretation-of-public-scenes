@@ -185,12 +185,12 @@ class NNHandler_yolo(NNHandler):
 				print("[xx]", pred_bbox)
 
 			# Give class names
-			if self.class_names is None: self.class_names = ["class_%d"%i for i in range(np.max(classes, axis=None))]
+			if self.class_names is None: self.class_names = []
 			# names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
 			try:
 				names = [self.class_names[int(i)] for i in classes]
 			except:
-				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else "class_%d"%i for i in classes]
 				eprint("[xx]", classes)
 
 			# encode yolo detections and feed to tracker

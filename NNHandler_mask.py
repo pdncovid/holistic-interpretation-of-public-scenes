@@ -36,6 +36,8 @@ from suren.util import get_iou, Json, eprint
 class NNHandler_mask(NNHandler_yolo):
 	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-obj_best'
 
+	class_names = ["Mask", "NoMask"]
+
 	# Definition of the parameters
 	max_cosine_distance = 0.4
 	nn_budget = None
