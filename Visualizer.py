@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 from collections import defaultdict
@@ -115,6 +116,9 @@ class Visualizer:
                 plt.ion()
             else:
                 plt.ioff()
+
+            if self.plot_out is not None and not os.path.exists(self.plot_out):
+                os.makedirs(self.plot_out)
 
             # Figure for Floor points
             fig1, ax1 = plt.subplots()
@@ -314,7 +318,9 @@ if __name__ == "__main__":
     if g.state["floor"] < 2:
         g.generateFloorMap()
 
-    g.findClusters()
+    if g.state["cluster"] < 1:
+        g.findClusters()
+
     g.calculateThreatLevel()
 
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg

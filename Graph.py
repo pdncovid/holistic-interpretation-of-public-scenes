@@ -49,7 +49,7 @@ class Graph:
 		self.state = {
 			"people" : 0, 		# 1 - people bbox, 2 - tracking id
 			"handshake" : 0, 	# 1 - hs only, 2 - with tracking id, 3 - person info
-			"cluster" : 0,
+			"cluster" : 0,		# 1 - has cluster info
 			"mask" : 0,
 			"floor" : 0			# 1 - X, Y points only, 2 - Projected Floor maps generated with X,Y
 		}
@@ -405,6 +405,8 @@ class Graph:
 		self.groupProbability = self.groupProbability > self.GROUP_TIME_THRESH
 
 		print(self.groupProbability)
+
+		self.state["cluster"] = 1
 
 
 	def calculateThreatLevel(self):
