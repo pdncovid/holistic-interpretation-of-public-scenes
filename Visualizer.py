@@ -141,6 +141,7 @@ class Visualizer:
 
 
         img_handle.open()
+
         for t in range(self.graph.time_series_length):
             rgb = img_handle.read_frame(t)
             rgb_ = rgb.copy()
