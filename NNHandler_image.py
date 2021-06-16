@@ -167,14 +167,12 @@ class NNHandler_image(NNHandler):
             raise NotImplementedError
 
     def runForBatch(self):
-        if self.img_loc is None and self.json_file is None:
-            raise ValueError("Both img_loc and json_file cannot be None")
+        if self.img_loc is None and self.json_file is None: raise ValueError("Both img_loc and json_file cannot be None")
 
-        elif self.img_loc is None and self.json_file is not None:
-            self.init_from_json()
+        elif self.img_loc is None and self.json_file is not None: self.init_from_json()
+
         else:
             self.init_from_img_loc()
-
             if self.json_file is not None: self.write_json()
 
         print("\t[f] Read %s file with %d frames" %(self.format, self.time_series_length))
