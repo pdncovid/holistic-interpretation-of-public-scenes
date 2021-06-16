@@ -188,17 +188,11 @@ if __name__ == "__main__":
 	img_handle.runForBatch()
 
 	hs_handle = NNHandler_handshake(vis=args.visualize, is_tracked=args.tracked)
-	try:
-		if os.path.exists(json_loc):
-			if args.overwrite:
-				raise Exception("Overwriting json : %s"%json_loc)
 
-			# To load YOLO + DSORT track from json
-			hs_handle.init_from_json(json_loc)
-
-		else:
-			raise Exception("Json does not exists : %s"%json_loc)
-	except:
+	if os.path.exists(json_loc) and not args.overwrite:
+		# To load YOLO + DSORT track from json
+		hs_handle.init_from_json(json_loc)
+	else:
 		# To create YOLO + DSORT track and save to json
 		hs_handle.create_yolo(img_handle)
 		hs_handle.save_json(json_loc)
