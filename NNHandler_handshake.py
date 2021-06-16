@@ -17,7 +17,7 @@ class NNHandler_handshake(NNHandler_yolo):
 	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort"
 
 	model_filename = yolo_dir + '/model_data/mars-small128.pb'
-	weigths_filename = yolo_dir + '/checkpoints/yolov4-fullshake_best'
+	weigths_filename = yolo_dir + '/checkpoints/yolov4-deee-UTI_best'
 
 	class_names = ["Handshake"]
 
