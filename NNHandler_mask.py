@@ -34,9 +34,9 @@ from suren.util import get_iou, Json, eprint
 
 
 class NNHandler_mask(NNHandler_yolo):
-	yolo_dir = "./suren/temp/yolov4-deepsort-master/"
-	model_filename = yolo_dir + 'model_data/mars-small128.pb'
-	weigths_filename = yolo_dir + 'checkpoints/yolov4-obj_best'
+	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-obj_best'
+
+	class_names = ["Mask", "NoMask"]
 
 	# Definition of the parameters
 	max_cosine_distance = 0.4
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 	img_loc = args.input
 	json_loc = args.output
 
-	args.visualize=True
+	args.visualize=False
 	args.verbose=True
 	args.tracker=False
 
@@ -110,42 +110,22 @@ if __name__ == "__main__":
 	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-	if args.tracker:
+	nn_handle = NNHandler_mask(mask_file=json_loc, is_tracked=args.tracker, vis=args.visualize)
 
-		nn_handle = NNHandler_mask(mask_file=json_loc, is_tracked=True)
+	try:
+		if os.path.exists(json_loc):
+			if args.overwrite:
+				raise Exception("Overwriting json : %s" % json_loc)
 
-		try:
-			if os.path.exists(json_loc):
-				if args.overwrite:
-					raise Exception("Overwriting json : %s" % json_loc)
+			# To load YOLO + DSORT track from json
+			nn_handle.init_from_json()
 
-				# To load YOLO + DSORT track from json
-				nn_handle.init_from_json()
-
-			else:
-				raise Exception("Json does not exists : %s" % json_loc)
-		except:
-			# To create YOLO mask + DSORT track and save to json
-			nn_handle.create_tracker(img_handle)
-			# nn_handle.save_json()
-
-	else:
-		nn_handle = NNHandler_mask(mask_file=json_loc, is_tracked=False)
-
-		try:
-			if os.path.exists(json_loc):
-				if args.overwrite:
-					raise Exception("Overwriting json : %s" % json_loc)
-
-				# To load YOLO + DSORT track from json
-				nn_handle.init_from_json()
-
-			else:
-				raise Exception("Json does not exists : %s" % json_loc)
-		except:
-			# To create YOLO mask + DSORT track and save to json
-			nn_handle.create_yolo(img_handle)
-			# nn_handle.save_json()
+		else:
+			raise Exception("Json does not exists : %s" % json_loc)
+	except:
+		# To create YOLO mask + DSORT track and save to json
+		nn_handle.create_yolo(img_handle)
+		nn_handle.save_json()
 
 
 	# g = Graph()
