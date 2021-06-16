@@ -14,12 +14,12 @@ from suren.util import get_iou, Json, eprint
 
 
 class NNHandler_handshake(NNHandler_yolo):
-	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/model/yolov4-deepsort"
+	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort"
 
 	model_filename = yolo_dir + '/model_data/mars-small128.pb'
 	weigths_filename = yolo_dir + '/checkpoints/yolov4-fullshake_best'
 
-	class_names =  ["Handshake"]
+	class_names = ["Handshake"]
 
 	# Definition of the parameters
 	max_cosine_distance = 0.4
