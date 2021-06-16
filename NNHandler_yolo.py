@@ -185,12 +185,12 @@ class NNHandler_yolo(NNHandler):
 				print("[xx]", pred_bbox)
 
 			# Give class names
-			if self.class_names is None: self.class_names = ["class_%d"%i for i in range(np.max(classes, axis=None))]
+			if self.class_names is None: self.class_names = []
 			# names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
 			try:
 				names = [self.class_names[int(i)] for i in classes]
 			except:
-				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
+				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else "class_%d"%i for i in classes]
 				eprint("[xx]", classes)
 
 			# encode yolo detections and feed to tracker
@@ -251,8 +251,7 @@ class NNHandler_yolo(NNHandler):
 
 				cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
 				cv2.rectangle(frame, (int(bbox[0]), int(bbox[1] - 30)),
-							  (int(bbox[0]) + (len(class_name) + len(str(track.track_id))) * 17, int(bbox[1])), color,
-							  -1)
+							  (int(bbox[0]) + len(txt) * 17, int(bbox[1])), color, -1)
 				cv2.putText(frame, txt, (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75, (255, 255, 255), 2)
 
 				# if enable info flag then print details about each track
