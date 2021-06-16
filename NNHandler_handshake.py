@@ -27,7 +27,7 @@ class NNHandler_handshake(NNHandler_yolo):
 	nms_max_overlap = 1.0
 
 	iou_thresh = .45
-	score_thresh = .5
+	score_thresh = .2
 	input_size = 416
 
 
