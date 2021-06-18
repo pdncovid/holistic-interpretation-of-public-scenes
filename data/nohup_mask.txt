@@ -1,0 +1,397 @@
+2021-06-18 17:06:38.094771: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:06:43.259838: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 17:06:45.156152: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 17:06:45.156563: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 17:06:45.156588: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:06:45.160641: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 17:06:45.163923: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 17:06:45.166421: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 17:06:45.170967: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 17:06:45.175773: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 17:06:45.178611: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 17:06:45.178643: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv5.mp4
+	[f] Read avi file with 1453 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv5-mask.json
+	[*] Tracked : False
+2021-06-18 17:06:50.931589: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:06:52.487981: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 17:06:54.413502: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 17:06:54.413846: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 17:06:54.413865: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:06:54.417413: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 17:06:54.419943: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 17:06:54.422582: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 17:06:54.427239: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 17:06:54.431215: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 17:06:54.433225: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 17:06:54.433247: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 17:06:58.875134: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 17:06:58.879912: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 17:06:58.880288: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7f434e152090 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 17:06:58.880303: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 17:06:58.881537: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 17:06:58.881546: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 17:06:59.631508: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 17:06:59.631527: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv3.mp4
+	[f] Read avi file with 1394 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv3-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 17:28:48.908165: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:28:54.250718: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 17:28:56.197038: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 17:28:56.197412: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 17:28:56.197434: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:28:56.202831: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 17:28:56.206503: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 17:28:56.208589: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 17:28:56.212709: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 17:28:56.215933: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 17:28:56.218389: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 17:28:56.218407: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 17:29:07.115583: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 17:29:07.124366: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 17:29:07.125223: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7f394bf3d2a0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 17:29:07.125248: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 17:29:07.127461: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 17:29:07.127477: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 17:29:08.528272: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 17:29:08.528303: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv4.mp4
+	[f] Read avi file with 1706 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 17:59:01.181375: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:59:06.519276: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 17:59:08.449555: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 17:59:08.449994: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 17:59:08.450022: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 17:59:08.453958: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 17:59:08.456919: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 17:59:08.459317: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 17:59:08.463139: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 17:59:08.466462: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 17:59:08.468783: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 17:59:08.468799: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 17:59:20.546521: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 17:59:20.555690: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 17:59:20.556581: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7efe1490ddc0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 17:59:20.556608: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 17:59:20.558971: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 17:59:20.558989: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 17:59:21.707472: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 17:59:21.707501: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv2.mp4
+	[f] Read avi file with 1785 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv2-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 18:31:02.700248: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 18:31:08.155127: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 18:31:10.071553: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 18:31:10.072009: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 18:31:10.072039: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 18:31:10.077235: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 18:31:10.080702: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 18:31:10.083416: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 18:31:10.088137: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 18:31:10.092253: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 18:31:10.095534: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 18:31:10.095563: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 18:31:22.089413: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 18:31:22.099502: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 18:31:22.100107: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7f855529e110 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 18:31:22.100132: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 18:31:22.102712: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 18:31:22.102737: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 18:31:23.435698: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 18:31:23.435729: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv7.mp4
+	[f] Read avi file with 1738 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv7-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 19:01:13.555969: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 19:01:18.968738: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 19:01:20.910047: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 19:01:20.910505: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 19:01:20.910531: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 19:01:20.914249: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 19:01:20.917178: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 19:01:20.919421: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 19:01:20.924677: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 19:01:20.929562: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 19:01:20.931990: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 19:01:20.932009: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 19:01:32.586677: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 19:01:32.596835: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 19:01:32.597659: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7fce81c170c0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 19:01:32.597684: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 19:01:32.600174: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 19:01:32.600193: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 19:01:33.935963: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 19:01:33.935996: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv9.mp4
+	[f] Read avi file with 1689 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv9-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 19:30:30.776947: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 19:30:35.967551: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 19:30:37.886909: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 19:30:37.887396: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 19:30:37.887426: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 19:30:37.891789: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 19:30:37.895354: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 19:30:37.897555: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 19:30:37.901738: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 19:30:37.905527: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 19:30:37.907900: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 19:30:37.907915: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 19:30:44.707495: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 19:30:44.717032: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 19:30:44.717707: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7fe2e1e62ee0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 19:30:44.717733: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 19:30:44.720140: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 19:30:44.720157: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 19:30:45.988903: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 19:30:45.988927: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv10.mp4
+	[f] Read avi file with 1033 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv10-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 19:48:42.219060: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 19:48:47.660948: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 19:48:49.589074: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 19:48:49.589595: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 19:48:49.589628: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 19:48:49.594071: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 19:48:49.597230: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 19:48:49.599372: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 19:48:49.603708: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 19:48:49.607317: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 19:48:49.609405: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 19:48:49.609423: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 19:49:02.513857: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 19:49:02.523974: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 19:49:02.524694: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7f684f288c70 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 19:49:02.524724: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 19:49:02.527175: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 19:49:02.527200: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 19:49:03.899877: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 19:49:03.899906: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv1.mp4
+	[f] Read avi file with 1800 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv1-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 20:20:11.880199: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 20:20:17.388201: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 20:20:19.301956: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 20:20:19.302374: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 20:20:19.302399: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 20:20:19.307149: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 20:20:19.310713: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 20:20:19.313468: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 20:20:19.317326: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 20:20:19.320210: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 20:20:19.322090: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 20:20:19.322105: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 20:20:31.029839: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 20:20:31.039339: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 20:20:31.040099: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7fc6cda82c70 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 20:20:31.040125: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 20:20:31.042577: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 20:20:31.042595: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 20:20:32.389996: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 20:20:32.390024: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv8.mp4
+	[f] Read avi file with 1801 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv8-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 20:51:05.246855: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 20:51:10.993665: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 20:51:12.915944: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 20:51:12.916344: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 20:51:12.916368: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 20:51:12.920046: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 20:51:12.923501: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 20:51:12.926466: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 20:51:12.933558: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 20:51:12.940237: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 20:51:12.943513: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 20:51:12.943565: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 20:51:25.451262: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 20:51:25.460661: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 20:51:25.461302: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7f3909600240 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 20:51:25.461333: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 20:51:25.463681: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 20:51:25.463704: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 20:51:26.556974: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 20:51:26.557001: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctv6.mp4
+	[f] Read avi file with 1804 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctv6-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 21:21:56.354392: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 21:22:01.751436: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 21:22:03.673414: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 21:22:03.673835: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 21:22:03.673859: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 21:22:03.677682: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 21:22:03.681221: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 21:22:03.683707: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 21:22:03.687586: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 21:22:03.691299: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 21:22:03.693284: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 21:22:03.693298: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 21:22:07.968948: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 21:22:07.978182: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 21:22:07.979089: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7f13d6734380 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 21:22:07.979114: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 21:22:07.981277: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 21:22:07.981292: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 21:22:09.366232: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 21:22:09.366268: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctvx.mp4
+	[f] Read avi file with 657 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctvx-mask.json
+	[*] Tracked : False
+creating json file
+2021-06-18 21:33:22.030397: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 21:33:27.300136: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcuda.so.1
+2021-06-18 21:33:29.230231: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:982] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2021-06-18 21:33:29.230658: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: Tesla C2075 computeCapability: 2.0
+coreClock: 1.147GHz coreCount: 14 deviceMemorySize: 5.18GiB deviceMemoryBandwidth: 140.01GiB/s
+2021-06-18 21:33:29.230680: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcudart.so.10.1
+2021-06-18 21:33:29.234645: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcublas.so.10
+2021-06-18 21:33:29.238172: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcufft.so.10
+2021-06-18 21:33:29.240415: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcurand.so.10
+2021-06-18 21:33:29.243891: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusolver.so.10
+2021-06-18 21:33:29.247474: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library libcusparse.so.10
+2021-06-18 21:33:29.250309: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/cuda-7.5/lib64:/usr/local/cula/lib64
+2021-06-18 21:33:29.250327: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1753] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-06-18 21:34:19.773657: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-06-18 21:34:19.783641: I tensorflow/core/platform/profile_utils/cpu_utils.cc:104] CPU Frequency: 4006260000 Hz
+2021-06-18 21:34:19.784414: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x7fb9a642c540 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-06-18 21:34:19.784441: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-06-18 21:34:19.787197: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 21:34:19.787242: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+2021-06-18 21:34:21.164688: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-06-18 21:34:21.164717: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      
+Frames will only be read linearly
+Creating an Image handler
+	[*] Image location : ./videos/DEEE/cctvx2.mp4
+	[f] Read avi file with 7461 frames
+Creating a YOLO handler
+Creating a mask handler
+	[*] Json location : ./labels/DEEE/mask/cctvx2-mask.json
+	[*] Tracked : False
+creating json file
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv5.mp4 -o ./labels/DEEE/mask/cctv5-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv3.mp4 -o ./labels/DEEE/mask/cctv3-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv4.mp4 -o ./labels/DEEE/mask/cctv-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv2.mp4 -o ./labels/DEEE/mask/cctv2-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv7.mp4 -o ./labels/DEEE/mask/cctv7-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv9.mp4 -o ./labels/DEEE/mask/cctv9-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv10.mp4 -o ./labels/DEEE/mask/cctv10-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv1.mp4 -o ./labels/DEEE/mask/cctv1-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv8.mp4 -o ./labels/DEEE/mask/cctv8-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctv6.mp4 -o ./labels/DEEE/mask/cctv6-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctvx.mp4 -o ./labels/DEEE/mask/cctvx-mask.json
+python ../NNHandler_mask.py -i ./videos/DEEE/cctvx2.mp4 -o ./labels/DEEE/mask/cctvx2-mask.json
