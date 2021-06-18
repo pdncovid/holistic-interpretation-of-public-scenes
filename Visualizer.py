@@ -67,6 +67,10 @@ class Visualizer:
         self.vid_keypoints = vid_keypoints
 
     def plot(self, WAIT=20, show_cmap=True):
+        self.show_gui=False
+        self.save_video_frames=True
+        self.plot_vid=True#Gihan added this because he didn't understand the code
+
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
@@ -159,7 +163,8 @@ class Visualizer:
                         for l in lines[t]:
                             ax1.plot(l[0], l[1])
 
-                    plt.pause(.1)
+                    if self.show_gui:
+                        plt.pause(.1)
 
                 # @Suren : TODO : Learn ion properly -_-
                 self.network_show = False
@@ -175,7 +180,7 @@ class Visualizer:
                             cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)),
                                      (255, 255, 255), 3)
 
-
+            # print("DEBUG",self.plot_vid)
             if self.plot_vid:
                 # Plot info from yolo
                 if self.person_handle is not None and self.vid_bbox:
@@ -202,14 +207,21 @@ class Visualizer:
                 if self.vid_out is not None:
                     vid_out.write(rgb_)
 
+
+
                 # display image with opencv or any operation you like
-                cv2.imshow("plot", rgb_)
+                if self.show_gui:
+                    cv2.imshow("plot", rgb_)
 
-                k = cv2.waitKey(WAIT)
+                    k = cv2.waitKey(WAIT)
 
-                if k & 0xff == ord('q'): break
-                elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
+                    if k & 0xff == ord('q'): break
+                    elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
 
+                
+                if self.save_video_frames:
+                    print("{}fr-{:04d}.jpg".format(self.plot_out,t))
+                    cv2.imwrite("{}fr-{:04d}.jpg".format(self.plot_out,t), rgb_)                    
             '''
             # fig.canvas.draw()
             #
@@ -230,7 +242,7 @@ class Visualizer:
 
             if self.plot_network:
                 if self.plot_out is not None:
-                    fig1.savefig("{}G-{:04d}".format(self.plot_out, t))
+                    fig1.savefig("{}G-{:04d}.jpg".format(self.plot_out, t))
                     ax1.clear()
                     ax1.set_xlim(xlim[0], xlim[1])
                     ax1.set_ylim(ylim[0], ylim[1])
@@ -255,6 +267,41 @@ class Visualizer:
     # plt.show(block=True)
 
 
+    def mergePhotos(self,directory=None):
+        mergedVideoOut=None
+        newH=500
+        if directory==None:
+            directory=self.plot_out
+
+        #This is a hardcoded function
+        imgPefixes=["fr","G","dimg","T"]
+        # imgPefixes=["fr","G","dimg","T"]
+        for t in range(1000):
+            outImg=np.zeros((newH,1,3),dtype=np.uint8)
+            for i in range(len(imgPefixes)):
+                imgName="{}{}-{:04d}.jpg".format(directory,imgPefixes[i],t)
+                if args.debug:
+                    print("Loading file ",imgName)
+                thisImg=cv2.imread(imgName)
+                H=thisImg.shape[0]
+                W=thisImg.shape[1]
+
+                newW=int((newH/(1.0*H))*W)
+                thisImg=cv2.resize(thisImg,(newW,newH))
+                outImg=np.concatenate((outImg,thisImg),axis=1)
+
+            cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out,t), outImg)
+
+            if t==0:
+                outVideoName="{}merged.mp4".format(directory)
+                mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
+                mergedVideoOut = cv2.VideoWriter(outVideoName, mergedFourcc, 20.0, (newW, newH))
+
+            mergedVideoOut.write(outImg)
+
+        mergedVideoOut.close()
+
+
 if __name__ == "__main__":
 
     parser=argparse.ArgumentParser()
@@ -270,6 +317,7 @@ if __name__ == "__main__":
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
     parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
+    parser.add_argument("--debug", "-db", type=bool, dest="debug", default=True)
 
     args = parser.parse_args()
     print(args)
@@ -338,3 +386,6 @@ if __name__ == "__main__":
 
     vis.plot(WAIT=20, show_cmap=False)
 
+    vis.mergePhotos()
+
+    print("END of program")
