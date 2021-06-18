@@ -73,6 +73,21 @@ class NNHandler_yolo(NNHandler):
 		raise NotImplementedError
 
 	@staticmethod
+	def get_parse():
+		parser = argparse.ArgumentParser()
+
+		parser.add_argument("--input_file", "-i", type=str, dest="input_file", default=None)
+		parser.add_argument("--output_file", "-o", type=str, dest="output_file", default=None)
+
+		parser.add_argument("--overwrite", "--ow", action="store_true", dest="overwrite")
+		parser.add_argument("--visualize", "--vis", action="store_true", dest="visualize")
+		parser.add_argument("--verbose", "--verb", action="store_true", dest="verbose")
+		parser.add_argument("--tracked", "-t", type=bool, dest="tracked", default=True)
+
+		args = parser.parse_args()
+		return args
+
+	@staticmethod
 	def plot(img, points, col):
 		x_min, y_min, x_max, y_max = points
 		cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
