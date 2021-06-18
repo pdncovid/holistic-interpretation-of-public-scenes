@@ -297,7 +297,7 @@ class NNHandler_yolo(NNHandler):
 
 	def save_json(self, file_name=None):
 		if file_name is None: file_name = self.json_file
-		if os.path.exists(os.path.dirname(file_name)) : os.makedirs(os.path.dirname(file_name))
+		if not os.path.exists(os.path.dirname(file_name)) : os.makedirs(os.path.dirname(file_name))
 
 		js = Json(file_name)
 		dic = {"frames": self.time_series_length}
