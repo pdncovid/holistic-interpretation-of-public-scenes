@@ -41,6 +41,10 @@ class Graph:
 		:param timeSeriesLength: Number of frames
 		"""
 		self.time_series_length = time_series_length
+		# self.time_series_length = 10
+		'''
+			Gihan hardcoded to 100 for debug purposes.
+		'''
 
 		self.n_nodes = 0
 		self.n_person = 0
@@ -401,10 +405,10 @@ class Graph:
 		c = np.sum(self.pairDetectionProbability,-1)
 		self.groupProbability = b/c
 
-		print(self.groupProbability)
+		print("Group probability", self.groupProbability)
 		self.groupProbability = self.groupProbability > self.GROUP_TIME_THRESH
 
-		print(self.groupProbability)
+		print("Group probability (bianry)",self.groupProbability)
 
 		self.state["cluster"] = 1
 
@@ -480,7 +484,7 @@ class Graph:
 		divider = make_axes_locatable(ax)
 		cax = divider.append_axes('right', size='5%', pad=0.05)
 		fig.colorbar(im, cax=cax, orientation='vertical')
-		fig.savefig("{}T-{:04d}".format(out_name, t))
+		fig.savefig("{}T-{:04d}.jpg".format(out_name, t))
 
 	def gihan_images(self, fig, ax, out_name, t, concat=True):
 
@@ -499,7 +503,7 @@ class Graph:
 				col.title.set_text(vals[ind][1])
 				col.matshow(vals[ind][0], vmin=0, vmax=1)
 
-			fig.savefig("{}dimg-{:04d}".format(out_name, t))
+			fig.savefig("{}dimg-{:04d}.jpg".format(out_name, t))
 			for col in ax:
 				col.clear()
 

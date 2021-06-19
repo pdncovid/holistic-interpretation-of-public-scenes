@@ -48,7 +48,8 @@ class Visualizer:
         self.vid_keypoints = False
         self.vid_out = None
 
-    def init_network(self, plot_out : str = None, network_scatter=True, network_lines=True, network_show=False):
+    def init_network(self, plot_out : str = None, network_scatter=True, \
+        network_lines=True, network_show=False):
         assert self.graph is not  None, "Graph cannot be empty while plotting"
 
         self.plot_out  = plot_out
@@ -57,7 +58,8 @@ class Visualizer:
         self.network_scatter = network_scatter
         self.network_lines = network_lines
 
-    def init_vid(self, vid_out : str = None, vid_bbox=True, vid_hbox=True, vid_scatter=True, vid_lines=True, vid_keypoints=True):
+    def init_vid(self, vid_out : str = None, vid_bbox=True, vid_hbox=True, \
+        vid_scatter=True, vid_lines=True, vid_keypoints=True):
         self.vid_out = vid_out
         self.plot_vid = True
         self.vid_bbox = vid_bbox
@@ -67,6 +69,10 @@ class Visualizer:
         self.vid_keypoints = vid_keypoints
 
     def plot(self, WAIT=20, show_cmap=True):
+        self.show_gui=False
+        self.save_video_frames=True
+        self.plot_vid=True#Gihan added this because he didn't understand the code
+
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
@@ -160,7 +166,8 @@ class Visualizer:
                         for l in lines[t]:
                             ax1.plot(l[0], l[1])
 
-                    plt.pause(.1)
+                    if self.show_gui:
+                        plt.pause(.1)
 
                 # @Suren : TODO : Learn ion properly -_-
                 self.network_show = False
@@ -169,48 +176,63 @@ class Visualizer:
                 if self.plot_vid:
                     if self.vid_scatter:
                         for p in range(len(sc_x_t)):
-                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p]), 5)
+                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, \
+                                tuple(cmap_vid[p]), 5)
 
                     if self.vid_lines:
                         for l in lines[t]:
-                            cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)),
-                                     (255, 255, 255), 3)
+                            cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)),\
+                                tuple(np.array(l[:, 1]).astype(int)),(255, 255, 255), 3)
 
-
+            # print("DEBUG",self.plot_vid)
             if self.plot_vid:
                 # Plot info from yolo
                 if self.person_handle is not None and self.vid_bbox:
                     for p in self.graph.nodes:
-                        x_min, y_min, x_max, y_max = map(int, [p.params["xMin"][t], p.params["yMin"][t], p.params["xMax"][t], p.params["yMax"][t]])
-                        NNHandler_person.plot(rgb_, (x_min, y_min, x_max, y_max), p.params["col"])
+                        x_min, y_min, x_max, y_max = map(int, 
+                            [p.params["xMin"][t], p.params["yMin"][t], \
+                            p.params["xMax"][t], p.params["yMax"][t]])
+                        NNHandler_person.plot(rgb_, (x_min, y_min, x_max, y_max), \
+                            p.params["col"])
 
                 # Plot info from openpose
                 if self.openpose_handle is not None and self.vid_keypoints:
-                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
+                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], \
+                        self.openpose_handle.is_tracked)
 
 
                 # Plot info from handshake
                 if self.hs_handle is not None and self.vid_hbox:
                     if str(t) in self.hs_handle.json_data:
-                        NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
+                        NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], \
+                            self.hs_handle.is_tracked)
 
                 # Plot info from graph
                 if self.graph is not None and self.graph.threatLevel is not None:
                     if str(t) in self.graph.threatLevel:
-                        cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100), 0, 0.75, (255, 255, 255), 2)
+                        cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100),\
+                         0, 0.75, (255, 255, 255), 2)
 
                 # save video
                 if self.vid_out is not None:
                     vid_out.write(rgb_)
 
+
+
                 # display image with opencv or any operation you like
-                cv2.imshow("plot", rgb_)
+                if self.show_gui:
+                    cv2.imshow("plot", rgb_)
 
-                k = cv2.waitKey(WAIT)
+                    k = cv2.waitKey(WAIT)
 
-                if k & 0xff == ord('q'): break
-                elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
+                    if k & 0xff == ord('q'): break
+                    elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
 
+                
+                if self.save_video_frames:
+                    if args.debug:
+                        print("{}fr-{:04d}.jpg".format(self.plot_out,t))
+                    cv2.imwrite("{}fr-{:04d}.jpg".format(self.plot_out,t), rgb_)                    
             '''
             # fig.canvas.draw()
             #
@@ -231,7 +253,7 @@ class Visualizer:
 
             if self.plot_network:
                 if self.plot_out is not None:
-                    fig1.savefig("{}G-{:04d}".format(self.plot_out, t))
+                    fig1.savefig("{}G-{:04d}.jpg".format(self.plot_out, t))
                     ax1.clear()
                     ax1.set_xlim(xlim[0], xlim[1])
                     ax1.set_ylim(ylim[0], ylim[1])
@@ -256,6 +278,58 @@ class Visualizer:
     # plt.show(block=True)
 
 
+    def mergePhotos(self,directory=None,noFrames=100):
+        OUTPUT_FILE_TYPE="mp4"#"mp4" | "webm"
+
+
+        mergedVideoOut="TempVariable"
+        newH=500
+        if directory==None:
+            directory=self.plot_out
+
+        #This is a hardcoded function
+        imgPefixes=["fr","G","dimg","T"]
+        # imgPefixes=["fr","G","dimg","T"]
+
+        fivePercentBlock=int(noFrames/20.0)
+        print("0% of merging completed")        
+
+        for t in range(noFrames):
+            outImg=np.zeros((newH,1,3),dtype=np.uint8)
+            for i in range(len(imgPefixes)):
+                imgName="{}{}-{:04d}.jpg".format(directory,imgPefixes[i],t)
+                if args.debug:
+                    print("Loading file ",imgName)
+                thisImg=cv2.imread(imgName)
+                H=thisImg.shape[0]
+                W=thisImg.shape[1]
+
+                newW=int((newH/(1.0*H))*W)
+                thisImg=cv2.resize(thisImg,(newW,newH))
+                outImg=np.concatenate((outImg,thisImg),axis=1)
+                # print("outimage shape",outImg.shape)
+
+            cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out,t), outImg)
+
+            if t==0:
+                if OUTPUT_FILE_TYPE=="mp4":
+                    outVideoName="{}merged.mp4".format(directory)
+                    mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
+                elif OUTPUT_FILE_TYPE=="webm":
+                    outVideoName="{}merged.webm".format(directory)
+                    mergedFourcc = cv2.VideoWriter_fourcc(*'VP90')
+                mergedVideoOut = cv2.VideoWriter(outVideoName,\
+                 mergedFourcc, 20.0, (int(outImg.shape[1]), int(outImg.shape[0])))
+            mergedVideoOut.write(outImg)
+            # print(newW,newH)
+
+            if t%fivePercentBlock==0:
+                print((5.0*t)/fivePercentBlock,"% of merging completed")
+
+
+        mergedVideoOut.release()
+        print("100% of merging completed")
+
 if __name__ == "__main__":
 
     parser=argparse.ArgumentParser()
@@ -271,6 +345,7 @@ if __name__ == "__main__":
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
     parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
+    parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
     args = parser.parse_args()
     print(args)
@@ -297,7 +372,8 @@ if __name__ == "__main__":
     hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
     hs_handler.init_from_json()
 
-    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
+    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, \
+        is_tracked=args.track)
     openpose_handler.init_from_json()
     openpose_handler = None
 
@@ -328,14 +404,18 @@ if __name__ == "__main__":
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
 
 
-    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler)  #args.output)
-
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, \
+    img=img_handle, openpose=None)  #args.output)
     # Call this to plot pyplot graph
     vis.init_network(plot_out="./data/output/vid-01/plot/")
     # Call this to plot cv2 video
-    # vis.init_vid(vid_out="./data/output/vid-01/out.mp4", vid_scatter=False, vid_lines=False)
+    vis.init_vid(vid_out="./data/output/vid-01/out.mp4", vid_scatter=False, vid_lines=False)
 
     print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
 
     vis.plot(WAIT=20, show_cmap=False)
 
+    vis.mergePhotos(noFrames=g.time_series_length)
+    
+
+    print("END of program")
