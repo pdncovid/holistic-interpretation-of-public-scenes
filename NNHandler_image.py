@@ -96,8 +96,8 @@ class NNHandler_image(NNHandler):
         if self.format in NNHandler_image.VID_FORMAT:
             self.cap.release()
 
-    def init_writer(self, out_name, h, w, fps=30):
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    def init_writer(self, out_name, h, w, fps=30, encoding="XVID"):
+        fourcc = cv2.VideoWriter_fourcc(*'%s'%encoding)
         self.vid_out = cv2.VideoWriter(out_name, fourcc, fps, (w, h))
 
     def write_frame(self,frame):
