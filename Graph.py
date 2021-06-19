@@ -68,6 +68,7 @@ class Graph:
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
 
 		self.projectedFloorMapNTXY = None
+		self.REFERENCE_POINTS = None
 
 
 
@@ -286,6 +287,7 @@ class Graph:
 
 		self.REFERENCE_POINTS=data["reference_points"]
 		self.REFERENCE_POINTS=np.float32(self.REFERENCE_POINTS)
+
 		self.DEST=np.float32(self.DEST)
 		self.transMatrix= cv2.getPerspectiveTransform(self.REFERENCE_POINTS,self.DEST)
 
