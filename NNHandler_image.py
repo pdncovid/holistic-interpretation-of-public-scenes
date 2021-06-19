@@ -9,7 +9,7 @@ from suren.util import get_iou, Json, eprint
 
 
 class NNHandler_image(NNHandler):
-    VID_FORMAT = ["avi"]
+    VID_FORMAT = ["avi", "mp4", "ts"]
     IMG_FORMAT = ["jpg", "png"]
 
 
@@ -22,11 +22,17 @@ class NNHandler_image(NNHandler):
         self.img_loc = img_loc
         self.json_file = json_file
 
-        print(self)
-
         self.cap = None
         self.json_data = None
         self.time_series_length = None
+
+        self.width = None
+        self.height = None
+        self.fps = None
+
+        self.vid_out = None
+
+        print(self)
 
     def __repr__(self):
         lines = []
@@ -36,10 +42,17 @@ class NNHandler_image(NNHandler):
             lines.append("\t[*] Json location : %s" % self.json_file)
         if self.time_series_length is not None:
             lines.append("\t[*] Frames : {}".format(self.time_series_length))
+        if self.width is not None and self.height is not None:
+            lines.append("\t[*] (h, w) : ({}, {})".format(self.height, self.width))
+        if self.fps is not None:
+            lines.append("\t[*] FPS : {}".format(self.fps))
+
         return "\n".join(lines)
 
-    def count_frames(self, path):
+    def count_frames(self, path=None):
         if self.format in NNHandler_image.VID_FORMAT:
+            if path is None: path = self.img_loc
+
             cap = cv2.VideoCapture(path)
 
             total = 0
@@ -55,22 +68,46 @@ class NNHandler_image(NNHandler):
             return total
 
         elif self.format in NNHandler_image.IMG_FORMAT:
-            img_names = list(map(lambda x: x.replace("\\", "/"), glob(self.img_loc + "/*.%s" % format)))
+            if path is None: path = self.img_loc
+
+            img_names = list(map(lambda x: x.replace("\\", "/"), glob(path + "/*.%s" % format)))
             return len(img_names)
 
         else:
             raise NotImplementedError
 
-    def open(self):
+    def open(self, init_param = False):
         if self.format in NNHandler_image.VID_FORMAT:
             self.cap = cv2.VideoCapture(self.img_loc)
             eprint("Frames will only be read linearly")
+
+            if init_param: self.init_param()
+
+    def init_param(self, cap=None):
+        if cap is None: cap = self.cap
+        assert cap is not None, "Capture cannot be none"
+
+        # self.time_series_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        # self.fps = cap.get(cv2.CAP_PROP_FPS)
 
     def close(self):
         if self.format in NNHandler_image.VID_FORMAT:
             self.cap.release()
 
-    def read_frame(self, frame):
+    def init_writer(self, out_name, h, w, fps=30):
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self.vid_out = cv2.VideoWriter(out_name, fourcc, fps, (w, h))
+
+    def write_frame(self,frame):
+        assert self.vid_out is not None, "Initialize writer by calling init_writer(out_name, h, w, fps)"
+        self.vid_out.write(frame)
+
+    def close_writer(self):
+        self.vid_out.release()
+
+    def read_frame(self, frame_no=None):
         if self.format in NNHandler_image.VID_FORMAT:
             # raise NotImplementedError("Don't do this. It causes errors")
             # self.cap.set(1, frame - 1)
@@ -79,7 +116,7 @@ class NNHandler_image(NNHandler):
             return frame
 
         elif self.format in NNHandler_image.IMG_FORMAT:
-            return cv2.imread(self.json_data[str(frame)])
+            return cv2.imread(self.json_data[str(frame_no)])
 
     def init_from_img_loc(self, img_loc=None, show=False):
         img_loc = self.img_loc if img_loc is None else img_loc
