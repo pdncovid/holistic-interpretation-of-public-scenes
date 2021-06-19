@@ -7,7 +7,7 @@ python dataset_labeling_script.py -i ./videos/DEEE -o ./labels/DEEE/yolo --suffi
 '''
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="Script to label all the videos one folder using python file (--file) and save as json.")
 
 parser.add_argument("--input", "-i", type=str, dest="input", help="Input folder")
 parser.add_argument("--output", "-o", type=str, dest="output", help="Output folder")
@@ -15,8 +15,8 @@ parser.add_argument("--suffix", "-s", type=str, dest="suffix", help="Suffix adde
 parser.add_argument("--file", "-f", type=str, dest="file", help="Python file to be run")
 parser.add_argument("--ftype", "-e", type=str, dest="ftype", default="mp4", help="Extension of video file")
 
-parser.add_argument("--verbose", "-v", action="store_true", dest="verbose")
-parser.add_argument("--overwrite", "-ow", action="store_true", dest="overwrite")
+parser.add_argument("--verbose", "-v", action="store_true", dest="verbose", help="Print intermediate outputs")
+parser.add_argument("--overwrite", "-ow", action="store_true", dest="overwrite", help="Overwrite existing json if it exists")
 
 
 args = parser.parse_args()

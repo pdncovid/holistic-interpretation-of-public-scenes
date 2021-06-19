@@ -73,9 +73,31 @@ class NNHandler_yolo(NNHandler):
 		raise NotImplementedError
 
 	@staticmethod
-	def plot(img, points, col):
-		x_min, y_min, x_max, y_max = points
-		cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
+	def get_parse():
+		parser = argparse.ArgumentParser()
+
+		parser.add_argument("--input_file", "-i", type=str, dest="input_file", default=None)
+		parser.add_argument("--output_file", "-o", type=str, dest="output_file", default=None)
+
+		parser.add_argument("--overwrite", "--ow", action="store_true", dest="overwrite")
+		parser.add_argument("--visualize", "--vis", action="store_true", dest="visualize")
+		parser.add_argument("--verbose", "--verb", action="store_true", dest="verbose")
+		parser.add_argument("--tracked", "-t", type=bool, dest="tracked", default=True)
+
+		args = parser.parse_args()
+		return args
+
+	@staticmethod
+	def plot(img, bbox, col):
+		cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), tuple(col), 2)
+
+		if len(bbox) > 4:
+			cv2.putText(img, str(bbox[4]), (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75, (255, 255, 255), 2)
+
+	# @staticmethod
+	# def plot(img, points, col):
+	# 	x_min, y_min, x_max, y_max = points
+	# 	cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
 
 	def __init__(self, json_file=None, is_tracked=True, vis=True, verbose=True, debug=False):
 
@@ -297,6 +319,7 @@ class NNHandler_yolo(NNHandler):
 
 	def save_json(self, file_name=None):
 		if file_name is None: file_name = self.json_file
+		if not os.path.exists(os.path.dirname(file_name)) : os.makedirs(os.path.dirname(file_name))
 
 		js = Json(file_name)
 		dic = {"frames": self.time_series_length}
