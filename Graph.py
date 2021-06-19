@@ -68,6 +68,7 @@ class Graph:
 		self.DEST=[[0,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,self.PROJECTED_SPACE_H],[self.PROJECTED_SPACE_W,0],[0,0]]
 
 		self.projectedFloorMapNTXY = None
+		self.REFERENCE_POINTS = None
 
 
 

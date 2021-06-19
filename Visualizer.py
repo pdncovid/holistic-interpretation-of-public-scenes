@@ -66,11 +66,12 @@ class Visualizer:
         self.vid_scatter = vid_scatter
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
+        self.mark_ref =True
 
     def plot(self, WAIT=20, show_cmap=True):
         self.show_gui=False
         self.save_video_frames=True
-        self.plot_vid=True#Gihan added this because he didn't understand the code
+        self.plot_vid=True  #Gihan added this because he didn't understand the code
 
 
         if Graph.plot_import() is not None:
@@ -207,10 +208,27 @@ class Visualizer:
                     if str(t) in self.graph.threatLevel:
                         cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100), 0, 0.75, (255, 255, 255), 2)
 
+                if self.mark_ref and self.graph is not None:
+                    points_projected = [self.graph.project(p[0], p[1]) for p in self.graph.REFERENCE_POINTS]
+                    points = np.array([self.graph.REFERENCE_POINTS], dtype=np.int32)
+                    cv2.polylines(rgb_, points, 1, 255)
+                    for i in range(4):
+                        print(points_projected)
+                        p1, p2 = points_projected[i], points_projected[i-1]
+                        ax1.plot(p1, p2)
+
                 # save video
                 if self.vid_out is not None:
                     vid_out.write(rgb_)
 
+
+
+
+                
+                if self.save_video_frames and self.plot_out is not None:
+                    if args.debug:
+                        print("{}fr-{:04d}.jpg".format(self.plot_out,t))
+                    cv2.imwrite("{}fr-{:04d}.jpg".format(self.plot_out,t), rgb_)
 
 
                 # display image with opencv or any operation you like
@@ -222,11 +240,6 @@ class Visualizer:
                     if k & 0xff == ord('q'): break
                     elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
 
-                
-                if self.save_video_frames and self.plot_out is not None:
-                    if args.debug:
-                        print("{}fr-{:04d}.jpg".format(self.plot_out,t))
-                    cv2.imwrite("{}fr-{:04d}.jpg".format(self.plot_out,t), rgb_)
             '''
             # fig.canvas.draw()
             #
@@ -330,13 +343,13 @@ if __name__ == "__main__":
     # parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/labels/DEEE/yolo/cctv1-yolo.json')
     # parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/labels/DEEE/handshake/cctv1.json')
     # parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/DEEE/cctv1.mp4')
-    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/seq18-graph_handshake.json')
-    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/seq18-person.json')
-    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/seq18-handshake_track.json')
+    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
+    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json')
+    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
     parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
     parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
-    parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/seq18-out.avi')
+    parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/vid-01-out.avi')
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
@@ -368,7 +381,7 @@ if __name__ == "__main__":
         person_handler.save_json()
 
     # HS handler
-    hs_handler = NNHandler_person(args.nnout_handshake, is_tracked=args.track)
+    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
     if os.path.exists(args.nnout_handshake):
         hs_handler.init_from_json()
     else:
@@ -410,9 +423,9 @@ if __name__ == "__main__":
     # vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)  #args.output)
     vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)  #args.output)
     # Call this to plot pyplot graph
-    # vis.init_network(plot_out="./data/output/vid-01/plot/")
+    vis.init_network(plot_out="./data/output/vid-001/plot/")
     # Call this to plot cv2 video
-    vis.init_vid(vid_out="./data/output/vid-01/out.avi", vid_scatter=False, vid_lines=False)
+    vis.init_vid(vid_out="./data/output/vid-001/out.avi", vid_scatter=False, vid_lines=False)
 
     print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
 
