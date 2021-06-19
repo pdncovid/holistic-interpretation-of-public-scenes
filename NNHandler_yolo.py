@@ -88,9 +88,16 @@ class NNHandler_yolo(NNHandler):
 		return args
 
 	@staticmethod
-	def plot(img, points, col):
-		x_min, y_min, x_max, y_max = points
-		cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
+	def plot(img, bbox, col):
+		cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), tuple(col), 2)
+
+		if len(bbox) > 4:
+			cv2.putText(img, str(bbox[4]), (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75, (255, 255, 255), 2)
+
+	# @staticmethod
+	# def plot(img, points, col):
+	# 	x_min, y_min, x_max, y_max = points
+	# 	cv2.rectangle(img, (x_min, y_min), (x_max, y_max), col, 2)
 
 	def __init__(self, json_file=None, is_tracked=True, vis=True, verbose=True, debug=False):
 
