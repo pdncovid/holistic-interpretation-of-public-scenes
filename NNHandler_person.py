@@ -70,7 +70,7 @@ class NNHandler_person(NNHandler_yolo):
 			except: yolo_bbox = self.json_data[str(t)]		# If reading from json file
 
 			for bbox in yolo_bbox:
-				idx = bbox.pop("id")
+				idx = bbox["id"]
 				person_dic[idx][t] = bbox
 
 		unclassified = person_dic.pop(-1)

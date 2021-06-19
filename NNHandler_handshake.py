@@ -14,10 +14,10 @@ from suren.util import get_iou, Json, eprint
 
 
 class NNHandler_handshake(NNHandler_yolo):
-	yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort"
+	# yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort"
 
-	model_filename = yolo_dir + '/model_data/mars-small128.pb'
-	weigths_filename = yolo_dir + '/checkpoints/yolov4-fullshake_best'
+	# model_filename = yolo_dir + '/model_data/mars-small128.pb'
+	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-fullshake_best'
 
 	class_names = ["Handshake"]
 
@@ -61,24 +61,21 @@ class NNHandler_handshake(NNHandler_yolo):
 		# Graph contains nodes which have time series info for separate nodes
 		# YOLO output has timeseries info first and then info of each node for that time series
 
-		handshake_frames = list(map(int, list(handshake_data.keys())))  # write in a better way
-		# print(handshake_frames)
-
 		if self.is_tracked:
 			shakes = defaultdict(dict)
 
-			for t in handshake_frames:
+			for t in handshake_data:
 				# First take all the detected nodes at time t
+				t_ = int(t)
 				node_t = []
 				node_ind = []
 				for ind, node in enumerate(graph.nodes):
-					if node.params["detection"][t]:
-						node_t.append([node.params["xMin"][t], node.params["yMin"][t], node.params["xMax"][t],
-									   node.params["yMax"][t]])
+					if node.params["detection"][t_]:
+						node_t.append([node.params["xMin"][t_], node.params["yMin"][t_], node.params["xMax"][t_], node.params["yMax"][t_]])
 						node_ind.append(ind)
 
 				# Next consider all handshake boxes at time t
-				for bbox in handshake_data[str(t)]:
+				for bbox in handshake_data[t]:
 					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
 					idx = bbox["id"]
 
@@ -93,11 +90,11 @@ class NNHandler_handshake(NNHandler_yolo):
 							input("Enter something")
 
 					# iou = list(map(lambda x: get_iou(bb_hs, x, mode=1), node_t))
-					shakes[idx][t] = iou
+					shakes[idx][int(t)] = iou
 
 			unclassified = shakes.pop(-1)	# non-id shakes
 
-			print(shakes)
+			# print(shakes)
 
 			for idx in shakes:
 				shake_t = shakes[idx].keys()
@@ -114,15 +111,17 @@ class NNHandler_handshake(NNHandler_yolo):
 					graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": None, "iou": shakes_iou_avg[p1]}
 					graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": None, "iou": shakes_iou_avg[p2]}
 
+			graph.state["handshake"] = 3
+
 		else:
-			for t in handshake_frames:
+			for t in handshake_data:
 				# First take all the detected nodes at time t
+				t_ = int(t)
 				node_t = []
 				node_ind = []
 				for ind, node in enumerate(graph.nodes):
-					if node.params["detection"][t]:
-						node_t.append([node.params["xMin"][t], node.params["yMin"][t], node.params["xMax"][t],
-									   node.params["yMax"][t]])
+					if node.params["detection"][t_]:
+						node_t.append([node.params["xMin"][t_], node.params["yMin"][t_], node.params["xMax"][t_], node.params["yMax"][t_]])
 						node_ind.append(ind)
 
 				# Next consider all handshake boxes at time t
@@ -130,7 +129,7 @@ class NNHandler_handshake(NNHandler_yolo):
 
 				# print(t, node_t)
 
-				for bbox in handshake_data[str(t)]["bboxes"]:
+				for bbox in handshake_data[t]["bboxes"]:
 					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
 					conf = bbox["conf"]
 
@@ -148,15 +147,14 @@ class NNHandler_handshake(NNHandler_yolo):
 
 					# get 2 max values
 					ind1, ind2 = np.argpartition(iou, -2)[-2:]
-
 					p1, p2 = node_ind[ind1], node_ind[ind2]
 
 					# print(t, p1, p2, iou)
 
-					graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": conf, "iou": iou[ind1]}
-					graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": conf, "iou": iou[ind2]}
+					graph.nodes[p1].params["handshake"][t_] = {"person": p2, "confidence": conf, "iou": iou[ind1]}
+					graph.nodes[p2].params["handshake"][t_] = {"person": p1, "confidence": conf, "iou": iou[ind2]}
 
-		graph.state["handshake"] = 2
+			graph.state["handshake"] = 2
 		print("Updated the graph")
 
 	def runForBatch(self):
