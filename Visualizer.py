@@ -48,7 +48,8 @@ class Visualizer:
         self.vid_keypoints = False
         self.vid_out = None
 
-    def init_network(self, plot_out : str = None, network_scatter=True, network_lines=True, network_show=False):
+    def init_network(self, plot_out : str = None, network_scatter=True, \
+        network_lines=True, network_show=False):
         assert self.graph is not  None, "Graph cannot be empty while plotting"
 
         self.plot_out  = plot_out
@@ -57,7 +58,8 @@ class Visualizer:
         self.network_scatter = network_scatter
         self.network_lines = network_lines
 
-    def init_vid(self, vid_out : str = None, vid_bbox=True, vid_hbox=True, vid_scatter=True, vid_lines=True, vid_keypoints=True):
+    def init_vid(self, vid_out : str = None, vid_bbox=True, vid_hbox=True, \
+        vid_scatter=True, vid_lines=True, vid_keypoints=True):
         self.vid_out = vid_out
         self.plot_vid = True
         self.vid_bbox = vid_bbox
@@ -173,35 +175,42 @@ class Visualizer:
                 if self.plot_vid:
                     if self.vid_scatter:
                         for p in range(len(sc_x_t)):
-                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p]), 5)
+                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, \
+                                tuple(cmap_vid[p]), 5)
 
                     if self.vid_lines:
                         for l in lines[t]:
-                            cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)),
-                                     (255, 255, 255), 3)
+                            cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)),\
+                                tuple(np.array(l[:, 1]).astype(int)),(255, 255, 255), 3)
 
             # print("DEBUG",self.plot_vid)
             if self.plot_vid:
                 # Plot info from yolo
                 if self.person_handle is not None and self.vid_bbox:
                     for p in self.graph.nodes:
-                        x_min, y_min, x_max, y_max = map(int, [p.params["xMin"][t], p.params["yMin"][t], p.params["xMax"][t], p.params["yMax"][t]])
-                        NNHandler_person.plot(rgb_, (x_min, y_min, x_max, y_max), p.params["col"])
+                        x_min, y_min, x_max, y_max = map(int, 
+                            [p.params["xMin"][t], p.params["yMin"][t], \
+                            p.params["xMax"][t], p.params["yMax"][t]])
+                        NNHandler_person.plot(rgb_, (x_min, y_min, x_max, y_max), \
+                            p.params["col"])
 
                 # Plot info from openpose
                 if self.openpose_handle is not None and self.vid_keypoints:
-                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
+                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], \
+                        self.openpose_handle.is_tracked)
 
 
                 # Plot info from handshake
                 if self.hs_handle is not None and self.vid_hbox:
                     if str(t) in self.hs_handle.json_data:
-                        NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
+                        NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], \
+                            self.hs_handle.is_tracked)
 
                 # Plot info from graph
                 if self.graph is not None and self.graph.threatLevel is not None:
                     if str(t) in self.graph.threatLevel:
-                        cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100), 0, 0.75, (255, 255, 255), 2)
+                        cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100),\
+                         0, 0.75, (255, 255, 255), 2)
 
                 # save video
                 if self.vid_out is not None:
@@ -268,8 +277,11 @@ class Visualizer:
     # plt.show(block=True)
 
 
-    def mergePhotos(self,directory=None):
-        mergedVideoOut=None
+    def mergePhotos(self,directory=None,noFrames=100):
+        OUTPUT_FILE_TYPE="mp4"#"mp4" | "webm"
+
+
+        mergedVideoOut="TempVariable"
         newH=500
         if directory==None:
             directory=self.plot_out
@@ -277,7 +289,11 @@ class Visualizer:
         #This is a hardcoded function
         imgPefixes=["fr","G","dimg","T"]
         # imgPefixes=["fr","G","dimg","T"]
-        for t in range(900):
+
+        fivePercentBlock=int(noFrames/20.0)
+        print("0% of merging completed")        
+
+        for t in range(noFrames):
             outImg=np.zeros((newH,1,3),dtype=np.uint8)
             for i in range(len(imgPefixes)):
                 imgName="{}{}-{:04d}.jpg".format(directory,imgPefixes[i],t)
@@ -295,16 +311,23 @@ class Visualizer:
             cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out,t), outImg)
 
             if t==0:
-                outVideoName="{}merged.mp4".format(directory)
-                mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
+                if OUTPUT_FILE_TYPE=="mp4":
+                    outVideoName="{}merged.mp4".format(directory)
+                    mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
+                elif OUTPUT_FILE_TYPE=="webm":
+                    outVideoName="{}merged.webm".format(directory)
+                    mergedFourcc = cv2.VideoWriter_fourcc(*'VP90')
                 mergedVideoOut = cv2.VideoWriter(outVideoName,\
                  mergedFourcc, 20.0, (int(outImg.shape[1]), int(outImg.shape[0])))
             mergedVideoOut.write(outImg)
             # print(newW,newH)
 
+            if t%fivePercentBlock==0:
+                print((5.0*t)/fivePercentBlock,"% of merging completed")
+
 
         mergedVideoOut.release()
-
+        print("100% of merging completed")        
 
 if __name__ == "__main__":
 
@@ -348,7 +371,8 @@ if __name__ == "__main__":
     hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
     hs_handler.init_from_json()
 
-    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, is_tracked=args.track)
+    openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose, \
+        is_tracked=args.track)
     openpose_handler.init_from_json()
     openpose_handler = None
 
@@ -389,7 +413,7 @@ if __name__ == "__main__":
 
     vis.plot(WAIT=20, show_cmap=False)
 
-    vis.mergePhotos()
+    vis.mergePhotos(noFrames=g.time_series_length)
     
 
     print("END of program")
