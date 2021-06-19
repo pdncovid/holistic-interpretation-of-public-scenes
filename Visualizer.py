@@ -149,6 +149,7 @@ class Visualizer:
         img_handle.open()
 
         for t in range(self.graph.time_series_length):
+
             rgb = img_handle.read_frame(t)
             rgb_ = rgb.copy()
 
@@ -204,17 +205,18 @@ class Visualizer:
                         NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
 
                 # Plot info from graph
-                if self.graph is not None and self.graph.threatLevel is not None:
-                    if str(t) in self.graph.threatLevel:
-                        cv2.putText(rgb_, str(self.graph.threatLevel[str(t)]), (100, 100), 0, 0.75, (255, 255, 255), 2)
+                if self.graph is not None and self.graph.frameThreatLevel is not None:
+                    # if str(t) in self.graph.threatLevel:
+                    # print(self.graph.frameThreatLevel[t])
+                    cv2.putText(rgb_, str(self.graph.frameThreatLevel[t]), (100, 100), 0, 0.75, (255, 255, 255), 2)
 
                 if self.mark_ref and self.graph is not None:
-                    points_projected = [self.graph.project(p[0], p[1]) for p in self.graph.REFERENCE_POINTS]
+                    # points_projected = [self.graph.project(p[0], p[1]) for p in self.graph.REFERENCE_POINTS]
                     points = np.array([self.graph.REFERENCE_POINTS], dtype=np.int32)
                     cv2.polylines(rgb_, points, 1, 255)
                     for i in range(4):
-                        print(points_projected)
-                        p1, p2 = points_projected[i], points_projected[i-1]
+                        # print(points_projected)
+                        p1, p2 = self.graph.DEST[i], self.graph.DEST[i-1]
                         ax1.plot(p1, p2)
 
                 # save video
@@ -339,17 +341,17 @@ class Visualizer:
 if __name__ == "__main__":
 
     parser=argparse.ArgumentParser()
-    # parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
-    # parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/labels/DEEE/yolo/cctv1-yolo.json')
-    # parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/labels/DEEE/handshake/cctv1.json')
-    # parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/DEEE/cctv1.mp4')
-    parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json')
-    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json')
-    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json')
-    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi')
-    parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
-    parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
-    parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/vid-01-out.avi')
+
+    # IGNORE THIS
+    # parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json') # Change this
+    # parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
+
+    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json') # Change this : handshake
+    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json') # Change this : person
+    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi') # Change this : input
+    parser.add_argument("--cam","-c",type=str,dest="cam",default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
+    parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/vid-01-out.avi') # Change this : output
+
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
@@ -396,7 +398,7 @@ if __name__ == "__main__":
 
 
     g = Graph()
-    g.getCameraInfoFromJson("./data/camera-orientation/jsons/uti.json")
+    g.getCameraInfoFromJson(args.cam)
     # g.init_from_json(args.graph_file)
     # g.run_gihan()
 
@@ -416,11 +418,6 @@ if __name__ == "__main__":
 
     g.calculateThreatLevel()
 
-    # hs_handler = NNHandler_handshake('./data/vid-01-handshake.json', is_tracked=False)        # This is without DSORT tracker and avg
-    # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
-
-
-    # vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)  #args.output)
     vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)  #args.output)
     # Call this to plot pyplot graph
     vis.init_network(plot_out="./data/output/vid-001/plot/")
