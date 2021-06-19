@@ -55,7 +55,8 @@ class Graph:
 			"handshake" : 0, 	# 1 - hs only, 2 - with tracking id, 3 - person info
 			"cluster" : 0,		# 1 - has cluster info
 			"mask" : 0,
-			"floor" : 0			# 1 - X, Y points only, 2 - Projected Floor maps generated with X,Y
+			"floor" : 0,		# 0b001 - X, Y points only, 0b010 - Interpolation, 0b100 - Projected Floor maps generated with X,Y
+			"threat" : 0
 		}
 
 		self.saveGraphFileName = save_name
@@ -118,20 +119,6 @@ class Graph:
 			sc_tx, sc_ty = [], []
 			line_t = defaultdict(list)
 			for n, p in enumerate(self.nodes):
-				# # print(n, p.params)
-				# # if p.params["detection"][t]:
-				# p_x1 = p.params["xMin"][t]
-				# p_y1 = p.params["yMin"][t]
-				# p_x2 = p.params["xMax"][t]
-				# p_y2 = p.params["yMax"][t]
-				#
-				# #TODO : @Gihan - Do perspective transform here for (p_x, p_y)
-				#
-				#
-				# p_x = (p_x1 + p_x2) / 2
-				# p_y = (p_y1 + p_y2) / 2
-				# p_x, p_y = self.project(p_x, p_y)
-
 				p_x = p.params["X"][t]
 				p_y = p.params["Y"][t]
 				p_x, p_y = self.project(p_x, p_y)
@@ -159,14 +146,16 @@ class Graph:
 
 		return sc_x, sc_y, lines
 
-	def get_cmap(self, show=False):
-		colors = cm.hsv(np.linspace(0, .8, self.n_nodes))
+	def get_cmap(self, n : int = None, show=False):
+		if n is None: n = self.n_nodes
+
+		colors = cm.hsv(np.linspace(0, .8, n))
 		window = 10
 		col_arr = np.ones((window, 4))
 		col_arr[:, -1] = np.power(.8, np.arange(window))[::-1]
 		arr1 = np.tile(colors, (window, 1, 1)).transpose((1, 0, 2))
 		# print(colors.shape, arr1.shape)
-		arr2 = np.tile(col_arr, (self.n_nodes, 1, 1))
+		arr2 = np.tile(col_arr, (n, 1, 1))
 		# print(col_arr.shape, arr2.shape)
 		cmap = arr1 * arr2
 		# print(arr1[1, :, :], arr2[1, :, :])
@@ -333,16 +322,19 @@ class Graph:
 	# 	for n in self.nodes:
 	# 		n.interpolate_undetected_timestamps()
 
-	def generateFloorMap(self, verbose=False):
+	def generateFloorMap(self, verbose=False, debug=False):
 
-		assert self.state["people"] == 2, "Floor map cannot be generated without people bbox"
+		assert self.state["people"] >= 2, "Floor map cannot be generated without people bbox"
 
 		if self.state["floor"] < 1:
 			for n in self.nodes:
 				n.calculate_standing_locations()
+			self.state["floor"] = 1
 
-		for n in self.nodes:
-			n.interpolate_undetected_timestamps()
+		if self.state["floor"] & 1 << 1 == 0:
+			for n in self.nodes:
+				n.interpolate_undetected_timestamps(debug=debug)
+			self.state["floor"] |= 1 << 1
 
 		# Floor map N x T with X and Y points.
 		self.projectedFloorMapNTXY = np.zeros((self.n_nodes, self.time_series_length, 2),dtype=np.float32)
@@ -356,13 +348,13 @@ class Graph:
 				self.projectedFloorMapNTXY[n,t,0]=projected[0]
 				self.projectedFloorMapNTXY[n,t,1]=projected[1]
 
-		self.state["floor"] = 2
+		self.state["floor"] |= 1 << 2
 
 		if verbose:
-			print("Finished creating floormap {} ".format(self.floorMapNTXY.shape))
+			print("Finished creating floormap {} ".format(self.projectedFloorMapNTXY.shape))
 
 
-	def findClusters(self,METHOD="NAIVE"):
+	def findClusters(self, METHOD="NAIVE", debug=False, verbose=False):
 
 		self.groupProbability = np.zeros((self.n_nodes, self.n_nodes, self.time_series_length), np.float32)
 
@@ -387,8 +379,10 @@ class Graph:
 								self.groupProbability[p1,p2,t]=1.0
 							else:
 								self.groupProbability[p1,p2,t]=0.0
-						# print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater)
-						print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater[t1:t2])						
+
+						if debug:
+							# print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater)
+							print("Dist between {} and  {}:".format(p1,p2),tempDistDeleteThisVariableLater[t1:t2])
 					else:
 						self.groupProbability[p1,p2,:]=self.groupProbability[p2,p1,:]
 						self.pairDetectionProbability[p1,p2,:]=self.pairDetectionProbability[p2,p1,:]
@@ -407,15 +401,18 @@ class Graph:
 		c = np.sum(self.pairDetectionProbability,-1)
 		self.groupProbability = b/c
 
-		print("Group probability", self.groupProbability)
+		if verbose:
+			print("Group probability", self.groupProbability)
+
 		self.groupProbability = self.groupProbability > self.GROUP_TIME_THRESH
 
-		print("Group probability (bianry)",self.groupProbability)
+		if verbose:
+			print("Group probability (bianry)",self.groupProbability)
 
 		self.state["cluster"] = 1
 
 
-	def calculateThreatLevel(self):
+	def calculateThreatLevel(self, debug=False):
 		P=len(self.nodes)
 		T=self.time_series_length
 
@@ -454,6 +451,8 @@ class Graph:
 						self.pairT[t,p1,p2]=threatOfPair
 			self.frameThreatLevel[t]=threatLevel
 		print("Finished calculating threat level")
+
+		self.state["threat"] = 1
 		return 0
 
 	def fullyAnalyzeGraph(self):
