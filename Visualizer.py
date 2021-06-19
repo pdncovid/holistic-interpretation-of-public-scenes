@@ -220,7 +220,8 @@ class Visualizer:
 
                 
                 if self.save_video_frames:
-                    print("{}fr-{:04d}.jpg".format(self.plot_out,t))
+                    if args.debug:
+                        print("{}fr-{:04d}.jpg".format(self.plot_out,t))
                     cv2.imwrite("{}fr-{:04d}.jpg".format(self.plot_out,t), rgb_)                    
             '''
             # fig.canvas.draw()
@@ -276,7 +277,7 @@ class Visualizer:
         #This is a hardcoded function
         imgPefixes=["fr","G","dimg","T"]
         # imgPefixes=["fr","G","dimg","T"]
-        for t in range(1000):
+        for t in range(900):
             outImg=np.zeros((newH,1,3),dtype=np.uint8)
             for i in range(len(imgPefixes)):
                 imgName="{}{}-{:04d}.jpg".format(directory,imgPefixes[i],t)
@@ -289,17 +290,20 @@ class Visualizer:
                 newW=int((newH/(1.0*H))*W)
                 thisImg=cv2.resize(thisImg,(newW,newH))
                 outImg=np.concatenate((outImg,thisImg),axis=1)
+                # print("outimage shape",outImg.shape)
 
             cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out,t), outImg)
 
             if t==0:
                 outVideoName="{}merged.mp4".format(directory)
                 mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
-                mergedVideoOut = cv2.VideoWriter(outVideoName, mergedFourcc, 20.0, (newW, newH))
-
+                mergedVideoOut = cv2.VideoWriter(outVideoName,\
+                 mergedFourcc, 20.0, (int(outImg.shape[1]), int(outImg.shape[0])))
             mergedVideoOut.write(outImg)
+            # print(newW,newH)
 
-        mergedVideoOut.close()
+
+        mergedVideoOut.release()
 
 
 if __name__ == "__main__":
@@ -317,7 +321,7 @@ if __name__ == "__main__":
     parser.add_argument("--config_file","-c",type=str,dest="config_file",default="args/visualizer-01.json")
     parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/out.avi')
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
-    parser.add_argument("--debug", "-db", type=bool, dest="debug", default=True)
+    parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
     args = parser.parse_args()
     print(args)
@@ -376,7 +380,6 @@ if __name__ == "__main__":
 
 
     vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler)  #args.output)
-
     # Call this to plot pyplot graph
     vis.init_network(plot_out="./data/output/vid-01/plot/")
     # Call this to plot cv2 video
@@ -387,5 +390,6 @@ if __name__ == "__main__":
     vis.plot(WAIT=20, show_cmap=False)
 
     vis.mergePhotos()
+    
 
     print("END of program")
