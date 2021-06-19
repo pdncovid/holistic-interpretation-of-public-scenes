@@ -327,7 +327,7 @@ class Visualizer:
 
 
         mergedVideoOut.release()
-        print("100% of merging completed")        
+        print("100% of merging completed")
 
 if __name__ == "__main__":
 
@@ -403,11 +403,12 @@ if __name__ == "__main__":
     # hs_handler = NNHandler_handshake('./data/vid-01-handshake_track.json', is_tracked=True)       # With DSORT and avg
 
 
-    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler)  #args.output)
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, \
+    img=img_handle, openpose=None)  #args.output)
     # Call this to plot pyplot graph
     vis.init_network(plot_out="./data/output/vid-01/plot/")
     # Call this to plot cv2 video
-    # vis.init_vid(vid_out="./data/output/vid-01/out.mp4", vid_scatter=False, vid_lines=False)
+    vis.init_vid(vid_out="./data/output/vid-01/out.mp4", vid_scatter=False, vid_lines=False)
 
     print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
 
