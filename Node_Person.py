@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod 
 from Node import *
+import os
 
 class Person(Node):
 
@@ -71,8 +72,11 @@ class Person(Node):
 			self.setParam("X", t, X)
 			self.setParam("Y", t, self.params["yMax"][t])
 
-	def calculate_detected_time_period(self):
-		print("DEBUG: running person calc")
+	def calculate_detected_time_period(self, debug=False):
+		f_name = os.path.basename(__file__)
+
+		if debug:
+			print("\t {} [DEBUG]: running person calc".format(f_name))
 		startT=0
 		endTExclusive=self.time_series_length
 
@@ -97,14 +101,16 @@ class Person(Node):
 			self.params["neverDetected"]=True
 
 
-	def interpolate_undetected_timestamps(self):
+	def interpolate_undetected_timestamps(self, debug=False):
 		'''
 			Gihan (25/03/2021)
 			I am implementing this without thinking straight.
 			I will be refining this logic later on.
 		'''
+		f_name = os.path.basename(__file__)
+
 		self.calculate_standing_locations()
-		self.calculate_detected_time_period()
+		self.calculate_detected_time_period(debug=debug)
 		self.params["interpolated"]=[False for _ in range(self.time_series_length)]
 
 		if not self.params["neverDetected"]:
@@ -118,10 +124,13 @@ class Person(Node):
 						if self.params["detection"][t2]==False:
 							t2+=1
 						else:
-							print("DEBUG INTERPOLATION (before): ",t1,t2)
-							# print("DEBUG INTERPOLATION: ",self.params["detection"])
-							for a in range(t1-2,t2+2):
-								print(a, self.params["detection"][a], self.params["X"][a],self.params["Y"][a])
+							# @GIHAN : WTF?
+							if debug:
+								print("\t " + f_name + " [DEBUG]: INTERPOLATION (before): ",t1,t2)
+
+								# print("DEBUG INTERPOLATION: ",self.params["detection"])
+								for a in range(t1-2,t2+2):
+									print("\t\t ", a, self.params["detection"][a], self.params["X"][a],self.params["Y"][a])
 
 
 							#Now we know t1----t2(exclusive) are false detections.
@@ -132,12 +141,13 @@ class Person(Node):
 								self.setParam("X",t1+tt, self.params["X"][t1-1] + tt*xStep)
 								self.setParam("Y",t1+tt, self.params["Y"][t1-1] + tt*yStep)
 								self.setParam("interpolated",t1+tt,True)
-							
-							print("DEBUG INTERPOLATION (after): ",t1,t2)
-							# print("DEBUG INTERPOLATION: ",self.params["detection"])
-							for a in range(t1-2,t2+2):
-								print(a, self.params["detection"][a], self.params["X"][a],self.params["Y"][a])
 
+							if debug:
+								print("\t " + f_name + " [DEBUG]: INTERPOLATION (after): ",t1,t2)
+
+								# print("DEBUG INTERPOLATION: ",self.params["detection"])
+								for a in range(t1-2,t2+2):
+									print("\t\t ", a, self.params["detection"][a], self.params["X"][a],self.params["Y"][a])
 
 							t1=t2
 							break

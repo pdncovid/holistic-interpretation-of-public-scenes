@@ -25,106 +25,143 @@ except ImportError as e:
 
 
 class Visualizer:
-    def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None):
+    @staticmethod
+    def get_cmap(size : list):
+        if len(size) == 1:
+            n = size[0]
+            cmap = plt.get_cmap('hsv')
+            sample = np.linspace(0, 1, n+1)[:-1]
+            colors = np.array([cmap(i) for i in sample])
+            return colors
+        elif len(size) == 2:
+            n, window = size
+            # cmap = plt.get_cmap('hsv')
+            # window = 10
+            cmap = plt.get_cmap('hsv')
+            sample = np.linspace(0, 1, n+1)[:-1]
+            colors = np.array([cmap(i) for i in sample])
+            col_arr = np.ones((window, 4))
+            col_arr[:, -1] = np.power(.8, np.arange(window))[::-1]
+            arr1 = np.tile(colors, (window, 1, 1)).transpose((1, 0, 2))
+            # print(colors.shape, arr1.shape)
+            arr2 = np.tile(col_arr, (n, 1, 1))
+            # print(col_arr.shape, arr2.shape)
+            colors = arr1 * arr2
+            return colors
+        else:
+            raise NotImplementedError
+
+
+
+    def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None, debug=False):
         self.graph = graph
         self.person_handle = person
         self.hs_handle = handshake
         self.img_handle = img
         self.openpose_handle = openpose
 
+        self.debug = debug
+
+
         # Scatter plot components
-        self.plot_network = False
-        self.network_show = False
-        self.network_scatter = False
-        self.network_lines = False
-        self.plot_out = None
+        self.make_plot = False      # create plot (Everything below wont matter is this isn't set)
+        self.plot_show = False      # show plot
+        self.plot_out_name = None   # save plot
+        self.plot_scatter = False
+        self.plot_lines = False
 
         # Img/Video components
-        self.plot_vid = False
+        self.make_vid = False       # create video frame (Everything below wont matter is this isn't set)
+        self.vid_show = False      # show vid
+        self.vid_out_name = None   # save vid
+        self.img_out_name = None   # save vid as frames (only prefix here... )
         self.vid_bbox = False
         self.vid_hbox = False
         self.vid_scatter = False
         self.vid_lines = False
-        self.vid_keypoints = False
-        self.vid_out = None
-        self.show_gui = False
+        self.vid_keypoints = False      # openpose
 
-    def init_network(self, plot_out : str = None, network_scatter=True, network_lines=True, network_show=False):
-        assert self.graph is not  None, "Graph cannot be empty while plotting"
+        # Common to plot and vid
+        self.mark_ref =True
 
-        self.plot_out  = plot_out
-        self.plot_network = True
-        self.network_show = network_show
-        self.network_scatter = network_scatter
-        self.network_lines = network_lines
+    def init_plot(self, plot_out : str = None, network_scatter=True, network_lines=True, network_show=False):
+        assert self.graph is not None, "Graph cannot be empty while plotting"
+        self.make_plot = True
 
-    def init_vid(self, vid_out : str = None, vid_bbox=True, vid_hbox=True,  vid_scatter=True, vid_lines=True, vid_keypoints=True):
-        self.vid_out = vid_out
-        self.plot_vid = True
+        self.plot_out_name = plot_out
+        self.plot_show = network_show
+        self.plot_scatter = network_scatter
+        self.plot_lines = network_lines
+
+    def init_vid(self, vid_out : str = None, img_out : str = None,
+                 vid_bbox=True, vid_hbox=True,  vid_scatter=False, vid_lines=False, vid_keypoints=True, vid_show = False):
+        self.make_vid = True
+
+        self.vid_out_name = vid_out
+        self.img_out_name = img_out
+        self.vid_show = vid_show
         self.vid_bbox = vid_bbox
         self.vid_hbox = vid_hbox
         self.vid_scatter = vid_scatter
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
-        self.mark_ref =True
 
-    def plot(self, WAIT=20, show_cmap=True):
-        self.show_gui=False
-        self.save_video_frames=True
-        self.plot_vid=True  #Gihan added this because he didn't understand the code
-
+    def plot(self, WAIT=20, show_cmap=False):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
             return
 
+        # colour map
+        if self.graph is not None:
+            self.cmap = self.get_cmap([self.graph.n_nodes])
+            # self.cmap = self.graph.get_cmap(show=show_cmap)
+        else:
+            raise NotImplementedError("Cannot get CMAP")
+
+        cmap_vid = np.array(self.cmap[:, :-1] * 255)[:, [2, 1, 0]]      # RGB and then to BGR
+        cmap_plot = np.reshape(self.cmap, (-1, 4), order='C')        # RGB alpha
+        # cmap_ = cv2.cvtColor(cmap_.reshape(1, -1, 3), cv2.COLOR_RGB2BGR).reshape(-1, 3)
+
+        # for n, p in enumerate(self.graph.nodes):
+        #     p.params["col"] = cmap_vid[n]
+
         # Process and get all graph points till time t
         if self.graph is not None:
-            # colour map
-            cmap = self.graph.get_cmap(show=show_cmap)
 
             # scatter x, y and lines
             sc_x, sc_y, lines = self.graph.get_plot_points()
-
             xlim, ylim = self.graph.get_plot_lim(sc_x, sc_y)
-
             # print(sc_x.shape, sc_y.shape, cmap.shape)
 
-            print(cmap.shape)
-
-            cmap_vid = np.array(cmap[:, -1, :-1] * 255)[:, [2, 1, 0]]
-            cmap_network = np.reshape(cmap[:, -1, :], (-1, 4), order='C')
-            # cmap_ = cv2.cvtColor(cmap_.reshape(1, -1, 3), cv2.COLOR_RGB2BGR).reshape(-1, 3)
-            print(cmap_vid)
-
-            for n, p in enumerate(self.graph.nodes):
-                p.params["col"] = cmap_vid[n]
-
-
-        # PLOT Video
-        if self.plot_vid:
-            cv2.namedWindow("plot")
+        # MAKE Video
+        if self.make_vid:
+            if self.vid_show:
+                cv2.namedWindow("plot")
 
             # SAVE VIDEO
-            if self.vid_out is not None:
+            if self.img_handle is not  None and not os.path.exists(self.img_out_name):
+                os.makedirs(self.img_out_name)
+
+            if self.vid_out_name is not None:
+                if not os.path.exists(os.path.dirname(self.vid_out_name)):
+                    os.makedirs(os.path.dirname(self.vid_out_name))
+
                 img_handle.open()
                 rgb = img_handle.read_frame(0)
                 img_handle.close()
                 h, w, _ = rgb.shape
                 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-                vid_out = cv2.VideoWriter(self.vid_out, fourcc, 20.0, (w, h))
+                vid_out = cv2.VideoWriter(self.vid_out_name, fourcc, 20.0, (w, h))
 
+        # MAKE plot
+        if self.make_plot:
 
-        # PLOT Network
-        if self.plot_network:
+            if self.plot_show: plt.ion()
+            else: plt.ioff()
 
-            if self.network_show:
-                plt.ion()
-            else:
-                plt.ioff()
-
-            if self.plot_out is not None and not os.path.exists(self.plot_out):
-                os.makedirs(self.plot_out)
+            if self.plot_out_name is not None and not os.path.exists(self.plot_out_name):
+                os.makedirs(self.plot_out_name)
 
             # Figure for Floor points
             fig1, ax1 = plt.subplots()
@@ -134,47 +171,56 @@ class Visualizer:
             # Figure for each metric
             fig2, ax2 = plt.subplots(2, 2)
             plt.subplots_adjust(wspace=.35, hspace=.35)
-            g.gihan_init(fig2, ax2)
+            self.graph.gihan_init(fig2, ax2)
 
             # Figure for threat level
             fig3 = plt.figure()
 
-
-
-        # plt.figure()
-        # plt.scatter(np.arange(4), np.ones(4), color=cmap_)
-        # plt.show()
-
-
         img_handle.open()
-
         for t in range(self.graph.time_series_length):
 
             rgb = img_handle.read_frame(t)
             rgb_ = rgb.copy()
 
-            # Plot info from graph
-            if self.graph is not None:
-                sc_x_t = list(map(int, sc_x[:, t]))
-                sc_y_t = list(map(int, sc_y[:, t]))
+            # ------------------------------- MAKE PLOT ----------------------------------
 
-                # Plot network
-                if self.plot_network:
-                    if self.network_scatter:
-                        ax1.scatter(sc_x_t, sc_y_t, color=cmap_network)
+            # Plot network
+            if self.make_plot:
 
-                    if self.network_lines:
+                # Plot info from graph
+                if self.graph is not None:
+                    sc_x_t = list(map(int, sc_x[:, t]))
+                    sc_y_t = list(map(int, sc_y[:, t]))
+
+                    if self.plot_scatter:
+                        ax1.scatter(sc_x_t, sc_y_t, color=cmap_plot)
+
+                    if self.plot_lines:
                         for l in lines[t]:
                             ax1.plot(l[0], l[1])
 
-                    if self.show_gui:
-                        plt.pause(.1)
+                    if self.mark_ref:
+                        for i in range(4):
+                            p1, p2 = self.graph.DEST[i], self.graph.DEST[i - 1]
+                            ax1.plot(p1, p2, 'k', linewidth=.5)
+
+
+                    if self.plot_out_name is not None:
+                        fig1.savefig("{}G-{:04d}.jpg".format(self.plot_out_name, t))
+                        ax1.clear()
+                        ax1.set_xlim(xlim[0], xlim[1])
+                        ax1.set_ylim(ylim[0], ylim[1])
+
+                        self.graph.gihan_images(fig2, ax2, self.plot_out_name, t)
+                        self.graph.threat_image(fig3, self.plot_out_name, t)
+
+
 
                 # @Suren : TODO : Learn ion properly -_-
-                self.network_show = False
+                # self.plot_show = False
 
-                # Plot video
-                if self.plot_vid:
+                # @suren : Scatters and lines are removed from video
+                if self.make_vid:
                     if self.vid_scatter:
                         for p in range(len(sc_x_t)):
                             cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p]), 5)
@@ -183,94 +229,55 @@ class Visualizer:
                         for l in lines[t]:
                             cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)),(255, 255, 255), 3)
 
-            # print("DEBUG",self.plot_vid)
-            if self.plot_vid:
+            # ------------------------------- MAKE VIDEO ----------------------------------
+
+            if self.make_vid:
+
+                # Plot reference on video
+                if self.mark_ref and self.graph is not None:
+                    points = np.array([self.graph.REFERENCE_POINTS], dtype=np.int32)
+                    cv2.polylines(rgb_, points, 1, 255)
+
                 # Plot info from yolo
                 if self.person_handle is not None and self.vid_bbox:
-                    for idx, p in enumerate(self.graph.nodes):
-                        # print(p.params)
-                        x_min, y_min, x_max, y_max = map(int,
-                                            [p.params[val][t] for val in ["xMin", "yMin", "xMax", "yMax"]])
-                        NNHandler_person.plot(rgb_, (x_min, y_min, x_max, y_max, idx), p.params["col"])
+                    if str(t) in self.person_handle.json_data:
+                        NNHandler_person.plot(rgb_, self.person_handle.json_data[str(t)], cmap_vid, self.person_handle.is_tracked)
                         # TODO @suren : match colour in graph and vid
-
-                # Plot info from openpose
-                if self.openpose_handle is not None and self.vid_keypoints:
-                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
-
 
                 # Plot info from handshake
                 if self.hs_handle is not None and self.vid_hbox:
                     if str(t) in self.hs_handle.json_data:
                         NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
 
+                # Plot info from openpose
+                if self.openpose_handle is not None and self.vid_keypoints:
+                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
+
                 # Plot info from graph
                 if self.graph is not None and self.graph.frameThreatLevel is not None:
-                    # if str(t) in self.graph.threatLevel:
-                    # print(self.graph.frameThreatLevel[t])
-                    cv2.putText(rgb_, str(self.graph.frameThreatLevel[t]), (100, 100), 0, 0.75, (255, 255, 255), 2)
-
-                if self.mark_ref and self.graph is not None:
-                    # points_projected = [self.graph.project(p[0], p[1]) for p in self.graph.REFERENCE_POINTS]
-                    points = np.array([self.graph.REFERENCE_POINTS], dtype=np.int32)
-                    cv2.polylines(rgb_, points, 1, 255)
-                    for i in range(4):
-                        # print(points_projected)
-                        p1, p2 = self.graph.DEST[i], self.graph.DEST[i-1]
-                        ax1.plot(p1, p2)
+                    cv2.putText(rgb_, "%.4f"%(self.graph.frameThreatLevel[t]), (100, 100), 0, 0.75, (255, 255, 255), 2)
 
                 # save video
-                if self.vid_out is not None:
+                if self.vid_out_name is not None:
                     vid_out.write(rgb_)
 
+                if self.plot_out_name is not None:
+                    if self.debug: print("{}fr-{:04d}.jpg".format(self.img_out_name, t))
+                    cv2.imwrite("{}fr-{:04d}.jpg".format(self.img_out_name, t), rgb_)
+
+            # ------------------------------- SHOW VIDEO / PLOT ----------------------------------
+
+            # display image with opencv or any operation you like
+            if self.make_vid and self.vid_show:
+                cv2.imshow("plot", rgb_)
+
+                k = cv2.waitKey(WAIT)
+
+                if k & 0xff == ord('q'): break
+                elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
 
 
-
-                
-                if self.save_video_frames and self.plot_out is not None:
-                    if args.debug:
-                        print("{}fr-{:04d}.jpg".format(self.plot_out,t))
-                    cv2.imwrite("{}fr-{:04d}.jpg".format(self.plot_out,t), rgb_)
-
-
-                # display image with opencv or any operation you like
-                if self.show_gui:
-                    cv2.imshow("plot", rgb_)
-
-                    k = cv2.waitKey(WAIT)
-
-                    if k & 0xff == ord('q'): break
-                    elif k & 0xff == ord('g') or WAIT != 0: pass # self.network_show = True
-
-            '''
-            # fig.canvas.draw()
-            #
-            # # convert canvas to image
-            # img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-            # img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-            # img = img.reshape(rgb.shape[::-1] + (3,))
-
-            # img is rgb, convert to opencv's default bgr
-            # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            # img_sctr = img.copy()
-            # print(img_sctr.shape, rgb.shape)
-
-            # img_ = np.hstack((img, img_sctr))
-            '''
-
-
-
-            if self.plot_network:
-                if self.plot_out is not None:
-                    fig1.savefig("{}G-{:04d}.jpg".format(self.plot_out, t))
-                    ax1.clear()
-                    ax1.set_xlim(xlim[0], xlim[1])
-                    ax1.set_ylim(ylim[0], ylim[1])
-
-                    g.gihan_images(fig2, ax2, self.plot_out, t)
-                    g.threat_image(fig3, self.plot_out, t)
-
-                elif self.network_show:
+            if self.make_plot and self.plot_show:
                     ax1.clear()
                     ax1.set_xlim(xlim[0], xlim[1])
                     ax1.set_ylim(ylim[0], ylim[1])
@@ -280,7 +287,7 @@ class Visualizer:
 
         img_handle.close()
 
-        if self.vid_out is not None:
+        if self.vid_out_name is not None:
             vid_out.release()
     # cap.release()
 
@@ -294,7 +301,7 @@ class Visualizer:
         mergedVideoOut="TempVariable"
         newH=500
         if directory==None:
-            directory=self.plot_out
+            directory=self.plot_out_name
 
         #This is a hardcoded function
         imgPefixes=["fr","G","dimg","T"]
@@ -318,7 +325,7 @@ class Visualizer:
                 outImg=np.concatenate((outImg,thisImg),axis=1)
                 # print("outimage shape",outImg.shape)
 
-            cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out,t), outImg)
+            cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out_name, t), outImg)
 
             if t==0:
                 if OUTPUT_FILE_TYPE=="mp4":
@@ -346,11 +353,11 @@ if __name__ == "__main__":
     # parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json') # Change this
     # parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
 
-    parser.add_argument("--nnout_yolo","-y",type=str,dest="nnout_yolo",default='./data/vid-01-yolo.json') # Change this : handshake
-    parser.add_argument("--nnout_handshake","-hs",type=str,dest="nnout_handshake",default='./data/vid-01-handshake_track.json') # Change this : person
-    parser.add_argument("--video_file","-v",type=str,dest="video_file",default='./data/videos/seq18.avi') # Change this : input
-    parser.add_argument("--cam","-c",type=str,dest="cam",default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
-    parser.add_argument("--output","-o",type=str,dest="output",default='./suren/temp/vid-01-out.avi') # Change this : output
+    parser.add_argument("--input","-i", type=str, default='./data/videos/seq18.avi') # Change this : input fil
+    parser.add_argument("--output","-o", type=str, default='./data/output/seq18/') # Change this : output dir
+    parser.add_argument("--person","-p", type=str, default='./data/labels/seq18/seq18-person.json') # Change this : person
+    parser.add_argument("--handshake","--hs", type=str, default='./data/labels/seq18/seq18-handshake.json') # Change this : handshake
+    parser.add_argument("--cam", "-c", type=str,dest="cam",default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
 
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
@@ -358,33 +365,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
 
-    # if None in [args.nnout_yolo, args.nnout_handshake, args.video_file, args.graph_file, args.track]:
-    #     print("Running from config file")
-    #
-    #     with open(args.config_file) as json_file:
-    #         data = json.load(json_file)
-    #         args = argparse.Namespace()
-    #         dic = vars(args)
-    #
-    #         for k in data.keys():
-    #             dic[k]=data[k]
-    #         print(args)
-
-
-    img_handle = NNHandler_image(format="avi", img_loc=args.video_file)
+    img_handle = NNHandler_image(format="avi", img_loc=args.input)
     img_handle.runForBatch()
 
     # Person handler
-    person_handler = NNHandler_person(args.nnout_yolo, is_tracked=args.track)
-    if os.path.exists(args.nnout_yolo):
+    person_handler = NNHandler_person(args.person, is_tracked=args.track)
+    if os.path.exists(args.person):
         person_handler.init_from_json()
     else:
         person_handler.create_yolo(img_handle)
         person_handler.save_json()
 
     # HS handler
-    hs_handler = NNHandler_handshake(args.nnout_handshake, is_tracked=args.track)
-    if os.path.exists(args.nnout_handshake):
+    hs_handler = NNHandler_handshake(args.handshake, is_tracked=args.track)
+    if os.path.exists(args.handshake):
         hs_handler.init_from_json()
     else:
         hs_handler.create_yolo(img_handle)
@@ -394,8 +388,6 @@ if __name__ == "__main__":
     # openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose,  is_tracked=args.track)
     # openpose_handler.init_from_json()
     openpose_handler = None
-
-
 
     g = Graph()
     g.getCameraInfoFromJson(args.cam)
@@ -416,13 +408,19 @@ if __name__ == "__main__":
     if g.state["cluster"] < 1:
         g.findClusters()
 
-    g.calculateThreatLevel()
+    if g.state["threat"] < 1:
+        g.calculateThreatLevel()
 
-    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)  #args.output)
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)
+
+    plot_loc = args.output + "/plot/"
+    vid_loc = (args.output + "/out.avi").replace("\\", "/").replace("//", "/")
+
     # Call this to plot pyplot graph
-    vis.init_network(plot_out="./data/output/vid-001/plot/")
+    vis.init_plot(plot_out=plot_loc)
+
     # Call this to plot cv2 video
-    vis.init_vid(vid_out="./data/output/vid-001/out.avi", vid_scatter=False, vid_lines=False)
+    vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_scatter=False, vid_lines=False)
 
     print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
 
