@@ -109,7 +109,7 @@ class Graph:
 
 	def get_plot_points(self):
 
-		assert self.state["floor"] >= 1, "Need X, Y points to plot graph"
+		# assert self.state["floor"] >= 1, "Need X, Y points to plot graph"     # @suren : TODO
 
 		sc_x = []
 		sc_y = []
@@ -297,6 +297,10 @@ class Graph:
 			eprint(e)
 			N = len(data["nodes"])
 
+		if N == 0:
+			eprint("No nodes :(")
+			return
+
 		try:
 			time_series_length = data["frames"]
 			assert len(data["nodes"][0]["detection"]) == time_series_length, "Time series length not equal"
@@ -304,9 +308,8 @@ class Graph:
 			eprint(e)
 			time_series_length = len(data["nodes"][0]["detection"])
 
-		if N == 0:
-			eprint("No nodes :(")
-			return
+		self.state = data["state"]
+
 
 		if self.time_series_length is None: self.time_series_length = time_series_length
 
@@ -329,12 +332,12 @@ class Graph:
 		if self.state["floor"] < 1:
 			for n in self.nodes:
 				n.calculate_standing_locations()
-			self.state["floor"] = 1
+			# self.state["floor"] = 1     # @suren : TODO
 
 		if self.state["floor"] & 1 << 1 == 0:
 			for n in self.nodes:
 				n.interpolate_undetected_timestamps(debug=debug)
-			self.state["floor"] |= 1 << 1
+			# self.state["floor"] |= 1 << 1     # @suren : TODO
 
 		# Floor map N x T with X and Y points.
 		self.projectedFloorMapNTXY = np.zeros((self.n_nodes, self.time_series_length, 2),dtype=np.float32)
@@ -348,7 +351,7 @@ class Graph:
 				self.projectedFloorMapNTXY[n,t,0]=projected[0]
 				self.projectedFloorMapNTXY[n,t,1]=projected[1]
 
-		self.state["floor"] |= 1 << 2
+		# self.state["floor"] |= 1 << 2    # @suren : TODO
 
 		if verbose:
 			print("Finished creating floormap {} ".format(self.projectedFloorMapNTXY.shape))
@@ -409,7 +412,7 @@ class Graph:
 		if verbose:
 			print("Group probability (bianry)",self.groupProbability)
 
-		self.state["cluster"] = 1
+		# self.state["cluster"] = 1     # @suren : TODO
 
 
 	def calculateThreatLevel(self, debug=False):
@@ -452,7 +455,7 @@ class Graph:
 			self.frameThreatLevel[t]=threatLevel
 		print("Finished calculating threat level")
 
-		self.state["threat"] = 1
+		# self.state["threat"] = 1     # @suren : TODO
 		return 0
 
 	def fullyAnalyzeGraph(self):

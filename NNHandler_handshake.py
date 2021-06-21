@@ -92,7 +92,8 @@ class NNHandler_handshake(NNHandler_yolo):
 					# iou = list(map(lambda x: get_iou(bb_hs, x, mode=1), node_t))
 					shakes[idx][int(t)] = iou
 
-			unclassified = shakes.pop(-1)	# non-id shakes
+			if -1 in shakes:
+				unclassified = shakes.pop(-1)	# non-id shakes
 
 			# print(shakes)
 
