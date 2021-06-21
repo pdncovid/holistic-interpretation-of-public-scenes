@@ -66,7 +66,7 @@ class NNHandler_image(NNHandler):
 
             cap.release()
 
-            return self.time_series_length
+            return total
 
         elif self.format in NNHandler_image.IMG_FORMAT:
             if path is None: path = self.img_loc

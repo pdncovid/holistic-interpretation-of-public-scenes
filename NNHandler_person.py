@@ -73,7 +73,8 @@ class NNHandler_person(NNHandler_yolo):
 				idx = bbox["id"]
 				person_dic[idx][t] = bbox
 
-		unclassified = person_dic.pop(-1)
+		if -1 in person_dic:
+			unclassified = person_dic.pop(-1)
 
 		# print(person_dic)
 
