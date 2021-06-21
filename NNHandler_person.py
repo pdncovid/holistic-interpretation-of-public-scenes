@@ -29,7 +29,7 @@ class NNHandler_person(NNHandler_yolo):
 	input_size = 416
 
 
-	def __init__(self, json_file=None, is_tracked=True, vis=True, verbose=True, debug=False):
+	def __init__(self, json_file=None, is_tracked=True, vis=False, verbose=True, debug=False):
 
 		super().__init__(json_file=json_file, is_tracked=is_tracked, vis=vis, verbose=verbose, debug=debug)
 		print("\t[*] Person detector")

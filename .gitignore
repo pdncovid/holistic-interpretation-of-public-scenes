@@ -17,3 +17,6 @@ data/videos/*
 model/*
 suren/temp/temp.py
 *.avi
+*.npy
+data/ground_truth/*
+data/labels/EarthCam/mask/*

@@ -42,7 +42,7 @@ class NNHandler_handshake(NNHandler_yolo):
 			x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
 			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
 
-	def __init__(self, handshake_file=None, is_tracked=True, vis=True, verbose=True, debug=False):
+	def __init__(self, handshake_file=None, is_tracked=True, vis=False, verbose=True, debug=False):
 
 		super().__init__(json_file=handshake_file, is_tracked=is_tracked, vis=vis, verbose=verbose, debug=debug)
 		print("\t[*] Handshake detector")

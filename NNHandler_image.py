@@ -54,18 +54,20 @@ class NNHandler_image(NNHandler):
             if path is None: path = self.img_loc
 
             cap = cv2.VideoCapture(path)
+            self.init_param(cap=cap)
 
-            total = 0
-            # loop over the frames of the video
-            while True:
-                (grabbed, frame) = cap.read()
-                if not grabbed:
-                    break
-                total += 1
-
+            #
+            # total = 0
+            # # loop over the frames of the video
+            # while True:
+            #     (grabbed, frame) = cap.read()
+            #     if not grabbed:
+            #         break
+            #     total += 1
+            #
             cap.release()
 
-            return total
+            return self.time_series_length
 
         elif self.format in NNHandler_image.IMG_FORMAT:
             if path is None: path = self.img_loc
@@ -87,10 +89,11 @@ class NNHandler_image(NNHandler):
         if cap is None: cap = self.cap
         assert cap is not None, "Capture cannot be none"
 
-        # self.time_series_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        self.n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        # self.fps = cap.get(cv2.CAP_PROP_FPS)
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        self.time_series_length = int(self.n_frames/self.fps)
 
     def close(self):
         if self.format in NNHandler_image.VID_FORMAT:
