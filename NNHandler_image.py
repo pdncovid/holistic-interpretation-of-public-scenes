@@ -54,17 +54,16 @@ class NNHandler_image(NNHandler):
             if path is None: path = self.img_loc
 
             cap = cv2.VideoCapture(path)
-            self.init_param(cap=cap)
+            # self.init_param(cap=cap)
 
-            #
-            # total = 0
-            # # loop over the frames of the video
-            # while True:
-            #     (grabbed, frame) = cap.read()
-            #     if not grabbed:
-            #         break
-            #     total += 1
-            #
+            total = 0
+            # loop over the frames of the video
+            while True:
+                (grabbed, frame) = cap.read()
+                if not grabbed:
+                    break
+                total += 1
+
             cap.release()
 
             return self.time_series_length
