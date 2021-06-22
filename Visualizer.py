@@ -371,6 +371,8 @@ if __name__ == "__main__":
     parser.add_argument("--cam", "-c", type=str, default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
     parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph.json') # Change this
 
+    parser.add_argument("--visualize","-v", action="store_true", help="Visualize the video output") # Change this
+
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
@@ -461,10 +463,12 @@ if __name__ == "__main__":
         plot_loc = vid_loc = None
 
     # Call this to plot pyplot graph
-    # vis.init_plot(plot_out=plot_loc)
+    if args.output is not None:
+        vis.init_plot(plot_out=plot_loc)
 
     # Call this to plot cv2 video
-    vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_scatter=False, vid_lines=False, vid_show=True)
+    if args.output is not None or args.visualize is not None:
+        vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_show=args.visualize)
 
     print("-----------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-----------------")
 

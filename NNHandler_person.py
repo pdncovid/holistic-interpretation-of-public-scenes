@@ -25,7 +25,7 @@ class NNHandler_person(NNHandler_yolo):
 	nms_max_overlap = 1.0
 
 	iou_thresh = .45
-	score_thresh = .5
+	score_thresh = .2
 	input_size = 416
 
 
@@ -107,37 +107,33 @@ if __name__=="__main__":
 
 	parser = argparse.ArgumentParser()
 
-	parser.add_argument("--input_file", "-i", type=str, dest="input_file", default=img_loc)
-	parser.add_argument("--output_file", "-o", type=str, dest="output_file", default=json_loc)
+	parser.add_argument("--input_file", "-i", type=str, dest="input", default=img_loc)
+	parser.add_argument("--output_file", "-o", type=str, dest="output", default=json_loc)
 	parser.add_argument("--overwrite", "--ow", action="store_true", dest="overwrite")
 	parser.add_argument("--visualize", "--vis", action="store_true", dest="visualize")
 	parser.add_argument("--verbose", "--verb", action="store_true", dest="verbose")
 	parser.add_argument("--tracked", "-t", type=bool, dest="tracked", default=True)
 
 	args = parser.parse_args()
+
+	args.input = "./data/videos/TownCentreXVID.mp4"
+	args.output = "./data/labels/TownCentre/person.json"
 	args.overwrite = True
 	args.verbose=True
+	args.visualize=False
 
-	img_loc = args.input_file
-	json_loc = args.output_file
+	img_loc = args.input
+	json_loc = args.output
 
 	# TEST
 	img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 	img_handle.runForBatch()
 
-	nn_yolo = NNHandler_person(vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose, debug=False)
-	try:
-		if os.path.exists(json_loc):
-			if args.overwrite:
-				raise Exception("Overwriting json : %s"%json_loc)
-
-			# To load YOLO + DSORT track from json
-			nn_yolo.init_from_json(json_loc)
-
-		else:
-			raise Exception("Json does not exists : %s"%json_loc)
-	except:
+	person_handler = NNHandler_person(json_file=json_loc, vis=args.visualize, is_tracked=args.tracked, verbose=args.verbose, debug=False)
+	if os.path.exists(json_loc) and not args.overwrite:
+		# To load YOLO + DSORT track from json
+		person_handler.init_from_json()
+	else:
 		# To create YOLO + DSORT track and save to json
-		nn_yolo.create_yolo(img_handle)
-		nn_yolo.save_json(json_loc)
-
+		person_handler.create_yolo(img_handle)
+		person_handler.save_json()
