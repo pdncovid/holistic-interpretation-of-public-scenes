@@ -4,6 +4,7 @@ import cv2
 from NNHandler_mask import NNHandler_mask
 from NNHandler_image import NNHandler_image
 from suren.util import Json
+from Visualizer import Visualizer
 
 
 def json_to_text(js : Json, img_handle : NNHandler_image, out_dir : str, mask : bool = None):
@@ -36,13 +37,11 @@ def json_to_text(js : Json, img_handle : NNHandler_image, out_dir : str, mask : 
 
     img_handle.close()
 
+dataset = "DEEE"
+vid = "cctv2.mp4"
 
-
-
-
-
-img_loc = "./suren/temp/18.avi"
-json_loc = "./suren/temp/18-mask.json"
+img_loc = "./data/videos/{}/{}".format(dataset, vid)
+json_loc = "./data/labels/{}/mask/{}-mask.json".format(dataset, vid.split('.')[0])
 
 visualize = True
 verbose = True
@@ -53,29 +52,22 @@ overwrite = False
 img_handle = NNHandler_image(format="avi", img_loc=img_loc)
 img_handle.runForBatch()
 
-# NNHandler_mask.model_filename = './model_data/mars-small128.pb'
 # NNHandler_mask.weigths_filename = './checkpoints/yolov4-obj_best'
 
 nn_handle = NNHandler_mask(mask_file=json_loc, is_tracked=tracker)
 
-# nn_handle.model_filename = './model_data/mars-small128.pb'
 # nn_handle.weigths_filename = './checkpoints/yolov4-obj_best'
 
 
-try:
-    if os.path.exists(json_loc):
-        if overwrite:
-            raise Exception("Overwriting json : %s" % json_loc)
-
-        # To load YOLO + DSORT track from json
-        nn_handle.init_from_json()
-
-    else:
-        raise Exception("Json does not exists : %s" % json_loc)
-except:
-    # To create YOLO mask + DSORT track and save to json
+if os.path.exists(json_loc) and not overwrite:
+    nn_handle.init_from_json()
+else:
     nn_handle.create_yolo(img_handle)
-    # nn_handle.save_json()
+    nn_handle.save_json()
+
+vis = Visualizer(person=nn_handle, img=img_handle)
+vis.init_vid(vid_show=True)
+vis.plot(WAIT=0)
 
 
 # js = Json(json_loc)

@@ -203,14 +203,33 @@ class NNHandler_yolo(NNHandler):
 			if self.debug:
 				print("[xx]", pred_bbox)
 
-			# Give class names
-			if self.class_names is None: self.class_names = []
-			# names = [self.class_names[int(i)] if int(i) < len(self.class_names) else str(i) for i in classes]
-			try:
-				names = [self.class_names[int(i)] for i in classes]
-			except:
-				names = [self.class_names[int(i)] if int(i) < len(self.class_names) else "class_%d"%i for i in classes]
+
+			if self.class_names is None:
+				# Give class names
+				names = ["class_%d" % i for i in classes]
 				eprint("[xx]", classes)
+
+			else:
+				# custom allowed classes (uncomment line below to customize tracker for only people)
+				allowed_classes = self.class_names
+
+				# loop through objects and use class index to get class name, allow only classes in allowed_classes list
+				names = []
+				deleted_indx = []
+				for i, idx in enumerate(classes):
+					# print(i, idx, len(allowed_classes))
+					if int(idx) < len(allowed_classes):
+						names.append(allowed_classes[int(idx)])
+					else:
+						deleted_indx.append(i)
+
+				names = np.array(names)
+				count = len(names)
+
+				# delete detections that are not in allowed_classes
+				bboxes = np.delete(bboxes, deleted_indx, axis=0)
+				scores = np.delete(scores, deleted_indx, axis=0)
+
 
 			# encode yolo detections and feed to tracker
 			features = encoder(frame, bboxes)
@@ -265,13 +284,14 @@ class NNHandler_yolo(NNHandler):
 					id = -1
 					txt = class_name
 
-				color = colors[int(id) % len(colors)]
-				color = [i * 255 for i in color]
+				if self.visualize:
+					color = colors[int(id) % len(colors)]
+					color = [i * 255 for i in color]
 
-				cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
-				cv2.rectangle(frame, (int(bbox[0]), int(bbox[1] - 30)),
-							  (int(bbox[0]) + len(txt) * 17, int(bbox[1])), color, -1)
-				cv2.putText(frame, txt, (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75, (255, 255, 255), 2)
+					cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color, 2)
+					cv2.rectangle(frame, (int(bbox[0]), int(bbox[1] - 30)),
+								  (int(bbox[0]) + len(txt) * 17, int(bbox[1])), color, -1)
+					cv2.putText(frame, txt, (int(bbox[0]), int(bbox[1] - 10)), 0, 0.75, (255, 255, 255), 2)
 
 				# if enable info flag then print details about each track
 				if self.verbose:

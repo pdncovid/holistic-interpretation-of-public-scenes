@@ -25,6 +25,8 @@ except ImportError as e:
 
 
 class Visualizer:
+
+
     @staticmethod
     def get_cmap(size : list):
         if len(size) == 1:
@@ -61,7 +63,7 @@ class Visualizer:
         self.openpose_handle = openpose
 
         self.debug = debug
-
+        self.time_series_length = None
 
         # Scatter plot components
         self.make_plot = False      # create plot (Everything below wont matter is this isn't set)
@@ -106,25 +108,29 @@ class Visualizer:
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
 
-    def plot(self, WAIT=20, show_cmap=False):
+    def plot(self, WAIT=20):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
             return
 
+        assert self.graph is not None or self.img_handle is not None, "Cannot visualize anything if both Image handle and graph is None"
+
+        if self.graph is not None:
+            self.time_series_length = self.graph.time_series_length
+        else:
+            self.time_series_length = self.img_handle.time_series_length
+
         # colour map
         if self.graph is not None:
             self.cmap = self.get_cmap([self.graph.n_nodes])
-            # self.cmap = self.graph.get_cmap(show=show_cmap)
+            # self.cmap = self.graph.get_cmap()
         else:
-            raise NotImplementedError("Cannot get CMAP")
+            self.cmap = self.get_cmap([20])
 
         cmap_vid = np.array(self.cmap[:, :-1] * 255)[:, [2, 1, 0]]      # RGB and then to BGR
         cmap_plot = np.reshape(self.cmap, (-1, 4), order='C')        # RGB alpha
         # cmap_ = cv2.cvtColor(cmap_.reshape(1, -1, 3), cv2.COLOR_RGB2BGR).reshape(-1, 3)
-
-        # for n, p in enumerate(self.graph.nodes):
-        #     p.params["col"] = cmap_vid[n]
 
         # Process and get all graph points till time t
         if self.graph is not None:
@@ -136,20 +142,22 @@ class Visualizer:
 
         # MAKE Video
         if self.make_vid:
+            assert self.img_handle is not None, "Image handle cannot be None, if video is required"
+
             if self.vid_show:
                 cv2.namedWindow("plot")
 
             # SAVE VIDEO
-            if self.img_handle is not  None and not os.path.exists(self.img_out_name):
+            if self.img_out_name is not None and not os.path.exists(self.img_out_name):
                 os.makedirs(self.img_out_name)
 
             if self.vid_out_name is not None:
                 if not os.path.exists(os.path.dirname(self.vid_out_name)):
                     os.makedirs(os.path.dirname(self.vid_out_name))
 
-                img_handle.open()
-                rgb = img_handle.read_frame(0)
-                img_handle.close()
+                self.img_handle.open()
+                rgb = self.img_handle.read_frame()
+                self.img_handle.close()
                 h, w, _ = rgb.shape
                 fourcc = cv2.VideoWriter_fourcc(*'XVID')
                 vid_out = cv2.VideoWriter(self.vid_out_name, fourcc, 20.0, (w, h))
@@ -176,11 +184,14 @@ class Visualizer:
             # Figure for threat level
             fig3 = plt.figure()
 
-        img_handle.open()
-        for t in range(self.graph.time_series_length):
+        if self.img_handle is not None:
+            self.img_handle.open()
 
-            rgb = img_handle.read_frame(t)
-            rgb_ = rgb.copy()
+        for t in range(self.time_series_length):
+
+            if self.img_handle is not None:
+                rgb = self.img_handle.read_frame(t)
+                rgb_ = rgb.copy()
 
             # ------------------------------- MAKE PLOT ----------------------------------
 
@@ -278,14 +289,15 @@ class Visualizer:
 
 
             if self.make_plot and self.plot_show:
-                    ax1.clear()
-                    ax1.set_xlim(xlim[0], xlim[1])
-                    ax1.set_ylim(ylim[0], ylim[1])
+                ax1.clear()
+                ax1.set_xlim(xlim[0], xlim[1])
+                ax1.set_ylim(ylim[0], ylim[1])
 
             if (t + 1) % 20 == 0:
-                progress(t + 1, self.graph.time_series_length, "drawing graph")
+                progress(t + 1, self.time_series_length, "drawing graph")
 
-        img_handle.close()
+        if self.img_handle is not None:
+            self.img_handle.close()
 
         if self.vid_out_name is not None:
             vid_out.release()
@@ -307,7 +319,7 @@ class Visualizer:
         imgPefixes=["fr","G","dimg","T"]
         # imgPefixes=["fr","G","dimg","T"]
 
-        fivePercentBlock=int(noFrames/20.0)
+        fivePercentBlock= min(1, int(noFrames/20.0))
         print("0% of merging completed")        
 
         for t in range(noFrames):
@@ -350,14 +362,16 @@ if __name__ == "__main__":
     parser=argparse.ArgumentParser()
 
     # IGNORE THIS
-    # parser.add_argument("--graph_file","-g",type=str,dest="graph_file",default='./data/vid-01-graph_handshake.json') # Change this
     # parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
 
     parser.add_argument("--input","-i", type=str, default='./data/videos/seq18.avi') # Change this : input fil
     parser.add_argument("--output","-o", type=str, default='./data/output/seq18/') # Change this : output dir
     parser.add_argument("--person","-p", type=str, default='./data/labels/seq18/seq18-person.json') # Change this : person
     parser.add_argument("--handshake","--hs", type=str, default='./data/labels/seq18/seq18-handshake.json') # Change this : handshake
-    parser.add_argument("--cam", "-c", type=str,dest="cam",default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
+    parser.add_argument("--cam", "-c", type=str, default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
+    parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph.json') # Change this
+
+    parser.add_argument("--visualize","-v", action="store_true", help="Visualize the video output") # Change this
 
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
@@ -365,68 +379,101 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
 
-    img_handle = NNHandler_image(format="avi", img_loc=args.input)
-    img_handle.runForBatch()
+    suren_mode = True
+
+    if suren_mode:
+        args.input = "./data/videos/TownCentreXVID.mp4"
+        args.person = "./data/labels/TownCentre/person.json"
+        args.handshake = "./data/labels/TownCentre/person.json"
+        args.cam = "./data/camera-orientation/jsons/oxford.json"
+        args.graph = None
+        args.output = None
+
+    # Initiate image handler
+    if args.input is not None:
+        img_handle = NNHandler_image(format="avi", img_loc=args.input)
+        img_handle.runForBatch()
+    else:
+        img_handle = None
 
     # Person handler
-    person_handler = NNHandler_person(args.person, is_tracked=args.track)
-    if os.path.exists(args.person):
-        person_handler.init_from_json()
+    if args.person is not None:
+        person_handler = NNHandler_person(args.person, is_tracked=args.track)
+        if os.path.exists(args.person):
+            person_handler.init_from_json()
+        else:
+            person_handler.create_yolo(img_handle)
+            person_handler.save_json()
     else:
-        person_handler.create_yolo(img_handle)
-        person_handler.save_json()
+        person_handler = None
 
     # HS handler
-    hs_handler = NNHandler_handshake(args.handshake, is_tracked=args.track)
-    if os.path.exists(args.handshake):
-        hs_handler.init_from_json()
+    if args.handshake is not None:
+        hs_handler = NNHandler_handshake(args.handshake, is_tracked=args.track)
+        if os.path.exists(args.handshake):
+            hs_handler.init_from_json()
+        else:
+            hs_handler.create_yolo(img_handle)
+            hs_handler.save_json()
     else:
-        hs_handler.create_yolo(img_handle)
-        hs_handler.save_json()
+        hs_handler = None
 
 
     # openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose,  is_tracked=args.track)
     # openpose_handler.init_from_json()
     openpose_handler = None
 
-    g = Graph()
-    g.getCameraInfoFromJson(args.cam)
-    # g.init_from_json(args.graph_file)
-    # g.run_gihan()
+    if args.graph is not None:
+        g = Graph()
+        g.getCameraInfoFromJson(args.cam)
 
-    if g.state["people"] < 2:
-        person_handler.connectToGraph(g)
-        person_handler.runForBatch()
+        if os.path.exists(args.graph):
+            g.init_from_json(args.graph)
 
-    if g.state["handshake"] < 3:
-        hs_handler.connectToGraph(g)
-        hs_handler.runForBatch()
+        print("State = ", g.state)
 
-    if g.state["floor"] < 2:
-        g.generateFloorMap()
+        if g.state["people"] < 2:
+            person_handler.connectToGraph(g)
+            person_handler.runForBatch()
 
-    if g.state["cluster"] < 1:
-        g.findClusters()
+        if g.state["handshake"] < 3:
+            hs_handler.connectToGraph(g)
+            hs_handler.runForBatch()
 
-    if g.state["threat"] < 1:
-        g.calculateThreatLevel()
+        if g.state["floor"] < 7:
+            g.generateFloorMap()
 
-    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=None)
+        if g.state["cluster"] < 1:
+            g.findClusters()
 
-    plot_loc = args.output + "/plot/"
-    vid_loc = (args.output + "/out.avi").replace("\\", "/").replace("//", "/")
+        if g.state["threat"] < 1:
+            g.calculateThreatLevel()
+
+        if args.graph is not None:
+            g.saveToFile(args.graph)
+    else:
+        g = None
+
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler)
+
+    if args.output is not None:
+        plot_loc = args.output + "/plot/"
+        vid_loc = (args.output + "/out.avi").replace("\\", "/").replace("//", "/")
+    else:
+        plot_loc = vid_loc = None
 
     # Call this to plot pyplot graph
-    vis.init_plot(plot_out=plot_loc)
+    if args.output is not None:
+        vis.init_plot(plot_out=plot_loc)
 
     # Call this to plot cv2 video
-    vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_scatter=False, vid_lines=False)
+    if args.output is not None or args.visualize is not None:
+        vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_show=args.visualize)
 
-    print("-------------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-------------------")
+    print("-----------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-----------------")
 
-    vis.plot(WAIT=20, show_cmap=False)
+    vis.plot(WAIT=20)
 
     vis.mergePhotos(noFrames=g.time_series_length)
-    
 
     print("END of program")

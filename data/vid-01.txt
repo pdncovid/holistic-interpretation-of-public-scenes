@@ -1,2 +1,0 @@
-/storage/datasets/UCF101-action-recognition-dataset/ut-interaction_set2/seq18.avi
-kepler.ce.pdn.ac.lk
