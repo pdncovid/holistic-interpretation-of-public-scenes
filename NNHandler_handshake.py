@@ -42,7 +42,7 @@ class NNHandler_handshake(NNHandler_yolo):
 			x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
 			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
 
-	def __init__(self, handshake_file=None, is_tracked=True, vis=True, verbose=True, debug=False):
+	def __init__(self, handshake_file=None, is_tracked=True, vis=False, verbose=True, debug=False):
 
 		super().__init__(json_file=handshake_file, is_tracked=is_tracked, vis=vis, verbose=verbose, debug=debug)
 		print("\t[*] Handshake detector")
@@ -92,7 +92,8 @@ class NNHandler_handshake(NNHandler_yolo):
 					# iou = list(map(lambda x: get_iou(bb_hs, x, mode=1), node_t))
 					shakes[idx][int(t)] = iou
 
-			unclassified = shakes.pop(-1)	# non-id shakes
+			if -1 in shakes:
+				unclassified = shakes.pop(-1)	# non-id shakes
 
 			# print(shakes)
 
