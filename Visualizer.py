@@ -369,7 +369,7 @@ if __name__ == "__main__":
     parser.add_argument("--person","-p", type=str, default='./data/labels/seq18/seq18-person.json') # Change this : person
     parser.add_argument("--handshake","--hs", type=str, default='./data/labels/seq18/seq18-handshake.json') # Change this : handshake
     parser.add_argument("--cam", "-c", type=str, default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
-    parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph.json') # Change this
+    parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph.json') # Change this : INCOMPLETE (Make sure this isn't None)
 
     parser.add_argument("--visualize","-v", action="store_true", help="Visualize the video output") # Change this
 
@@ -378,6 +378,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     print(args)
+    time_series_length = None
 
     suren_mode = True
 
@@ -386,8 +387,10 @@ if __name__ == "__main__":
         args.person = "./data/labels/TownCentre/person.json"
         args.handshake = "./data/labels/TownCentre/person.json"
         args.cam = "./data/camera-orientation/jsons/oxford.json"
-        args.graph = None
-        args.output = None
+        args.graph = './data/temp/oxford-graph.json'
+        args.output = './data/output/oxford/'
+        args.visualize = False
+        time_series_length = 500  # @gihan... change this
 
     # Initiate image handler
     if args.input is not None:
@@ -434,11 +437,11 @@ if __name__ == "__main__":
 
         if g.state["people"] < 2:
             person_handler.connectToGraph(g)
-            person_handler.runForBatch()
+            person_handler.runForBatch(time_series_length)
 
         if g.state["handshake"] < 3:
             hs_handler.connectToGraph(g)
-            hs_handler.runForBatch()
+            hs_handler.runForBatch(time_series_length)
 
         if g.state["floor"] < 7:
             g.generateFloorMap()
@@ -449,8 +452,7 @@ if __name__ == "__main__":
         if g.state["threat"] < 1:
             g.calculateThreatLevel()
 
-        if args.graph is not None:
-            g.saveToFile(args.graph)
+        # g.saveToFile(args.graph)
     else:
         g = None
 
@@ -474,6 +476,7 @@ if __name__ == "__main__":
 
     vis.plot(WAIT=20)
 
-    vis.mergePhotos(noFrames=g.time_series_length)
+    if args.output is not None:
+        vis.mergePhotos(noFrames=g.time_series_length)
 
     print("END of program")

@@ -10,7 +10,7 @@ from NNHandler_yolo import NNHandler_yolo
 from NNHandler_image import NNHandler_image, cv2
 from Graph import Graph
 
-from suren.util import get_iou, Json, eprint
+from suren.util import get_iou, Json, eprint, iou_batch
 
 
 class NNHandler_handshake(NNHandler_yolo):
@@ -47,9 +47,10 @@ class NNHandler_handshake(NNHandler_yolo):
 		super().__init__(json_file=handshake_file, is_tracked=is_tracked, vis=vis, verbose=verbose, debug=debug)
 		print("\t[*] Handshake detector")
 
-	def update_handshake(self):
-		# Use self.graph and find the two people using maximum intersection area
+	def update_handshake(self, time_series_length=None):
+		if time_series_length is None: time_series_length = self.time_series_length
 
+		# Use self.graph and find the two people using maximum intersection area
 		graph = self.graph
 		handshake_data = self.json_data
 
@@ -61,6 +62,7 @@ class NNHandler_handshake(NNHandler_yolo):
 		# Graph contains nodes which have time series info for separate nodes
 		# YOLO output has timeseries info first and then info of each node for that time series
 
+		'''
 		if self.is_tracked:
 			shakes = defaultdict(dict)
 
@@ -80,7 +82,7 @@ class NNHandler_handshake(NNHandler_yolo):
 					idx = bbox["id"]
 
 					# iou between bb_hs and bb_person (node_t)
-					iou = []
+					iou = []		# @suren : TODO : Batch IOU
 					for i in range(len(node_t)):
 						try:
 							iou.append(get_iou(bb_hs, node_t[i], mode=1))
@@ -130,11 +132,13 @@ class NNHandler_handshake(NNHandler_yolo):
 
 				# print(t, node_t)
 
-				for bbox in handshake_data[t]["bboxes"]:
+				# for bbox in handshake_data[t]["bboxes"]:		@ Suren : This is a temp edit
+				for bbox in handshake_data[t]:
 					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
 					conf = bbox["conf"]
 
 					# iou between bb_hs and bb_person (node_t)
+					# TODO : Update to combine this @ suren --> L1
 					iou = []
 					for i in range(len(node_t)):
 						try:
@@ -156,10 +160,72 @@ class NNHandler_handshake(NNHandler_yolo):
 					graph.nodes[p2].params["handshake"][t_] = {"person": p1, "confidence": conf, "iou": iou[ind2]}
 
 			graph.state["handshake"] = 2
+		'''
+
+		if self.is_tracked:
+			shakes = defaultdict(dict)
+
+			for t in handshake_data:
+				t_ = int(t)
+
+				if t_ >= time_series_length: continue
+
+				# First take all the detected nodes at time t
+				node_t = [[node.params["xMin"][t_],
+						   node.params["yMin"][t_],
+						   node.params["xMax"][t_],
+						   node.params["yMax"][t_]] for node in graph.nodes]
+
+
+				# Next consider all handshake boxes at time t
+				for bbox in handshake_data[t]:
+					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
+					idx = bbox["id"]
+
+					# print(node_t, bb_hs)
+
+					# iou between bb_hs and bb_person (node_t)
+					iou = iou_batch([bb_hs], node_t)
+
+					# print(iou) #, np.array(iou).shape)
+
+					# iou = list(map(lambda x: get_iou(bb_hs, x, mode=1), node_t))
+					shakes[idx][int(t)] = iou[0]
+
+			if -1 in shakes:
+				unclassified = shakes.pop(-1)	# non-id shakes
+
+			# print(shakes)
+
+			for idx in shakes:
+				shake_t = shakes[idx].keys()
+				shake_iou = list(shakes[idx].values())
+
+				# print(len(shake_iou), len(shake_iou[0]))
+				# for s in shake_iou: print(len(s))
+				# print(np.array(shake_iou).shape)
+
+				shakes_iou_avg = np.mean(np.array(shake_iou), axis=0).astype(float)
+
+				# print(shakes_iou_avg)
+
+				p1, p2 = np.argpartition(shakes_iou_avg, -2)[-2:]
+				p1, p2 = int(p1), int(p2)
+
+				# print(graph.nodes)
+
+				for t in shake_t:
+					# print(t, p1, p2)
+					graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": None, "iou": shakes_iou_avg[p1]}
+					graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": None, "iou": shakes_iou_avg[p2]}
+
+			graph.state["handshake"] = 3
+
+
 		print("Updated the graph")
 
-	def runForBatch(self):
-		self.update_handshake()
+	def runForBatch(self, time_series_length=None):
+		self.update_handshake(time_series_length)
 
 
 if __name__ == "__main__":
