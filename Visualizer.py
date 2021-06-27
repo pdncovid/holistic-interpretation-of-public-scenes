@@ -317,7 +317,6 @@ class Visualizer:
 
         #This is a hardcoded function
         imgPefixes=["fr","G","dimg","T"]
-        # imgPefixes=["fr","G","dimg","T"]
 
         fivePercentBlock= min(1, int(noFrames/20.0))
         print("0% of merging completed")        
@@ -365,22 +364,28 @@ if __name__ == "__main__":
     # parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
 
     parser.add_argument("--input","-i", type=str, default='./data/videos/seq18.avi') # Change this : input fil
-    parser.add_argument("--output","-o", type=str, default='./data/output/seq18/') # Change this : output dir
+    parser.add_argument("--output","-o", type=str, default='./data/output/seq18-temp/') # Change this : output dir
     parser.add_argument("--person","-p", type=str, default='./data/labels/seq18/seq18-person.json') # Change this : person
     parser.add_argument("--handshake","--hs", type=str, default='./data/labels/seq18/seq18-handshake.json') # Change this : handshake
     parser.add_argument("--cam", "-c", type=str, default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
-    parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph.json') # Change this : INCOMPLETE (Make sure this isn't None)
+    parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph-temp.json') # Change this : INCOMPLETE (Make sure this isn't None)
 
     parser.add_argument("--visualize","-v", action="store_true", help="Visualize the video output") # Change this
 
+    parser.add_argument("--overwrite_graph","-owg", type=bool, default=False) # Change this : INCOMPLETE
     parser.add_argument("--track", "-tr", type=bool, dest="track", default=True)
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
     args = parser.parse_args()
     print(args)
-    time_series_length = None
 
+    # args.visualize = True
+    # args.output = None
+    # args.graph = None
+    # time_series_length = 500
     suren_mode = True
+    start_time = 0
+    end_time = None
 
     if suren_mode:
         args.input = "./data/videos/TownCentreXVID.mp4"
@@ -390,7 +395,10 @@ if __name__ == "__main__":
         args.graph = './data/temp/oxford-graph.json'
         args.output = './data/output/oxford/'
         args.visualize = False
-        time_series_length = 500  # @gihan... change this
+        # @gihan... change these
+        start_time = 100
+        end_time = 500
+        # time_series_length = 500
 
     # Initiate image handler
     if args.input is not None:
@@ -437,11 +445,11 @@ if __name__ == "__main__":
 
         if g.state["people"] < 2:
             person_handler.connectToGraph(g)
-            person_handler.runForBatch(time_series_length)
+            person_handler.runForBatch(start_time, end_time)
 
-        if g.state["handshake"] < 3:
+        if g.state["handshake"] < 2:
             hs_handler.connectToGraph(g)
-            hs_handler.runForBatch(time_series_length)
+            hs_handler.runForBatch(start_time, end_time)
 
         if g.state["floor"] < 7:
             g.generateFloorMap()
@@ -452,7 +460,8 @@ if __name__ == "__main__":
         if g.state["threat"] < 1:
             g.calculateThreatLevel()
 
-        # g.saveToFile(args.graph)
+        if args.overwrite_graph:
+            g.saveToFile(args.graph)
     else:
         g = None
 
