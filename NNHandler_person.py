@@ -55,18 +55,19 @@ class NNHandler_person(NNHandler_yolo):
 
 		print("This person is visible only from {} to {} frames".format(firstApperanceT,lastAppearanceT))
 
-	def update_graph_nodes(self, time_series_length=None):
-		if time_series_length is None: time_series_length = self.time_series_length
+	def update_graph_nodes(self, start_time=None, end_time = None):
+		if start_time is None: start_time = 0
+		if end_time is None: end_time = self.time_series_length
 
 		graph = self.graph
-		if graph.time_series_length is None: graph.time_series_length = time_series_length
+		if graph.time_series_length is None: graph.time_series_length = end_time-start_time
 		else: raise Exception("Graph is not empty")
 
 		assert len(graph.nodes) == 0, "Graph not empty. Cannot update non-empty graph"
 
 		person_dic = defaultdict(dict)
 
-		for t in range(time_series_length):
+		for t in range(start_time, end_time):
 			try: yolo_bbox = self.json_data[t]
 			except: yolo_bbox = self.json_data[str(t)]		# If reading from json file
 
@@ -80,14 +81,17 @@ class NNHandler_person(NNHandler_yolo):
 		# print(person_dic)
 
 		for idx in person_dic:
-			detected = [True if t in person_dic[idx] else False for t in range(time_series_length)]
+			# TEMP SOLUTION FOR GIHAN
+			detected = {t : (True if t in person_dic[idx] else False) for t in range(start_time, end_time)}
 
-			x_min = [person_dic[idx][t]["x1"] if detected[t] else 0 for t in range(time_series_length)]
-			x_max = [person_dic[idx][t]["x2"] if detected[t] else 0 for t in range(time_series_length)]
-			y_min = [person_dic[idx][t]["y1"] if detected[t] else 0 for t in range(time_series_length)]
-			y_max = [person_dic[idx][t]["y2"] if detected[t] else 0 for t in range(time_series_length)]
+			x_min = [person_dic[idx][t]["x1"] if detected[t] else 0 for t in range(start_time, end_time)]
+			x_max = [person_dic[idx][t]["x2"] if detected[t] else 0 for t in range(start_time, end_time)]
+			y_min = [person_dic[idx][t]["y1"] if detected[t] else 0 for t in range(start_time, end_time)]
+			y_max = [person_dic[idx][t]["y2"] if detected[t] else 0 for t in range(start_time, end_time)]
 
-			p = Person(time_series_length=time_series_length,
+			detected = [detected[t] for t in detected]
+
+			p = Person(time_series_length=end_time-start_time,
 					   initParams={"xMin":x_min, "xMax":x_max, "yMin":y_min, "yMax":y_max, "detection":detected})
 			# print(idx, p.params)
 			graph.add_person(p)
@@ -95,8 +99,8 @@ class NNHandler_person(NNHandler_yolo):
 		graph.state["people"] = 2
 
 
-	def runForBatch(self, time_series_length=None):
-		self.update_graph_nodes(time_series_length)
+	def runForBatch(self, start_time=None, end_time = None):
+		self.update_graph_nodes(start_time, end_time)
 
 
 
