@@ -47,8 +47,9 @@ class NNHandler_handshake(NNHandler_yolo):
 		super().__init__(json_file=handshake_file, is_tracked=is_tracked, vis=vis, verbose=verbose, debug=debug)
 		print("\t[*] Handshake detector")
 
-	def update_handshake(self, time_series_length=None):
-		if time_series_length is None: time_series_length = self.time_series_length
+	def update_handshake(self, start_time=None, end_time = None):
+		if start_time is None: start_time = 0
+		if end_time is None: end_time = self.time_series_length
 
 		# Use self.graph and find the two people using maximum intersection area
 		graph = self.graph
@@ -168,7 +169,9 @@ class NNHandler_handshake(NNHandler_yolo):
 			for t in handshake_data:
 				t_ = int(t)
 
-				if t_ >= time_series_length: continue
+				if not (start_time <= t_ < end_time): continue
+
+				t_ -= start_time
 
 				# First take all the detected nodes at time t
 				node_t = [[node.params["xMin"][t_],
@@ -178,11 +181,13 @@ class NNHandler_handshake(NNHandler_yolo):
 
 
 				# Next consider all handshake boxes at time t
-				for bbox in handshake_data[t]:
+				for i, bbox in enumerate(handshake_data[t]):
 					bb_hs = [bbox["x1"], bbox["y1"], bbox["x2"], bbox["y2"]]
-					idx = bbox["id"]
 
-					# print(node_t, bb_hs)
+					if self.is_tracked:
+						idx = bbox["id"]
+					else:
+						idx = i		# Random index to each HS
 
 					# iou between bb_hs and bb_person (node_t)
 					iou = iou_batch([bb_hs], node_t)
@@ -190,42 +195,55 @@ class NNHandler_handshake(NNHandler_yolo):
 					# print(iou) #, np.array(iou).shape)
 
 					# iou = list(map(lambda x: get_iou(bb_hs, x, mode=1), node_t))
-					shakes[idx][int(t)] = iou[0]
+					shakes[idx][t_] = iou[0]
 
 			if -1 in shakes:
 				unclassified = shakes.pop(-1)	# non-id shakes
 
 			# print(shakes)
 
-			for idx in shakes:
-				shake_t = shakes[idx].keys()
-				shake_iou = list(shakes[idx].values())
+			if self.is_tracked:
+				for idx in shakes:
+					shake_t = shakes[idx].keys()
+					shake_iou = list(shakes[idx].values())
 
-				# print(len(shake_iou), len(shake_iou[0]))
-				# for s in shake_iou: print(len(s))
-				# print(np.array(shake_iou).shape)
+					# print(idx, shakes[idx])
 
-				shakes_iou_avg = np.mean(np.array(shake_iou), axis=0).astype(float)
+					shakes_iou_avg = np.mean(np.array(shake_iou), axis=0).astype(float)
 
-				# print(shakes_iou_avg)
+					# print(shakes_iou_avg)
 
-				p1, p2 = np.argpartition(shakes_iou_avg, -2)[-2:]
-				p1, p2 = int(p1), int(p2)
+					p1, p2 = np.argpartition(shakes_iou_avg, -2)[-2:]
+					p1, p2 = int(p1), int(p2)
 
-				# print(graph.nodes)
+					# print(graph.nodes)
 
-				for t in shake_t:
-					# print(t, p1, p2)
-					graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": None, "iou": shakes_iou_avg[p1]}
-					graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": None, "iou": shakes_iou_avg[p2]}
+					for t in shake_t:
+						# print(t, p1, p2)
+						# print(graph.nodes[p1].params["handshake"])
+						graph.nodes[p1].params["handshake"][t] = {"person": p2, "confidence": None, "iou": shakes_iou_avg[p1]}
+						graph.nodes[p2].params["handshake"][t] = {"person": p1, "confidence": None, "iou": shakes_iou_avg[p2]}
 
-			graph.state["handshake"] = 3
+				graph.state["handshake"] = 3
 
+			else:
+				for idx in shakes:
+
+					for t in shakes[idx]:
+						t_ = int(t)
+						iou = shakes[idx][t]
+
+						p1, p2 = np.argpartition(iou, -2)[-2:]
+						p1, p2 = int(p1), int(p2)
+
+						graph.nodes[p1].params["handshake"][t_] = {"person": p2, "confidence": None, "iou": iou[p1]}
+						graph.nodes[p2].params["handshake"][t_] = {"person": p1, "confidence": None, "iou": iou[p2]}
+				graph.state["handshake"] = 2
 
 		print("Updated the graph")
 
-	def runForBatch(self, time_series_length=None):
-		self.update_handshake(time_series_length)
+	def runForBatch(self, start_time=None, end_time = None):
+		self.update_handshake(start_time, end_time)
 
 
 if __name__ == "__main__":
