@@ -89,7 +89,9 @@ class NNHandler_yolo(NNHandler):
 
 	@staticmethod
 	def plot(img, bb_list:list, colors:list, is_tracked=False):
-		for bbox, col in zip(bb_list, colors):
+		n_col = len(colors)
+		for i, bbox in enumerate(bb_list):
+			col = colors[i%n_col]
 			x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
 			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), tuple(col), 2)
 

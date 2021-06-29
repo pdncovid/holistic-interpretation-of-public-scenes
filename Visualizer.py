@@ -116,16 +116,25 @@ class Visualizer:
 
         assert self.graph is not None or self.img_handle is not None, "Cannot visualize anything if both Image handle and graph is None"
 
-        if self.graph is not None:
+        if self.img_handle is not None:
+            if self.img_handle.start_time is not None and self.img_handle.end_time is not None:
+                self.start_time = self.img_handle.start_time
+                self.end_time = self.img_handle.end_time
+                self.time_series_length = self.end_time - self.start_time
+            else:
+                self.time_series_length = self.time_series_length
+
+        elif self.graph is not None:
             self.time_series_length = self.graph.time_series_length
         else:
-            self.time_series_length = self.img_handle.time_series_length
+            raise NotImplementedError
 
         # colour map
         if col_num is not None:
             self.cmap = self.get_cmap([col_num])
         elif self.graph is not None:
             self.cmap = self.get_cmap([self.graph.n_nodes])
+            col_num = len(self.cmap)
             # self.cmap = self.graph.get_cmap()
         else:
             raise NotImplementedError
@@ -140,7 +149,11 @@ class Visualizer:
             # scatter x, y and lines
             sc_x, sc_y, lines = self.graph.get_plot_points()
             xlim, ylim = self.graph.get_plot_lim(sc_x, sc_y)
-            # print(sc_x.shape, sc_y.shape, cmap.shape)
+
+            r, c = divmod(self.graph.n_nodes, len(cmap_plot))
+            # print(cmap_plot.shape, r, c, self.graph.n_nodes)
+            cmap_plot = np.append(np.tile(cmap_plot, (r, 1)), cmap_plot[:c, :], axis=0)
+            # print(self.start_time, self.end_time, self.time_series_length)
 
         # MAKE Video
         if self.make_vid:
@@ -187,7 +200,7 @@ class Visualizer:
             fig3 = plt.figure()
 
         if self.img_handle is not None:
-            self.img_handle.open()
+            self.img_handle.open(start_frame=start_time)
 
         for t in range(self.time_series_length):
 
@@ -214,7 +227,7 @@ class Visualizer:
 
                     if self.mark_ref:
                         for i in range(4):
-                            p1, p2 = self.graph.DEST[i], self.graph.DEST[i - 1]
+                            p1, p2 = self.graph.DEST[i], -self.graph.DEST[i - 1]
                             ax1.plot(p1, p2, 'k', linewidth=.5)
 
 
@@ -224,7 +237,7 @@ class Visualizer:
                         ax1.set_xlim(xlim[0], xlim[1])
                         ax1.set_ylim(ylim[0], ylim[1])
 
-                        self.graph.gihan_images(fig2, ax2, self.plot_out_name, t)
+                        self.graph.gihan_images(fig2, ax2, fig3, self.plot_out_name, t)
                         self.graph.threat_image(fig3, self.plot_out_name, t)
 
 
@@ -236,7 +249,7 @@ class Visualizer:
                 if self.make_vid:
                     if self.vid_scatter:
                         for p in range(len(sc_x_t)):
-                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p]), 5)
+                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p%col_num]), 5)
 
                     if self.vid_lines:
                         for l in lines[t]:
@@ -245,30 +258,49 @@ class Visualizer:
             # ------------------------------- MAKE VIDEO ----------------------------------
 
             if self.make_vid:
+                t_ = str(self.start_time + t)
 
                 # Plot reference on video
                 if self.mark_ref and self.graph is not None:
                     points = np.array([self.graph.REFERENCE_POINTS], dtype=np.int32)
                     cv2.polylines(rgb_, points, 1, 255)
 
-                # Plot info from yolo
+                # Plot info of person
                 if self.person_handle is not None and self.vid_bbox:
-                    if str(t) in self.person_handle.json_data:
-                        NNHandler_person.plot(rgb_, self.person_handle.json_data[str(t)], cmap_vid, self.person_handle.is_tracked)
+                    if t_ in self.person_handle.json_data:
+                        NNHandler_person.plot(rgb_, self.person_handle.json_data[t_], cmap_vid, self.person_handle.is_tracked)
                         # TODO @suren : match colour in graph and vid
+
+
+                if True:
+                    for i in range(self.graph.n_nodes):
+                        for j in range(i+1, self.graph.n_nodes):
+                            if self.graph.pairG[t, i, j] > .99:
+                                x1 = self.graph.nodes[i].params["X"][t]
+                                y1 = self.graph.nodes[i].params["Y"][t]
+                                x2 = self.graph.nodes[j].params["X"][t]
+                                y2 = self.graph.nodes[j].params["Y"][t]
+
+                                print(t, i, j, "x1, y1, x2, y2 =", x1, y1, x2, y2)
+
+                                cv2.line(rgb_, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 3)
+                                cv2.circle(rgb_, (int(x1), int(y1)), 1, (0, 0, 0), 7)
+                                cv2.circle(rgb_, (int(x2), int(y2)), 1, (0, 0, 0), 7)
+
 
                 # Plot info from handshake
                 if self.hs_handle is not None and self.vid_hbox:
-                    if str(t) in self.hs_handle.json_data:
-                        NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[str(t)], self.hs_handle.is_tracked)
+                    if t_ in self.hs_handle.json_data:
+                        NNHandler_handshake.plot(rgb_, self.hs_handle.json_data[t_], self.hs_handle.is_tracked)
 
                 # Plot info from openpose
                 if self.openpose_handle is not None and self.vid_keypoints:
-                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[str(t)], self.openpose_handle.is_tracked)
+                    NNHandler_openpose.plot(rgb_, self.openpose_handle.json_data[t_], self.openpose_handle.is_tracked)
 
                 # Plot info from graph
                 if self.graph is not None and self.graph.frameThreatLevel is not None:
                     cv2.putText(rgb_, "%.4f"%(self.graph.frameThreatLevel[t]), (100, 100), 0, 0.75, (255, 255, 255), 2)
+
 
                 # save video
                 if self.vid_out_name is not None:
@@ -352,7 +384,7 @@ class Visualizer:
             # print(newW,newH)
 
             if t%fivePercentBlock==0:
-                print((5.0*t)/fivePercentBlock,"% of merging completed")
+                print(".2% of merging completed"%((100*t)/noFrames))
 
 
         mergedVideoOut.release()
@@ -388,24 +420,26 @@ if __name__ == "__main__":
     suren_mode = True
     start_time = 0
     end_time = None
+    col_num = 0
 
     if suren_mode:
         args.input = "./data/videos/TownCentreXVID.mp4"
         args.person = "./data/labels/TownCentre/person.json"
-        args.handshake = "./data/labels/TownCentre/person.json"
+        args.handshake = "./data/labels/TownCentre/handshake.json"
         args.cam = "./data/camera-orientation/jsons/oxford.json"
         args.graph = './data/temp/oxford-graph.json'
         args.output = './data/output/oxford/'
         args.visualize = False
         # @gihan... change these
         start_time = 100
-        end_time = 500
+        end_time = 200
+        col_num = 10
         # time_series_length = 500
 
     # Initiate image handler
     if args.input is not None:
         img_handle = NNHandler_image(format="avi", img_loc=args.input)
-        img_handle.runForBatch()
+        img_handle.runForBatch(start_time, end_time)
     else:
         img_handle = None
 
@@ -485,7 +519,7 @@ if __name__ == "__main__":
 
     print("-----------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-----------------")
 
-    vis.plot(WAIT=20)
+    vis.plot(WAIT=20, col_num=col_num)
 
     if args.output is not None:
         vis.mergePhotos(noFrames=g.time_series_length)
