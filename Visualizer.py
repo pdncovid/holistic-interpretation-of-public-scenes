@@ -108,7 +108,7 @@ class Visualizer:
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
 
-    def plot(self, WAIT=20):
+    def plot(self, WAIT=20, col_num:int = None):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
@@ -122,11 +122,13 @@ class Visualizer:
             self.time_series_length = self.img_handle.time_series_length
 
         # colour map
-        if self.graph is not None:
+        if col_num is not None:
+            self.cmap = self.get_cmap([col_num])
+        elif self.graph is not None:
             self.cmap = self.get_cmap([self.graph.n_nodes])
             # self.cmap = self.graph.get_cmap()
         else:
-            self.cmap = self.get_cmap([20])
+            raise NotImplementedError
 
         cmap_vid = np.array(self.cmap[:, :-1] * 255)[:, [2, 1, 0]]      # RGB and then to BGR
         cmap_plot = np.reshape(self.cmap, (-1, 4), order='C')        # RGB alpha
