@@ -384,7 +384,7 @@ class Visualizer:
             # print(newW,newH)
 
             if t%fivePercentBlock==0:
-                print(".2% of merging completed"%((100*t)/noFrames))
+                print("{} percent of merging completed".format((100.0*t)/noFrames))
 
 
         mergedVideoOut.release()
@@ -429,6 +429,17 @@ if __name__ == "__main__":
         args.cam = "./data/camera-orientation/jsons/oxford.json"
         args.graph = './data/temp/oxford-graph.json'
         args.output = './data/output/oxford/'
+
+
+        args.input = "./data/videos/seq18.avi"
+        args.person = "./data/labels/seq18/person.json"
+        args.handshake = "./data/labels/seq18/handshake.json"
+        args.cam = "./data/camera-orientation/jsons/uti.json"
+        args.graph = './data/temp/seq18-graph.json'
+        args.output = './data/output/seq18/'
+
+
+
         args.visualize = False
         # @gihan... change these
         start_time = 100
