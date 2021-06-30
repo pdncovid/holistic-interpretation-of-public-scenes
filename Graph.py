@@ -441,14 +441,17 @@ class Graph:
 						i = 1 if interact["person"] == p2 else 0 #get from graph self.nodes @Jameel
 						m = 0.0 #get from graph self.nodes @Suren
 						g = self.groupProbability[p1,p2]
-						self.pairD[t,p1,p2]=d
-						self.pairI[t,p1,p2]=i
-						self.pairM[t,p1,p2]=m
-						self.pairG[t,p1,p2]=g
+						
+						self.pairD[t,p1,p2]=d*self.pairDetectionProbability[p1,p2,t]
+						self.pairI[t,p1,p2]=i*self.pairDetectionProbability[p1,p2,t]
+						self.pairM[t,p1,p2]=m*self.pairDetectionProbability[p1,p2,t]
+						self.pairG[t,p1,p2]=g*self.pairDetectionProbability[p1,p2,t]
+
+
 
 						EPS_m = 2.0
 						EPS_g = 2.0
-						threatOfPair = (d+i)*(EPS_m-m)*(EPS_g-g)
+						threatOfPair = (d+i)*(EPS_m-m)*(EPS_g-g)*self.pairDetectionProbability[p1,p2,t]
 						threatLevel += threatOfPair
 
 						self.pairT[t,p1,p2]=threatOfPair
