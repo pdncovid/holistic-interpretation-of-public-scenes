@@ -32,6 +32,9 @@ class NNHandler_image(NNHandler):
 
         self.vid_out = None
 
+        self.start_time = None
+        self.end_time = None
+
         print(self)
 
     def __repr__(self):
@@ -77,12 +80,16 @@ class NNHandler_image(NNHandler):
         else:
             raise NotImplementedError
 
-    def open(self, init_param = False):
+    def open(self, start_frame:int = None, init_param = False):
         if self.format in NNHandler_image.VID_FORMAT:
             self.cap = cv2.VideoCapture(self.img_loc)
             eprint("Frames will only be read linearly")
 
             if init_param: self.init_param()
+
+            if start_frame is not None:
+                for i in range(start_frame):
+                    self.read_frame(i)
 
     def init_param(self, cap=None):
         if cap is None: cap = self.cap
@@ -212,7 +219,7 @@ class NNHandler_image(NNHandler):
         else:
             raise NotImplementedError
 
-    def runForBatch(self):
+    def runForBatch(self, start=None, end=None):
         if self.img_loc is None and self.json_file is None: raise ValueError("Both img_loc and json_file cannot be None")
 
         elif self.img_loc is None and self.json_file is not None: self.init_from_json()
@@ -220,6 +227,9 @@ class NNHandler_image(NNHandler):
         else:
             self.init_from_img_loc()
             if self.json_file is not None: self.write_json()
+
+        if start: self.start_time = start
+        if end: self.end_time = end
 
         print("\t[f] Read %s file with %d frames" %(self.format, self.time_series_length))
 

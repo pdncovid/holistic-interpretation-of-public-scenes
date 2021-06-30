@@ -125,7 +125,7 @@ class Graph:
 
 				# pos[n] = (p_x, p_y)
 				sc_tx.append(p_x)
-				sc_ty.append(p_y)
+				sc_ty.append(-p_y)
 
 				if p.params["handshake"][t]['person'] is not None:
 					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
@@ -490,13 +490,13 @@ class Graph:
 		fig.colorbar(im, cax=cax, orientation='vertical')
 		fig.savefig("{}T-{:04d}.jpg".format(out_name, t))
 
-	def gihan_images(self, fig, ax, out_name, t, concat=True):
+	def gihan_images(self, fig, ax, fig_, out_name, t, concat=True, full=True):
 
 		vals = {
 			"d" : (self.pairD[t, :, :], "Distance"),
 			"i" : (self.pairI[t, :, :], "Interaction"),
 			"m" : (self.pairM[t, :, :], "Mask"),
-			"g" : (self.pairG[t, :, :], "Group")
+			"gr" : (self.pairG[t, :, :], "Group")
 		}
 
 		if len(ax) == 2:
@@ -511,9 +511,18 @@ class Graph:
 			for col in ax:
 				col.clear()
 
+		if full:
+			for ind in vals:
+				fig_.clf()
+				ax_ = fig_.add_axes([0, 0, 1, 1])
+				im = ax_.matshow(vals[ind][0], vmin=0, vmax=1)
+				divider = make_axes_locatable(ax_)
+				cax = divider.append_axes('right', size='5%', pad=0.05)
+				fig_.colorbar(im, cax=cax, orientation='vertical')
+				fig_.savefig("{}{}-{:04d}.jpg".format(out_name, ind, t))
 
-		else:
-			raise NotImplementedError
+
+
 
 
 
