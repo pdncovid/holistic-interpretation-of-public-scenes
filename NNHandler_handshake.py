@@ -16,8 +16,10 @@ from suren.util import get_iou, Json, eprint, iou_batch
 class NNHandler_handshake(NNHandler_yolo):
 	# yolo_dir = os.path.dirname(os.path.realpath(__file__)) + "/submodules/yolov4-deepsort"
 
+
 	# model_filename = yolo_dir + '/model_data/mars-small128.pb'
 	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-fullshake_best'
+
 
 	class_names = ["Handshake"]
 
@@ -27,7 +29,7 @@ class NNHandler_handshake(NNHandler_yolo):
 	nms_max_overlap = 1.0
 
 	iou_thresh = .45
-	score_thresh = .5
+	score_thresh = .2
 	input_size = 416
 
 
