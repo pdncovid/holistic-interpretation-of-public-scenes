@@ -1,4 +1,4 @@
-import json
+import json, os
 import cv2
 import numpy as np
 from collections import defaultdict
@@ -86,23 +86,72 @@ class Graph:
 		projected=[projected[0]/projected[2],projected[1]/projected[2]]
 		return projected
 
-	def get_plot_lim(self, sc_x=None, sc_y=None):
+	def get_plot_lim(self, sc_x=None, sc_y=None, hw:tuple=None):
+
+		# LIM based on ref box
+		x_min, x_max = np.min(self.DEST[:, 0], axis=None), np.max(self.DEST[:, 0], axis=None)
+		y_min, y_max = np.min(-1*self.DEST[:, 1], axis=None), np.max(-1*self.DEST[:, 1], axis=None)
+
+		x_diff = x_max - x_min
+		y_diff = y_max - y_min
+		r = .05
+
+		x_min -= x_diff * r
+		x_max += y_diff * r
+		y_min -= y_diff * r
+		y_max += y_diff * r
+
+		x_lim = [x_min, x_max]
+		y_lim = [y_min, y_max]
+
+		# LIM based on plot points
 		if sc_x is not None and sc_y is not None:
-			y_lim = [np.min(sc_y, axis=None) - 5, np.max(sc_y, axis=None) + 5]
-			x_lim = [np.min(sc_x, axis=None) - 5, np.max(sc_x, axis=None) + 5]
 
-		else:
+			x_min = np.nanmin(sc_x, axis=None)
+			x_max = np.nanmax(sc_x, axis=None)
 
-			# @GIHAN. TODO : Put 4 endpoints here
-			x_min = 0
-			x_max = 0
-			y_min = 0
-			y_max = 0
-			x_lim = [x_min, x_max]
-			y_lim = [y_min, y_max]
+			y_min = np.nanmin(sc_y, axis=None)
+			y_max = np.nanmax(sc_y, axis=None)
+
+			x_diff = x_max - x_min
+			y_diff = y_max - y_min
+			r = .05
+
+			x_min -= x_diff*r
+			x_max += y_diff*r
+
+			y_min -= y_diff*r
+			y_max += y_diff*r
+
+			x_lim[0] = min(x_lim[0], x_min)
+			x_lim[1] = max(x_lim[1], x_max)
+			y_lim[0] = min(y_lim[0], y_min)
+			y_lim[1] = max(y_lim[1], y_max)
+
+		# LIM based on video size
+		if hw is not None:
 
 			raise NotImplementedError
 
+			# @GIHAN. TODO : Put 4 endpoints here
+			print(hw)
+			# x2, y2 = self.project(hw[1], hw[0])
+
+
+			x_diff = x_max - x_min
+			y_diff = y_max - y_min
+			r = .01
+
+			x_min -= x_diff*r
+			x_max += y_diff*r
+
+			y_min -= y_diff*r
+			y_max += y_diff*r
+
+			x_lim[0] = min(x_lim[0], x_min)
+			x_lim[1] = max(x_lim[1], x_max)
+			y_lim[0] = min(y_lim[0], y_min)
+			y_lim[1] = max(y_lim[1], y_max)
 
 		return x_lim,y_lim
 
@@ -111,29 +160,47 @@ class Graph:
 
 		# assert self.state["floor"] >= 1, "Need X, Y points to plot graph"     # @suren : TODO
 
+		# ori_x = []
+		# ori_y = []
+
 		sc_x = []
 		sc_y = []
 		lines = []
 		for t in range(self.time_series_length):
 			# pos = {}
+			# ori_tx, ori_ty = [], []
 			sc_tx, sc_ty = [], []
 			line_t = defaultdict(list)
 			for n, p in enumerate(self.nodes):
 				p_x = p.params["X"][t]
 				p_y = p.params["Y"][t]
-				p_x, p_y = self.project(p_x, p_y)
 
-				# pos[n] = (p_x, p_y)
-				sc_tx.append(p_x)
-				sc_ty.append(-p_y)
+				if p.params["detection"][t]:
+					# ori_tx.append(p_x)
+					# ori_ty.append(p_y)
+					p_x, p_y = self.project(p_x, p_y)
 
-				if p.params["handshake"][t]['person'] is not None:
-					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
-					line_t["%d_%d" % (n1, n2)].append([p_x, p_y])
-					# print(t, n1, n2, p_x, p_y)
+					# pos[n] = (p_x, p_y)
+					sc_tx.append(p_x)
+					sc_ty.append(-p_y)
+
+					if p.params["handshake"][t]['person'] is not None:
+						n1, n2 = sorted([n, p.params["handshake"][t]['person']])
+						line_t["%d_%d" % (n1, n2)].append([p_x, p_y])
+						# print(t, n1, n2, p_x, p_y)
+				else:
+					# ori_tx.append(None)
+					# ori_ty.append(None)
+
+					sc_tx.append(None)
+					sc_ty.append(None)
 
 			sc_x.append(sc_tx)
 			sc_y.append(sc_ty)
+
+			# ori_x.append(ori_tx)
+			# ori_y.append(ori_ty)
+
 			# print("XXX", line_t)
 			# @suren : find a better way to implement variable size array
 			try:
@@ -141,8 +208,11 @@ class Graph:
 			except ValueError:
 				line_t = []
 			lines.append(line_t)
-		sc_x = np.array(sc_x).transpose()
-		sc_y = np.array(sc_y).transpose()
+		sc_x = np.array(sc_x, dtype=float).transpose()
+		sc_y = np.array(sc_y, dtype=float).transpose()
+
+		# ori_x = np.array(ori_x, dtype=float).transpose()
+		# ori_y = np.array(ori_y, dtype=float).transpose()
 
 		return sc_x, sc_y, lines
 
@@ -463,7 +533,60 @@ class Graph:
 		self.findClusters()
 		self.calculateThreatLevel()
 
-	def gihan_init(self, fig, ax):
+
+	def set_ax(self, ax, n):
+		ax.set_xticks(range(n))
+		ax.set_yticks(range(n))
+		ax.set_xticklabels([str(i+1) for i in range(n)])
+		ax.set_yticklabels([str(i+1) for i in range(n)])
+
+	def threat_image_init(self, fig, ax):
+		# ax.spines.right.set_visible(False)
+		# ax.spines.bottom.set_visible(False)
+		# ax.tick_params(bottom=False, labelbottom=False)
+		T_max = np.max(self.pairT, axis=None)
+		im = ax.matshow(self.pairT[0, :, :], vmin=0, vmax=T_max)
+		divider = make_axes_locatable(ax)
+		cax = divider.append_axes('right', size='5%', pad=0.05)
+		fig.colorbar(im, cax=cax, orientation='vertical')
+		ax.clear()
+		fig.savefig("./data/output/threat_image_init.jpg")
+
+	def threat_image_save(self, fig, ax, out_name, t):
+		T_max = np.max(self.pairT, axis=None)
+		ax.matshow(self.pairT[t, :, :], vmin=0, vmax=T_max)
+		self.set_ax(ax, self.n_nodes)
+		# n, m = self.pairT[t, :, :].shape
+		# ax.set_xticklabels([str(i) for i in range(n+1)])
+		# ax.set_yticklabels([str(i) for i in range(m+1)])
+		fig.savefig("{}T-{:04d}.jpg".format(out_name, t))
+		ax.clear()
+
+	def threat_image(self, fig, out_name, t):
+		fig.clf()
+		ax = fig.add_axes([0, 0, 1, 1])
+		im = ax.matshow(self.pairT[t, :, :])
+		divider = make_axes_locatable(ax)
+		cax = divider.append_axes('right', size='5%', pad=0.05)
+		fig.colorbar(im, cax=cax, orientation='vertical')
+		fig.savefig("{}T-{:04d}.jpg".format(out_name, t))
+
+	def image_init(self, ax, xlim, ylim):
+		ax.set_xlim(xlim[0], xlim[1])
+		ax.set_ylim(ylim[0], ylim[1])
+		ax.clear()
+		ax.set_axis_off()
+
+	def image_save(self, fig1, ax1, xlim, ylim, out_dir, t, clear=True):
+
+		fig1.savefig("{}G-{:04d}.jpg".format(out_dir, t))
+		if clear:
+			ax1.clear()
+			ax1.set_xlim(xlim[0], xlim[1])
+			ax1.set_ylim(ylim[0], ylim[1])
+			ax1.set_axis_off()
+
+	def dimg_init_concat(self, fig, ax):
 		vals = {
 			"d" : (self.pairD[0, :, :], "Distance"),
 			"i" : (self.pairI[0, :, :], "Interaction"),
@@ -475,23 +598,37 @@ class Graph:
 			ax = [ax[i][j] for i in range(2) for j in range(2)]
 
 		for col, ind in zip(ax, vals):
+			# col.spines.right.set_visible(False)
+			# col.spines.top.set_visible(False)
 			col.title.set_text(vals[ind][1])
 			im = col.matshow(vals[ind][0], vmin=0, vmax=1)
 			divider = make_axes_locatable(col)
 			cax = divider.append_axes('right', size='5%', pad=0.05)
 			fig.colorbar(im, cax=cax, orientation='vertical')
 
-	def threat_image(self, fig, out_name, t):
-		fig.clf()
-		ax = fig.add_axes([0, 0, 1, 1])
-		im = ax.matshow(self.pairT[t, :, :])
+		for col in ax:
+			col.clear()
+		# 	col.spines.right.set_visible(False)
+		# 	col.spines.top.set_visible(False)
+
+		fig.savefig("./data/output/dimg_init_concat.jpg")
+
+	def dimg_init_full(self, fig, ax):
+		ax.clear()
+		# ax.spines.right.set_visible(False)
+		# ax.spines.top.set_visible(False)
+		im = ax.matshow(self.pairD[0, :, :], vmin=0, vmax=1)
 		divider = make_axes_locatable(ax)
 		cax = divider.append_axes('right', size='5%', pad=0.05)
 		fig.colorbar(im, cax=cax, orientation='vertical')
-		fig.savefig("{}T-{:04d}.jpg".format(out_name, t))
+		ax.clear()
+		fig.savefig("./data/output/dimg_init_full.jpg")
 
-	def gihan_images(self, fig, ax, fig_, out_name, t, concat=True, full=True):
+	def dimg_init(self, fig2, ax2, fig4, ax4):
+		self.dimg_init_concat(fig2, ax2)
+		self.dimg_init_full(fig4, ax4)
 
+	def dimg_save_concat(self, fig, ax, out_name, t):
 		vals = {
 			"d" : (self.pairD[t, :, :], "Distance"),
 			"i" : (self.pairI[t, :, :], "Interaction"),
@@ -502,36 +639,39 @@ class Graph:
 		if len(ax) == 2:
 			ax = [ax[i][j] for i in range(2) for j in range(2)]
 
-		if concat:
-			for col, ind in zip(ax, vals):
-				col.title.set_text(vals[ind][1])
-				col.matshow(vals[ind][0], vmin=0, vmax=1)
+		n, m = self.pairD[t, :, :].shape
 
-			fig.savefig("{}dimg-{:04d}.jpg".format(out_name, t))
-			for col in ax:
-				col.clear()
+		for col, ind in zip(ax, vals):
+			col.title.set_text(vals[ind][1])
+			col.matshow(vals[ind][0], vmin=0, vmax=1)
+			self.set_ax(col, self.n_nodes)
+			# col.set_xticklabels([str(i) for i in range(n+1)])
+			# col.set_yticklabels([str(i) for i in range(m+1)])
+		fig.savefig("{}dimg-{:04d}.jpg".format(out_name, t))
+		for col in ax:
+			col.clear()
 
-		if full:
-			for ind in vals:
-				fig_.clf()
-				ax_ = fig_.add_axes([0, 0, 1, 1])
-				im = ax_.matshow(vals[ind][0], vmin=0, vmax=1)
-				divider = make_axes_locatable(ax_)
-				cax = divider.append_axes('right', size='5%', pad=0.05)
-				fig_.colorbar(im, cax=cax, orientation='vertical')
-				fig_.savefig("{}{}-{:04d}.jpg".format(out_name, ind, t))
+	def dimg_save_full(self, fig, ax, out_name, t):
+		if not os.path.exists("{}/figs".format(out_name)) : os.makedirs("{}/figs".format(out_name))
+		vals = {
+			"d" : (self.pairD[t, :, :], "Distance"),
+			"i" : (self.pairI[t, :, :], "Interaction"),
+			"m" : (self.pairM[t, :, :], "Mask"),
+			"gr" : (self.pairG[t, :, :], "Group")
+		}
 
+		n, m = self.pairD[t, :, :].shape
+		for ind in vals:
+			ax.matshow(vals[ind][0], vmin=0, vmax=1)
+			self.set_ax(ax, self.n_nodes)
+			# ax.set_xticklabels([str(i) for i in range(n+1)])
+			# ax.set_yticklabels([str(i) for i in range(m+1)])
+			fig.savefig("{}/figs/{}-{:04d}.jpg".format(out_name, ind, t))
+			ax.clear()
 
-
-
-
-
-		# plt.figure()
-		# plt.matshow(self.pairI[t, :, :], vmin=0, vmax=1)
-		# plt.colorbar()
-		# plt.savefig("{}i-{:04d}".format(out_name, t))
-		# plt.close()
-
+	def dimg_save(self, fig2, ax2, fig4, ax4, out_name, t):
+		self.dimg_save_concat(fig2, ax2, out_name, t)
+		self.dimg_save_full(fig4, ax4, out_name, t)
 
 
 if __name__ == "__main__":

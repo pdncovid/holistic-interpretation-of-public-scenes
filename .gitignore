@@ -20,3 +20,5 @@ suren/temp/temp.py
 *.npy
 data/ground_truth/*
 data/labels/EarthCam/mask/*
+data/output/desktop.ini
+suren/temp_args.txt
