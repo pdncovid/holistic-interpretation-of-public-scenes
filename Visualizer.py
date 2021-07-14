@@ -86,6 +86,11 @@ class Visualizer:
         # Common to plot and vid
         self.mark_ref =True
 
+        # Info from img_handle
+        self.start_time = 0
+        self.end_time = None
+        self.hw = None if self.img_handle is None else (img_handle.height, img_handle.width)
+
     def init_plot(self, plot_out : str = None, network_scatter=True, network_lines=True, network_show=False):
         assert self.graph is not None, "Graph cannot be empty while plotting"
         self.make_plot = True
@@ -122,7 +127,7 @@ class Visualizer:
                 self.end_time = self.img_handle.end_time
                 self.time_series_length = self.end_time - self.start_time
             else:
-                self.time_series_length = self.time_series_length
+                self.time_series_length = self.img_handle.time_series_length
 
         elif self.graph is not None:
             self.time_series_length = self.graph.time_series_length
@@ -187,17 +192,19 @@ class Visualizer:
                 os.makedirs(self.plot_out_name)
 
             # Figure for Floor points
-            fig1, ax1 = plt.subplots()
-            ax1.set_xlim(xlim[0], xlim[1])
-            ax1.set_ylim(ylim[0], ylim[1])
+            fig1, ax1 = plt.subplots(1)
+            self.graph.image_init(ax1, xlim, ylim)
 
             # Figure for each metric
             fig2, ax2 = plt.subplots(2, 2)
             plt.subplots_adjust(wspace=.35, hspace=.35)
-            self.graph.gihan_init(fig2, ax2)
+            fig4, ax4 = plt.subplots(1)
+            self.graph.dimg_init(fig2, ax2, fig4, ax4)
 
             # Figure for threat level
-            fig3 = plt.figure()
+            fig3, ax3 = plt.subplots(1)
+            self.graph.threat_image_init(fig3, ax3)
+            # fig3 = plt.figure()
 
         if self.img_handle is not None:
             self.img_handle.open(start_frame=start_time)
@@ -215,8 +222,10 @@ class Visualizer:
 
                 # Plot info from graph
                 if self.graph is not None:
-                    sc_x_t = list(map(int, sc_x[:, t]))
-                    sc_y_t = list(map(int, sc_y[:, t]))
+                    # sc_x_t = list(map(int, sc_x[:, t]))
+                    # sc_y_t = list(map(int, sc_y[:, t]))
+                    sc_x_t = sc_x[:, t]
+                    sc_y_t = sc_y[:, t]
 
                     if self.plot_scatter:
                         ax1.scatter(sc_x_t, sc_y_t, color=cmap_plot)
@@ -227,18 +236,18 @@ class Visualizer:
 
                     if self.mark_ref:
                         for i in range(4):
-                            p1, p2 = self.graph.DEST[i], -self.graph.DEST[i - 1]
-                            ax1.plot(p1, p2, 'k', linewidth=.5)
+                            p1x, p1y = self.graph.DEST[i]
+                            p2x, p2y = self.graph.DEST[i-1]
+                            ax1.plot([p1x, p2x], [-p1y, -p2y], 'k', linewidth=.5)
 
 
                     if self.plot_out_name is not None:
-                        fig1.savefig("{}G-{:04d}.jpg".format(self.plot_out_name, t))
-                        ax1.clear()
-                        ax1.set_xlim(xlim[0], xlim[1])
-                        ax1.set_ylim(ylim[0], ylim[1])
-
-                        self.graph.gihan_images(fig2, ax2, fig3, self.plot_out_name, t)
-                        self.graph.threat_image(fig3, self.plot_out_name, t)
+                        # Save graph
+                        self.graph.image_save(fig1, ax1, xlim, ylim, self.plot_out_name, t, clear=True)
+                        # Save DIMG
+                        self.graph.dimg_save(fig2, ax2, fig4, ax4, self.plot_out_name, t)
+                        # Save threat
+                        self.graph.threat_image_save(fig3, ax3, self.plot_out_name, t)
 
 
 
@@ -281,7 +290,7 @@ class Visualizer:
                                 x2 = self.graph.nodes[j].params["X"][t]
                                 y2 = self.graph.nodes[j].params["Y"][t]
 
-                                print(t, i, j, "x1, y1, x2, y2 =", x1, y1, x2, y2)
+                                # print(t, i, j, "x1, y1, x2, y2 =", x1, y1, x2, y2)
 
                                 cv2.line(rgb_, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 3)
                                 cv2.circle(rgb_, (int(x1), int(y1)), 1, (0, 0, 0), 7)
@@ -299,7 +308,13 @@ class Visualizer:
 
                 # Plot info from graph
                 if self.graph is not None and self.graph.frameThreatLevel is not None:
-                    cv2.putText(rgb_, "%.4f"%(self.graph.frameThreatLevel[t]), (100, 100), 0, 0.75, (255, 255, 255), 2)
+                    font = 0 #cv2.FONT_HERSHEY_PLAIN
+                    h, w, _ = rgb_.shape
+                    offset_x, offset_y = int(.1*h), int(.9*h)
+                    font_scale = w*.75 / float(720)
+                    # print(font_scale, font, offset_x, offset_y)
+                    cv2.putText(rgb_, "%.4f"%(self.graph.frameThreatLevel[t]), (offset_x, offset_y), font, font_scale, (0, 0, 0), 3)
+                    cv2.putText(rgb_, "%.4f"%(self.graph.frameThreatLevel[t]), (offset_x, offset_y), font, font_scale, (255, 255, 255), 2)
 
 
                 # save video
@@ -341,50 +356,74 @@ class Visualizer:
 
 
     def mergePhotos(self,directory=None,noFrames=100):
+        if directory is None: directory=self.plot_out_name
+
+        out_dir = directory + "/merged/"
+        if not os.path.exists(out_dir) : os.makedirs(out_dir)
+
+        # Extension
         OUTPUT_FILE_TYPE="mp4"#"mp4" | "webm"
 
+        # Output size : (w_out, h_out)
+        h_out = 720
 
-        mergedVideoOut="TempVariable"
-        newH=500
-        if directory==None:
-            directory=self.plot_out_name
+        h_pic = h_out // 2
+        w2 = int(h_pic/0.75)
+
+        try:
+            img_temp = "{}fr-{:04d}.jpg".format(directory, 0)
+            h, w, _ = cv2.imread(img_temp).shape
+            w_pic = int(h_pic/float(h)*w)
+        except FileNotFoundError:
+            w_pic = int(h_pic/0.75)
+
+        w_out = w2 + w_pic
+
+        outVideoName = "{}merged.{}".format(out_dir, OUTPUT_FILE_TYPE)
+        if OUTPUT_FILE_TYPE == "avi":
+            mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
+        elif OUTPUT_FILE_TYPE == "mp4":
+            mergedFourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        elif OUTPUT_FILE_TYPE == "webm":
+            mergedFourcc = cv2.VideoWriter_fourcc(*'VP90')
+        else:
+            raise NotImplementedError
+        mergedVideoOut = cv2.VideoWriter(outVideoName, mergedFourcc, 20.0, (w_out, h_out))
 
         #This is a hardcoded function
         imgPefixes=["fr","G","dimg","T"]
+        img_sizes = [(h_pic, w_pic), (h_out-h_pic, w_pic), (h_pic, w_out-w_pic), (h_out-h_pic, w_out-w_pic)]
+        img_pad = [(0, 0), (h_pic, 0), (0, w_pic), (h_pic, w_pic)]
 
-        fivePercentBlock= min(1, int(noFrames/20.0))
+        fivePercentBlock= max(1, int(noFrames/20.0))
         print("0% of merging completed")        
 
         for t in range(noFrames):
-            outImg=np.zeros((newH,1,3),dtype=np.uint8)
-            for i in range(len(imgPefixes)):
+            outImg = np.empty((h_out, w_out, 3), dtype=np.uint8)
+            # outImg=np.zeros((newH,1,3),dtype=np.uint8)
+            for i in range(4):
                 imgName="{}{}-{:04d}.jpg".format(directory,imgPefixes[i],t)
                 if args.debug:
                     print("Loading file ",imgName)
-                thisImg=cv2.imread(imgName)
-                H=thisImg.shape[0]
-                W=thisImg.shape[1]
 
-                newW=int((newH/(1.0*H))*W)
-                thisImg=cv2.resize(thisImg,(newW,newH))
-                outImg=np.concatenate((outImg,thisImg),axis=1)
+                thisImg=cv2.imread(imgName)
+                out_size = img_sizes[i]
+                thisImg=cv2.resize(thisImg,(out_size[1], out_size[0]))
+
+                h_start = img_pad[i][0]
+                h_end = h_start + out_size[0]
+                w_start = img_pad[i][1]
+                w_end = w_start + out_size[1]
+
+                outImg[h_start:h_end, w_start:w_end] = thisImg
                 # print("outimage shape",outImg.shape)
 
-            cv2.imwrite("{}final-{:04d}.jpg".format(self.plot_out_name, t), outImg)
-
-            if t==0:
-                if OUTPUT_FILE_TYPE=="mp4":
-                    outVideoName="{}merged.mp4".format(directory)
-                    mergedFourcc = cv2.VideoWriter_fourcc(*'XVID')
-                elif OUTPUT_FILE_TYPE=="webm":
-                    outVideoName="{}merged.webm".format(directory)
-                    mergedFourcc = cv2.VideoWriter_fourcc(*'VP90')
-                mergedVideoOut = cv2.VideoWriter(outVideoName, mergedFourcc, 20.0, (int(outImg.shape[1]), int(outImg.shape[0])))
+            cv2.imwrite("{}final-{:04d}.jpg".format(out_dir, t), outImg)
             mergedVideoOut.write(outImg)
             # print(newW,newH)
 
             if t%fivePercentBlock==0:
-                print("{} percent of merging completed".format((100.0*t)/noFrames))
+                print("{:.2f}% of merging completed".format((100*t)/noFrames))
 
 
         mergedVideoOut.release()
@@ -417,34 +456,23 @@ if __name__ == "__main__":
     # args.output = None
     # args.graph = None
     # time_series_length = 500
-    suren_mode = True
+    suren_mode = False
     start_time = 0
-    end_time = None
-    col_num = 0
+    end_time = 200
+    col_num = 10
 
     if suren_mode:
-        args.input = "./data/videos/TownCentreXVID.mp4"
-        args.person = "./data/labels/TownCentre/person.json"
-        args.handshake = "./data/labels/TownCentre/handshake.json"
-        args.cam = "./data/camera-orientation/jsons/oxford.json"
-        args.graph = './data/temp/oxford-graph.json'
-        args.output = './data/output/oxford/'
-
-
-        args.input = "./data/videos/seq18.avi"
-        args.person = "./data/labels/seq18/person.json"
-        args.handshake = "./data/labels/seq18/handshake.json"
-        args.cam = "./data/camera-orientation/jsons/uti.json"
-        args.graph = './data/temp/seq18-graph.json'
-        args.output = './data/output/seq18/'
-
-
-
+        args.input = "./data/videos/DEEE/cctv1.mp4"
+        args.person = "./data/labels/DEEE/yolo/cctv1-yolo.json"
+        args.handshake = "./data/labels/DEEE/handshake/cctv1-hs.json"
+        args.cam = "./data/camera-orientation/jsons/deee.json"
+        args.graph = './data/temp/deee-cctv1.json'
+        args.output = './data/output/DEEE/cctv1/'
         args.visualize = False
         # @gihan... change these
         start_time = 100
         end_time = 200
-        col_num = 10
+        col_num = 20
         # time_series_length = 500
 
     # Initiate image handler

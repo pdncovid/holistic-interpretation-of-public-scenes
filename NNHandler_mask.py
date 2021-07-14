@@ -47,17 +47,6 @@ class NNHandler_mask(NNHandler_yolo):
 	score_thresh = .2
 	input_size = 416
 
-	@staticmethod
-	def plot(img, points, is_tracked):
-		if is_tracked:
-			bb_dic = points
-		else:
-			bb_dic = points["bboxes"]
-
-		for bbox in bb_dic:
-			x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
-			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (255, 255, 255), 2)
-
 	def __init__(self, mask_file=None, is_tracked=False, vis=False, verbose=False):
 
 		super().__init__()
