@@ -228,8 +228,8 @@ class NNHandler_image(NNHandler):
             self.init_from_img_loc()
             if self.json_file is not None: self.write_json()
 
-        if start: self.start_time = start
-        if end: self.end_time = end
+        if start is not None: self.start_time = start
+        if end is not None: self.end_time = end
 
         print("\t[f] Read %s file with %d frames" %(self.format, self.time_series_length))
 
