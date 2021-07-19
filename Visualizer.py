@@ -20,6 +20,8 @@ try:
     # import networkx as nx
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
+    plt.rc('ytick',labelsize=15)
+    plt.rc('xtick',labelsize=15)
 except ImportError as e:
     print(e)
 
@@ -456,7 +458,7 @@ if __name__ == "__main__":
     # args.output = None
     # args.graph = None
     # time_series_length = 500
-    suren_mode = False
+    suren_mode = True
     start_time = 0
     end_time = 200
     col_num = 10
@@ -468,12 +470,55 @@ if __name__ == "__main__":
         args.cam = "./data/camera-orientation/jsons/deee.json"
         args.graph = './data/temp/deee-cctv1.json'
         args.output = './data/output/DEEE/cctv1/'
-        args.visualize = False
         # @gihan... change these
         start_time = 100
         end_time = 200
         col_num = 20
         # time_series_length = 500
+
+        args.input = "./data/videos/seq18.avi"
+        args.person = "./data/labels/seq18/person.json"
+        args.handshake = "./data/labels/seq18/handshake.json"
+        args.cam = "./data/camera-orientation/jsons/uti.json"
+        args.graph = './data/temp/seq18.json'
+        args.output = './data/output/seq18/'
+        
+        start_time = 1
+        end_time = 1000
+        col_num = 20
+
+
+
+
+        args.input = "./data/videos/TownCentreXVID.mp4"
+        args.person = "./data/labels/TownCentre/person.json"
+        args.handshake = "./data/labels/TownCentre/handshake.json"
+        args.cam = "./data/camera-orientation/jsons/oxford.json"
+        args.graph = './data/temp/oxford.json'
+        args.output = './data/output/oxford/'
+        
+        start_time = 0
+        end_time = 100
+        col_num = 20
+
+
+
+        args.input = "./data/videos/DEEE/cctv2.mp4"
+        args.person = "./data/labels/DEEE/yolo/cctv2-yolo.json"
+        args.handshake = "./data/labels/DEEE/handshake/cctv2-hs.json"
+        args.cam = "./data/camera-orientation/jsons/deee.json"
+        args.graph = './data/temp/deee-cctv2.json'
+        args.output = './data/output/DEEE/cctv2/'
+        # @gihan... change these
+        start_time = 0
+        end_time = 200
+        col_num = 20
+
+
+
+
+        args.visualize = False
+
 
     # Initiate image handler
     if args.input is not None:
