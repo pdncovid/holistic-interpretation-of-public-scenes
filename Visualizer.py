@@ -62,24 +62,19 @@ class Visualizer:
         config = configparser.ConfigParser()
         config.read(file_path)
 
-        args.input = config['INPUT']['input']
-        args.person = config['INPUT']['person']
-        args.handshake = config['INPUT']['handshake']
-        args.cam = config['INPUT']['cam']
+        args.input = config['INPUT']['input'].replace('"', "")
+        args.person = config['INPUT']['person'].replace('"', "")
+        args.handshake = config['INPUT']['handshake'].replace('"', "")
+        args.cam = config['INPUT']['cam'].replace('"', "")
 
-        args.graph = config['IO']['graph']
+        args.graph = config['IO']['graph'].replace('"', "")
 
-        args.output = config['OUTPUT']['output']
+        args.output = config['OUTPUT']['output'].replace('"', "")
 
         args.visualize = config.getboolean('PARAMS', 'visualize')
         args.overwrite_graph = config.getboolean('PARAMS', 'overwrite_graph')
 
-
-
-        for section in config.sections():
-            for key in config[section]:
-                print(section, (key, config[section][key]))
-
+        return args
 
     def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None, debug=False):
         self.graph = graph
@@ -506,11 +501,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config_file = None
-    # config_file = "./data/config/oxford.ini"
+    # config_file = None
+    config_file = "./data/config/deee.ini"
     start_time = 0
     end_time = 1000
-    col_num = 20
+    col_num = 6
 
     if config_file is not None:
         args = Visualizer.read_ini(config_file, args)
