@@ -22,6 +22,8 @@ try:
     # import networkx as nx
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
+    plt.rc('ytick',labelsize=15)
+    plt.rc('xtick',labelsize=15)
 except ImportError as e:
     print(e)
 
@@ -505,7 +507,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config_file = None
-    config_file = "./data/config/oxford.ini"
+    # config_file = "./data/config/oxford.ini"
     start_time = 0
     end_time = 1000
     col_num = 20
