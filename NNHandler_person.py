@@ -25,7 +25,7 @@ class NNHandler_person(NNHandler_yolo):
 	nms_max_overlap = 1.0
 
 	iou_thresh = .45
-	score_thresh = .2
+	score_thresh = .5
 	input_size = 416
 
 
@@ -80,8 +80,9 @@ class NNHandler_person(NNHandler_yolo):
 
 		# print(person_dic)
 
-		for idx in person_dic:
+		for idx in sorted(person_dic):
 			# TEMP SOLUTION FOR GIHAN
+
 			detected = {t : (True if t in person_dic[idx] else False) for t in range(start_time, end_time)}
 
 			x_min = [person_dic[idx][t]["x1"] if detected[t] else 0 for t in range(start_time, end_time)]
@@ -92,7 +93,7 @@ class NNHandler_person(NNHandler_yolo):
 			detected = [detected[t] for t in detected]
 
 			p = Person(time_series_length=end_time-start_time,
-					   initParams={"xMin":x_min, "xMax":x_max, "yMin":y_min, "yMax":y_max, "detection":detected})
+					   initParams={"id":idx, "xMin":x_min, "xMax":x_max, "yMin":y_min, "yMax":y_max, "detection":detected})
 			# print(idx, p.params)
 			graph.add_person(p)
 
@@ -122,10 +123,10 @@ if __name__=="__main__":
 	args = parser.parse_args()
 
 	args.input = "./data/videos/TownCentreXVID.mp4"
-	args.output = "./data/labels/TownCentre/person.json"
-	args.overwrite = True
+	args.output = "./data/labels/TownCentre/person_5.json"
+	args.overwrite = False
 	args.verbose=True
-	args.visualize=False
+	args.visualize=True
 
 	img_loc = args.input
 	json_loc = args.output

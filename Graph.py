@@ -74,8 +74,12 @@ class Graph:
 		self.projectedFloorMapNTXY = None
 		self.REFERENCE_POINTS = None
 
-
-
+		self.pairD = None
+		self.pairI = None
+		self.pairM = None
+		self.pairG = None
+		self.pairT = None
+		self.frameThreatLevel = None
 
 	def __repr__(self):
 		rep = "Created Graph object with nodes = %d for frames = %d. Param example:\n" % (
@@ -158,8 +162,74 @@ class Graph:
 
 		return x_lim,y_lim
 
+	def get_points_t(self, t):
+		scx_det, scy_det, id_det = [], [], []
+		scx_interp, scy_interp, id_interp = [], [], []
+		line_t = {}
+		for n, p in enumerate(self.nodes):
+			# initParams = {"id": idx, "xMin": x_min, "xMax": x_max, "yMin": y_min, "yMax": y_max, "detection": detected})
+			p_id = p.params["id"]
+			# p_x = p.params["X"][t]
+			# p_y = p.params["Y"][t]
 
-	def get_plot_points(self):
+			if p.params["detection"][t]:
+				p_x, p_y = p.params["X_project"][t], p.params["Y_project"][t]
+
+				scx_det.append(p_x)
+				scy_det.append(-p_y)
+				id_det.append(p_id)
+
+				if p.params["handshake"][t]['person'] is not None:
+					n1, n2 = sorted([n, p.params["handshake"][t]['person']])
+					line_t["%d_%d" % (n1, n2)].append([p_x, p_y])
+
+			if p.params["interpolated"][t]:
+				p_x, p_y = p.params["X_project"][t], p.params["Y_project"][t]
+
+				scx_interp.append(p_x)
+				scy_interp.append(-p_y)
+				id_interp.append(p_id)
+
+
+		line_t = np.array([line_t[l] for l in line_t])
+		if len(line_t)>0 : line_t = line_t.transpose((0, 2, 1))
+
+		id_det = np.array(id_det, dtype=int)
+		id_interp = np.array(id_interp, dtype=int)
+
+		return scx_det, scy_det, id_det, line_t, scx_interp, scy_interp, id_interp
+
+
+	def get_scatter_points(self):
+		sc_x = []
+		sc_y = []
+		for t in range(self.time_series_length):
+			sc_tx, sc_ty = [], []
+			for p in self.nodes:
+				p_x = p.params["X"][t]
+				p_y = p.params["Y"][t]
+
+				if p.params["detection"][t]:
+					p_x, p_y = self.project(p_x, p_y)
+
+					# pos[n] = (p_x, p_y)
+					sc_tx.append(p_x)
+					sc_ty.append(-p_y)
+				else:
+
+					sc_tx.append(None)
+					sc_ty.append(None)
+
+			sc_x.append(sc_tx)
+			sc_y.append(sc_ty)
+		sc_x = np.array(sc_x, dtype=float).transpose()
+		sc_y = np.array(sc_y, dtype=float).transpose()
+
+		return sc_x, sc_y
+
+
+
+	def get_plot_points_all(self):
 
 		# assert self.state["floor"] >= 1, "Need X, Y points to plot graph"     # @suren : TODO
 
@@ -338,6 +408,8 @@ class Graph:
 			"nodes": [n.params for n in self.nodes]
 		}
 
+		Json.is_jsonable(data)  # Delete this later @suren
+
 		js = Json(file_name)
 		js.write(data)
 
@@ -407,24 +479,39 @@ class Graph:
 				n.calculate_standing_locations()
 			# self.state["floor"] = 1     # @suren : TODO
 
-		if self.state["floor"] & 1 << 1 == 0:
+		# if True:
 			for n in self.nodes:
-				n.interpolate_undetected_timestamps(debug=debug)
+				n.interpolate_undetected(debug=debug)
 			# self.state["floor"] |= 1 << 1     # @suren : TODO
+
+		# if True:
+			for n in self.nodes:
+				n.project_standing_location(self.transMatrix)
+
+
 
 		# Floor map N x T with X and Y points.
 		self.projectedFloorMapNTXY = np.zeros((self.n_nodes, self.time_series_length, 2),dtype=np.float32)
 
-		for n in range(self.n_nodes):
-			X = self.nodes[n].params["X"]
-			Y = self.nodes[n].params["Y"]
-			for t in range(self.time_series_length):
+		for n, node in enumerate(self.nodes):
+			self.projectedFloorMapNTXY[n, :, 0] = node.params["X_project"]
+			self.projectedFloorMapNTXY[n, :, 1] = node.params["Y_project"]
 
-				projected=self.project(X[t], Y[t])
-				self.projectedFloorMapNTXY[n,t,0]=projected[0]
-				self.projectedFloorMapNTXY[n,t,1]=projected[1]
+			# X = self.nodes[n].params["X"]
+			# Y = self.nodes[n].params["Y"]
+			# for t in range(self.time_series_length):
+			#
+			# 	projected=self.project(X[t], Y[t])
+			# 	self.projectedFloorMapNTXY[n,t,0]=projected[0]
+			# 	self.projectedFloorMapNTXY[n,t,1]=projected[1]
+			#
+			# np.testing.assert_almost_equal(self.projectedFloorMapNTXY[n, :, 0], node.params["X_project"], decimal = 5)
+			# np.testing.assert_almost_equal(self.projectedFloorMapNTXY[n, :, 1], node.params["Y_project"], decimal =5)
+			#
+			# raise NotImplementedError
 
 		# self.state["floor"] |= 1 << 2    # @suren : TODO
+		self.state["floor"] = 1
 
 		if verbose:
 			print("Finished creating floormap {} ".format(self.projectedFloorMapNTXY.shape))
@@ -531,8 +618,7 @@ class Graph:
 			self.frameThreatLevel[t]=threatLevel
 		print("Finished calculating threat level")
 
-		# self.state["threat"] = 1     # @suren : TODO
-		return 0
+		self.state["threat"] = 1     # @suren : TODO
 
 	def fullyAnalyzeGraph(self):
 		self.generateFloorMap()
@@ -585,6 +671,7 @@ class Graph:
 
 	def image_save(self, fig1, ax1, xlim, ylim, out_dir, t, clear=True):
 
+
 		fig1.savefig("{}G-{:04d}.jpg".format(out_dir, t))
 		if clear:
 			ax1.clear()
@@ -617,7 +704,7 @@ class Graph:
 		# 	col.spines.right.set_visible(False)
 		# 	col.spines.top.set_visible(False)
 
-		fig.savefig("./data/output/dimg_init_concat.jpg")
+		fig.savefig("./data/output/dimg_init_concat.png")
 
 	def dimg_init_full(self, fig, ax):
 		ax.clear()

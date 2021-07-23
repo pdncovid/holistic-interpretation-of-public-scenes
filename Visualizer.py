@@ -4,8 +4,10 @@ import numpy as np
 from collections import defaultdict
 import argparse
 import json
+import configparser
 
 from Graph import Graph
+
 from NNHandler_handshake import NNHandler_handshake
 from NNHandler_image import NNHandler_image
 from NNHandler_person import NNHandler_person
@@ -55,6 +57,28 @@ class Visualizer:
         else:
             raise NotImplementedError
 
+    @staticmethod
+    def read_ini(file_path, args):
+        config = configparser.ConfigParser()
+        config.read(file_path)
+
+        args.input = config['INPUT']['input']
+        args.person = config['INPUT']['person']
+        args.handshake = config['INPUT']['handshake']
+        args.cam = config['INPUT']['cam']
+
+        args.graph = config['IO']['graph']
+
+        args.output = config['OUTPUT']['output']
+
+        args.visualize = config.getboolean('PARAMS', 'visualize')
+        args.overwrite_graph = config.getboolean('PARAMS', 'overwrite_graph')
+
+
+
+        for section in config.sections():
+            for key in config[section]:
+                print(section, (key, config[section][key]))
 
 
     def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None, debug=False):
@@ -73,6 +97,7 @@ class Visualizer:
         self.plot_out_name = None   # save plot
         self.plot_scatter = False
         self.plot_lines = False
+        self.plot_group = False
 
         # Img/Video components
         self.make_vid = False       # create video frame (Everything below wont matter is this isn't set)
@@ -93,7 +118,7 @@ class Visualizer:
         self.end_time = None
         self.hw = None if self.img_handle is None else (img_handle.height, img_handle.width)
 
-    def init_plot(self, plot_out : str = None, network_scatter=True, network_lines=True, network_show=False):
+    def init_plot(self, plot_out : str = None, network_scatter=True, network_lines=True, network_group=True, network_show=False):
         assert self.graph is not None, "Graph cannot be empty while plotting"
         self.make_plot = True
 
@@ -101,6 +126,7 @@ class Visualizer:
         self.plot_show = network_show
         self.plot_scatter = network_scatter
         self.plot_lines = network_lines
+        self.plot_group = network_group
 
     def init_vid(self, vid_out : str = None, img_out : str = None,
                  vid_bbox=True, vid_hbox=True,  vid_scatter=False, vid_lines=False, vid_keypoints=True, vid_show = False):
@@ -115,7 +141,7 @@ class Visualizer:
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
 
-    def plot(self, WAIT=20, col_num:int = None):
+    def plot(self, WAIT=20, col_num:int = None, debug=False):
 
         if Graph.plot_import() is not None:
             eprint("Package not installed", Graph.plot_import())
@@ -152,14 +178,15 @@ class Visualizer:
 
         # Process and get all graph points till time t
         if self.graph is not None:
+            pass
 
             # scatter x, y and lines
-            sc_x, sc_y, lines = self.graph.get_plot_points()
-            xlim, ylim = self.graph.get_plot_lim(sc_x, sc_y)
+            # sc_x_, sc_y_ = self.graph.get_scatter_points()
+            # xlim, ylim = self.graph.get_plot_lim(sc_x_, sc_y_)
 
-            r, c = divmod(self.graph.n_nodes, len(cmap_plot))
+            # r, c = divmod(self.graph.n_nodes, len(cmap_plot))
             # print(cmap_plot.shape, r, c, self.graph.n_nodes)
-            cmap_plot = np.append(np.tile(cmap_plot, (r, 1)), cmap_plot[:c, :], axis=0)
+            # cmap_plot = np.append(np.tile(cmap_plot, (r, 1)), cmap_plot[:c, :], axis=0)
             # print(self.start_time, self.end_time, self.time_series_length)
 
         # MAKE Video
@@ -186,6 +213,10 @@ class Visualizer:
 
         # MAKE plot
         if self.make_plot:
+            assert self.graph is not None, "cannot plot without graph"
+
+            sc_x_, sc_y_ = self.graph.get_scatter_points()
+            xlim, ylim = self.graph.get_plot_lim(sc_x_, sc_y_)
 
             if self.plot_show: plt.ion()
             else: plt.ioff()
@@ -198,15 +229,16 @@ class Visualizer:
             self.graph.image_init(ax1, xlim, ylim)
 
             # Figure for each metric
-            fig2, ax2 = plt.subplots(2, 2)
-            plt.subplots_adjust(wspace=.35, hspace=.35)
-            fig4, ax4 = plt.subplots(1)
-            self.graph.dimg_init(fig2, ax2, fig4, ax4)
+            if self.graph.pairD is not None:
+                fig2, ax2 = plt.subplots(2, 2)
+                plt.subplots_adjust(wspace=.35, hspace=.35)
+                fig4, ax4 = plt.subplots(1)
+                self.graph.dimg_init(fig2, ax2, fig4, ax4)
 
             # Figure for threat level
-            fig3, ax3 = plt.subplots(1)
-            self.graph.threat_image_init(fig3, ax3)
-            # fig3 = plt.figure()
+            if self.graph.pairT is not None:
+                fig3, ax3 = plt.subplots(1)
+                self.graph.threat_image_init(fig3, ax3)
 
         if self.img_handle is not None:
             self.img_handle.open(start_frame=start_time)
@@ -224,32 +256,51 @@ class Visualizer:
 
                 # Plot info from graph
                 if self.graph is not None:
-                    # sc_x_t = list(map(int, sc_x[:, t]))
-                    # sc_y_t = list(map(int, sc_y[:, t]))
-                    sc_x_t = sc_x[:, t]
-                    sc_y_t = sc_y[:, t]
+                    scx_t, scy_t, id_t, line_t, scx_i, scy_i, id_i = self.graph.get_points_t(t)
+                    # scx_t = sc_x[:, t]
+                    # scy_t = sc_y[:, t]
+                    cmap_t = cmap_plot[id_t % col_num]
+                    cmap_i = cmap_plot[id_i % col_num]
+
+                    if self.graph.pairG is not None:
+                        pairs = np.where(self.graph.pairG[t, :, :] > .99)
+                        if len(pairs)>0:
+                            pairs = np.array([pairs[0], pairs[1]], dtype=int).transpose()
 
                     if self.plot_scatter:
-                        ax1.scatter(sc_x_t, sc_y_t, color=cmap_plot)
+                        ax1.scatter(scx_t, scy_t, color=cmap_t)
+                        ax1.scatter(scx_i, scy_i, color=cmap_i, marker='x')
 
                     if self.plot_lines:
-                        for l in lines[t]:
-                            ax1.plot(l[0], l[1])
+                        for l in line_t:
+                            ax1.plot(l[0], l[1], linewidth=1.5)
+
+                    if self.plot_group and self.graph.pairG is not None:
+                        for p in pairs:
+                            i, j = p
+                            x1 = self.graph.nodes[i].params["X_project"][t]
+                            y1 = -self.graph.nodes[i].params["Y_project"][t]
+                            x2 = self.graph.nodes[j].params["X_project"][t]
+                            y2 = -self.graph.nodes[j].params["Y_project"][t]
+
+                            ax1.plot([x1, x2], [y1, y2], 'k--', linewidth=.5)
 
                     if self.mark_ref:
-                        for i in range(4):
-                            p1x, p1y = self.graph.DEST[i]
-                            p2x, p2y = self.graph.DEST[i-1]
-                            ax1.plot([p1x, p2x], [-p1y, -p2y], 'k', linewidth=.5)
+                        px = np.array(self.graph.DEST)[:, 0]
+                        py = -np.array(self.graph.DEST)[:, 1]
+                        ax1.plot(px, py, 'k', linewidth=.5)
+                        ax1.plot([px[-1], px[0]], [py[-1], py[0]], 'k', linewidth=.5)
 
 
                     if self.plot_out_name is not None:
                         # Save graph
                         self.graph.image_save(fig1, ax1, xlim, ylim, self.plot_out_name, t, clear=True)
                         # Save DIMG
-                        self.graph.dimg_save(fig2, ax2, fig4, ax4, self.plot_out_name, t)
+                        if self.graph.pairD is not None:
+                            self.graph.dimg_save(fig2, ax2, fig4, ax4, self.plot_out_name, t)
                         # Save threat
-                        self.graph.threat_image_save(fig3, ax3, self.plot_out_name, t)
+                        if self.graph.pairT is not None:
+                            self.graph.threat_image_save(fig3, ax3, self.plot_out_name, t)
 
 
 
@@ -259,11 +310,11 @@ class Visualizer:
                 # @suren : Scatters and lines are removed from video
                 if self.make_vid:
                     if self.vid_scatter:
-                        for p in range(len(sc_x_t)):
-                            cv2.circle(rgb_, (sc_x_t[p], sc_y_t[p]), 1, tuple(cmap_vid[p%col_num]), 5)
+                        for p in range(len(scx_t)):
+                            cv2.circle(rgb_, (scx_t[p], scy_t[p]), 1, tuple(cmap_vid[p%col_num]), 5)
 
                     if self.vid_lines:
-                        for l in lines[t]:
+                        for l in line_t:
                             cv2.line(rgb_, tuple(np.array(l[:, 0]).astype(int)), tuple(np.array(l[:, 1]).astype(int)),(255, 255, 255), 3)
 
             # ------------------------------- MAKE VIDEO ----------------------------------
@@ -283,20 +334,19 @@ class Visualizer:
                         # TODO @suren : match colour in graph and vid
 
 
-                if True:
-                    for i in range(self.graph.n_nodes):
-                        for j in range(i+1, self.graph.n_nodes):
-                            if self.graph.pairG[t, i, j] > .99:
-                                x1 = self.graph.nodes[i].params["X"][t]
-                                y1 = self.graph.nodes[i].params["Y"][t]
-                                x2 = self.graph.nodes[j].params["X"][t]
-                                y2 = self.graph.nodes[j].params["Y"][t]
+                if self.graph is not None and self.graph.pairG is not None:
+                    for p in pairs:
+                        i, j = p
+                        x1 = self.graph.nodes[i].params["X"][t]
+                        y1 = self.graph.nodes[i].params["Y"][t]
+                        x2 = self.graph.nodes[j].params["X"][t]
+                        y2 = self.graph.nodes[j].params["Y"][t]
 
-                                # print(t, i, j, "x1, y1, x2, y2 =", x1, y1, x2, y2)
+                        # print(t, i, j, "x1, y1, x2, y2 =", x1, y1, x2, y2)
 
-                                cv2.line(rgb_, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 3)
-                                cv2.circle(rgb_, (int(x1), int(y1)), 1, (0, 0, 0), 7)
-                                cv2.circle(rgb_, (int(x2), int(y2)), 1, (0, 0, 0), 7)
+                        cv2.line(rgb_, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 3)
+                        cv2.circle(rgb_, (int(x1), int(y1)), 1, (0, 0, 0), 7)
+                        cv2.circle(rgb_, (int(x2), int(y2)), 1, (0, 0, 0), 7)
 
 
                 # Plot info from handshake
@@ -353,6 +403,7 @@ class Visualizer:
         if self.vid_out_name is not None:
             vid_out.release()
     # cap.release()
+        cv2.destroyAllWindows()
 
     # plt.show(block=True)
 
@@ -439,11 +490,13 @@ if __name__ == "__main__":
     # parser.add_argument("--nnout_openpose",'-p',type=str,dest="nnout_openpose",default='./data/vid-01-openpose_track.json')
 
     parser.add_argument("--input","-i", type=str, default='./data/videos/seq18.avi') # Change this : input fil
-    parser.add_argument("--output","-o", type=str, default='./data/output/seq18-temp/') # Change this : output dir
     parser.add_argument("--person","-p", type=str, default='./data/labels/seq18/seq18-person.json') # Change this : person
     parser.add_argument("--handshake","--hs", type=str, default='./data/labels/seq18/seq18-handshake.json') # Change this : handshake
     parser.add_argument("--cam", "-c", type=str, default="./data/camera-orientation/jsons/uti.json") # Change this: camfile
+
     parser.add_argument("--graph","-g", type=str, default='./data/output/seq18/seq18-graph-temp.json') # Change this : INCOMPLETE (Make sure this isn't None)
+
+    parser.add_argument("--output","-o", type=str, default='./data/output/seq18-temp/') # Change this : output dir
 
     parser.add_argument("--visualize","-v", action="store_true", help="Visualize the video output") # Change this
 
@@ -452,72 +505,21 @@ if __name__ == "__main__":
     parser.add_argument("--debug", "-db", type=bool, dest="debug", default=False)
 
     args = parser.parse_args()
-    print(args)
 
-    # args.visualize = True
-    # args.output = None
-    # args.graph = None
-    # time_series_length = 500
-    suren_mode = True
+    config_file = None
+    # config_file = "./data/config/oxford.ini"
     start_time = 0
-    end_time = 200
-    col_num = 10
+    end_time = 1000
+    col_num = 20
 
-    if suren_mode:
-        args.input = "./data/videos/DEEE/cctv1.mp4"
-        args.person = "./data/labels/DEEE/yolo/cctv1-yolo.json"
-        args.handshake = "./data/labels/DEEE/handshake/cctv1-hs.json"
-        args.cam = "./data/camera-orientation/jsons/deee.json"
-        args.graph = './data/temp/deee-cctv1.json'
-        args.output = './data/output/DEEE/cctv1/'
-        # @gihan... change these
-        start_time = 100
-        end_time = 200
-        col_num = 20
-        # time_series_length = 500
+    if config_file is not None:
+        args = Visualizer.read_ini(config_file, args)
 
-        args.input = "./data/videos/seq18.avi"
-        args.person = "./data/labels/seq18/person.json"
-        args.handshake = "./data/labels/seq18/handshake.json"
-        args.cam = "./data/camera-orientation/jsons/uti.json"
-        args.graph = './data/temp/seq18.json'
-        args.output = './data/output/seq18/'
-        
-        start_time = 1
-        end_time = 1000
-        col_num = 20
+    #Override
+    args.visualize = False
+    args.overwrite_graph = True
 
-
-
-
-        args.input = "./data/videos/TownCentreXVID.mp4"
-        args.person = "./data/labels/TownCentre/person.json"
-        args.handshake = "./data/labels/TownCentre/handshake.json"
-        args.cam = "./data/camera-orientation/jsons/oxford.json"
-        args.graph = './data/temp/oxford.json'
-        args.output = './data/output/oxford/'
-        
-        start_time = 0
-        end_time = 100
-        col_num = 20
-
-
-
-        args.input = "./data/videos/DEEE/cctv2.mp4"
-        args.person = "./data/labels/DEEE/yolo/cctv2-yolo.json"
-        args.handshake = "./data/labels/DEEE/handshake/cctv2-hs.json"
-        args.cam = "./data/camera-orientation/jsons/deee.json"
-        args.graph = './data/temp/deee-cctv2.json'
-        args.output = './data/output/DEEE/cctv2/'
-        # @gihan... change these
-        start_time = 0
-        end_time = 200
-        col_num = 20
-
-
-
-
-        args.visualize = False
+    print(args)
 
 
     # Initiate image handler
@@ -552,7 +554,6 @@ if __name__ == "__main__":
 
     # openpose_handler = NNHandler_openpose(openpose_file=args.nnout_openpose,  is_tracked=args.track)
     # openpose_handler.init_from_json()
-    openpose_handler = None
 
     if args.graph is not None:
         g = Graph()
@@ -571,12 +572,12 @@ if __name__ == "__main__":
             hs_handler.connectToGraph(g)
             hs_handler.runForBatch(start_time, end_time)
 
-        if g.state["floor"] < 7:
+        if g.state["floor"] < 1:
             g.generateFloorMap()
 
         if g.state["cluster"] < 1:
             g.findClusters()
-
+        #
         if g.state["threat"] < 1:
             g.calculateThreatLevel()
 
@@ -585,7 +586,7 @@ if __name__ == "__main__":
     else:
         g = None
 
-    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle, openpose=openpose_handler)
+    vis = Visualizer(graph=g, person=person_handler, handshake=hs_handler, img=img_handle)
 
     if args.output is not None:
         plot_loc = args.output + "/plot/"
@@ -598,7 +599,7 @@ if __name__ == "__main__":
         vis.init_plot(plot_out=plot_loc)
 
     # Call this to plot cv2 video
-    if args.output is not None or args.visualize is not None:
+    if args.output is not None or args.visualize:
         vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_show=args.visualize)
 
     print("-----------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-----------------")

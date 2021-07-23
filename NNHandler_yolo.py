@@ -91,12 +91,18 @@ class NNHandler_yolo(NNHandler):
 	def plot(img, bb_list:list, colors:list, is_tracked=False):
 		n_col = len(colors)
 		for i, bbox in enumerate(bb_list):
-			col = colors[i%n_col]
 			x_min, x_max, y_min, y_max = map(int, [bbox["x1"], bbox["x2"], bbox["y1"], bbox["y2"]])
-			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), tuple(col), 2)
 
 			if is_tracked:
-				cv2.putText(img, str(bbox["id"]), (x_min, y_min- 10), 0, 0.75, (255, 255, 255), 2)
+				p_id = bbox["id"]
+				cv2.putText(img, str(p_id), (x_min, y_min- 10), 0, 0.75, (0, 0, 0), 3)
+				cv2.putText(img, str(p_id), (x_min, y_min- 10), 0, 0.75, (255, 255, 255), 2)
+			else:
+				p_id = i
+
+			col = colors[p_id%n_col]
+			cv2.rectangle(img, (x_min, y_min), (x_max, y_max), tuple(col), 2)
+
 
 	def __init__(self, json_file=None, is_tracked=True, vis=True, verbose=True, debug=False):
 
