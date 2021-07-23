@@ -165,7 +165,7 @@ class Graph:
 	def get_points_t(self, t):
 		scx_det, scy_det, id_det = [], [], []
 		scx_interp, scy_interp, id_interp = [], [], []
-		line_t = {}
+		line_t = defaultdict(list)
 		for n, p in enumerate(self.nodes):
 			# initParams = {"id": idx, "xMin": x_min, "xMax": x_max, "yMin": y_min, "yMax": y_max, "detection": detected})
 			p_id = p.params["id"]
@@ -488,6 +488,7 @@ class Graph:
 			for n in self.nodes:
 				n.project_standing_location(self.transMatrix)
 
+		self.state["floor"] = 1
 
 
 		# Floor map N x T with X and Y points.
@@ -511,7 +512,6 @@ class Graph:
 			# raise NotImplementedError
 
 		# self.state["floor"] |= 1 << 2    # @suren : TODO
-		self.state["floor"] = 1
 
 		if verbose:
 			print("Finished creating floormap {} ".format(self.projectedFloorMapNTXY.shape))
@@ -618,7 +618,7 @@ class Graph:
 			self.frameThreatLevel[t]=threatLevel
 		print("Finished calculating threat level")
 
-		self.state["threat"] = 1     # @suren : TODO
+		# self.state["threat"] = 1     # @suren : TODO
 
 	def fullyAnalyzeGraph(self):
 		self.generateFloorMap()

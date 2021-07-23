@@ -62,24 +62,19 @@ class Visualizer:
         config = configparser.ConfigParser()
         config.read(file_path)
 
-        args.input = config['INPUT']['input']
-        args.person = config['INPUT']['person']
-        args.handshake = config['INPUT']['handshake']
-        args.cam = config['INPUT']['cam']
+        args.input = config['INPUT']['input'].replace('"', "")
+        args.person = config['INPUT']['person'].replace('"', "")
+        args.handshake = config['INPUT']['handshake'].replace('"', "")
+        args.cam = config['INPUT']['cam'].replace('"', "")
 
-        args.graph = config['IO']['graph']
+        args.graph = config['IO']['graph'].replace('"', "")
 
-        args.output = config['OUTPUT']['output']
+        args.output = config['OUTPUT']['output'].replace('"', "")
 
         args.visualize = config.getboolean('PARAMS', 'visualize')
         args.overwrite_graph = config.getboolean('PARAMS', 'overwrite_graph')
 
-
-
-        for section in config.sections():
-            for key in config[section]:
-                print(section, (key, config[section][key]))
-
+        return args
 
     def __init__(self, graph=None, person=None, handshake=None, img=None, openpose=None, debug=False):
         self.graph = graph
@@ -128,8 +123,9 @@ class Visualizer:
         self.plot_lines = network_lines
         self.plot_group = network_group
 
-    def init_vid(self, vid_out : str = None, img_out : str = None,
-                 vid_bbox=True, vid_hbox=True,  vid_scatter=False, vid_lines=False, vid_keypoints=True, vid_show = False):
+    def init_vid(self, vid_out : str = None, img_out : str = None, vid_show = False,
+                 vid_bbox=True, vid_hbox=True, vid_keypoints=True, vid_group=True,
+                 vid_scatter=False, vid_lines=False):
         self.make_vid = True
 
         self.vid_out_name = vid_out
@@ -140,6 +136,7 @@ class Visualizer:
         self.vid_scatter = vid_scatter
         self.vid_lines = vid_lines
         self.vid_keypoints = vid_keypoints
+        self.vid_group = vid_group
 
     def plot(self, WAIT=20, col_num:int = None, debug=False):
 
@@ -273,7 +270,7 @@ class Visualizer:
 
                     if self.plot_lines:
                         for l in line_t:
-                            ax1.plot(l[0], l[1], linewidth=1.5)
+                            ax1.plot(l[0], l[1], linewidth=3)
 
                     if self.plot_group and self.graph.pairG is not None:
                         for p in pairs:
@@ -283,7 +280,7 @@ class Visualizer:
                             x2 = self.graph.nodes[j].params["X_project"][t]
                             y2 = -self.graph.nodes[j].params["Y_project"][t]
 
-                            ax1.plot([x1, x2], [y1, y2], 'k--', linewidth=.5)
+                            ax1.plot([x1, x2], [y1, y2], 'k--', linewidth=1)
 
                     if self.mark_ref:
                         px = np.array(self.graph.DEST)[:, 0]
@@ -334,15 +331,13 @@ class Visualizer:
                         # TODO @suren : match colour in graph and vid
 
 
-                if self.graph is not None and self.graph.pairG is not None:
+                if self.vid_group and self.graph is not None and self.graph.pairG is not None:
                     for p in pairs:
                         i, j = p
                         x1 = self.graph.nodes[i].params["X"][t]
                         y1 = self.graph.nodes[i].params["Y"][t]
                         x2 = self.graph.nodes[j].params["X"][t]
                         y2 = self.graph.nodes[j].params["Y"][t]
-
-                        # print(t, i, j, "x1, y1, x2, y2 =", x1, y1, x2, y2)
 
                         cv2.line(rgb_, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 3)
                         cv2.circle(rgb_, (int(x1), int(y1)), 1, (0, 0, 0), 7)
@@ -506,11 +501,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config_file = None
-    # config_file = "./data/config/oxford.ini"
+    # config_file = None
+    config_file = "./data/config/uti.ini"
     start_time = 0
     end_time = 1000
-    col_num = 20
+    col_num = 6
 
     if config_file is not None:
         args = Visualizer.read_ini(config_file, args)
@@ -518,6 +513,7 @@ if __name__ == "__main__":
     #Override
     args.visualize = False
     args.overwrite_graph = True
+    plot_group = True               # This may increase the time a lot.
 
     print(args)
 
@@ -572,13 +568,13 @@ if __name__ == "__main__":
             hs_handler.connectToGraph(g)
             hs_handler.runForBatch(start_time, end_time)
 
-        if g.state["floor"] < 1:
+        if g.state["floor"] < 2:
             g.generateFloorMap()
 
         if g.state["cluster"] < 1:
             g.findClusters()
         #
-        if g.state["threat"] < 1:
+        if g.state["threat"] < 2:
             g.calculateThreatLevel()
 
         if args.overwrite_graph:
@@ -596,11 +592,11 @@ if __name__ == "__main__":
 
     # Call this to plot pyplot graph
     if args.output is not None:
-        vis.init_plot(plot_out=plot_loc)
+        vis.init_plot(plot_out=plot_loc, network_group=plot_group)
 
     # Call this to plot cv2 video
     if args.output is not None or args.visualize:
-        vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_show=args.visualize)
+        vis.init_vid(vid_out= vid_loc, img_out=plot_loc, vid_show=args.visualize, vid_group=plot_group)
 
     print("-----------------\nIf pyplot is visible and WAIT == 0, press 'g' to plot current graph\n-----------------")
 
