@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import json
+import configparser
+
 import os
 import sys
 import numpy as np
@@ -146,4 +148,14 @@ def iou_batch(bb_test, bb_gt):
     o = wh / ((bb_test[..., 2] - bb_test[..., 0]) * (bb_test[..., 3] - bb_test[..., 1])
               + (bb_gt[..., 2] - bb_gt[..., 0]) * (bb_gt[..., 3] - bb_gt[..., 1]) - wh)
     return (o)
+
+
+
+
+def read_ini(file_path, config_json):
+    config = configparser.ConfigParser()
+    config.read(file_path)
+    for section in config.sections():
+        for key in config[section]:
+            print((key, config[section][key]))
 

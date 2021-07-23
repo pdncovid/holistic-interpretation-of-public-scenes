@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod 
 from Node import *
 import os
+import numpy as np
 
 class Person(Node):
 
@@ -77,21 +77,18 @@ class Person(Node):
 
 		if debug:
 			print("\t {} [DEBUG]: running person calc".format(f_name))
+
 		startT=0
 		endTExclusive=self.time_series_length
 
 		# print(self.params["detection"])
 		for t in range(0,self.time_series_length):
-			if self.params["detection"][t]==False:
-				startT=t+1
-			else:
-				break
+			if self.params["detection"][t]==True: break
+			startT=t+1
 		for t in range(self.time_series_length-1,0,-1):
-			# print("XXX")
-			if self.params["detection"][t]==False:
-				endTExclusive=t
-			else:
+			if self.params["detection"][t]==True:
 				break
+			endTExclusive=t
 
 		if startT <endTExclusive:
 			self.params["neverDetected"]=False
@@ -153,3 +150,60 @@ class Person(Node):
 							break
 
 
+	def interpolate_undetected(self, debug=False):
+		'''
+			Gihan (25/03/2021)
+			I am implementing this without thinking straight.
+			I will be refining this logic later on.
+
+			@suren updated this
+		'''
+
+		f_name = os.path.basename(__file__)
+
+		self.params["interpolated"]=[False for _ in range(self.time_series_length)]
+
+		if "X" not in self.params.keys() or  "Y" not in self.params.keys():
+			self.calculate_standing_locations()
+
+		det = np.where(self.params["detection"])[0]
+		if len(det) > 0:
+			start = det[0]
+			end = det[-1]+1
+			self.params["neverDetected"]=False
+			self.params["detectionStartT"]=int(start)
+			self.params["detectionEndTExclusive"]=int(end)
+
+			X = self.params["X"]
+			Y = self.params["Y"]
+
+			x_det = np.array(X)[det]
+			y_det = np.array(Y)[det]
+
+			x_interp = np.interp(np.arange(start, end), det, x_det)
+			y_interp = np.interp(np.arange(start, end), det, y_det)
+
+			X[start:end] = x_interp.tolist()
+			Y[start:end] = y_interp.tolist()
+
+			self.params["interpolated"][start:end] = np.invert(self.params["detection"][start:end]).astype('bool').tolist()
+			self.params["interpolated"] = self.params["interpolated"]
+
+			self.params["X"] = X
+			self.params["Y"] = Y
+
+		else:
+			self.params["neverDetected"]=True
+
+
+	def project_standing_location(self, transMatrix, debug=False):
+
+
+		XY_mat = np.array([self.params["X"], self.params["Y"], np.ones(self.time_series_length)])
+		projected = np.dot(transMatrix, XY_mat)
+
+		projected[0, :] /= projected[2, :]
+		projected[1, :] /= projected[2, :]
+
+		self.params["X_project"] = projected[0, :].tolist()
+		self.params["Y_project"] = projected[1, :].tolist()

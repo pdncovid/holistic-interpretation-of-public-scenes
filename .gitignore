@@ -22,3 +22,6 @@ data/ground_truth/*
 data/labels/EarthCam/mask/*
 data/output/desktop.ini
 suren/temp_args.txt
+data/temp/*
+suren/temp.py
+suren/temp.py

@@ -242,7 +242,7 @@ class NNHandler_handshake(NNHandler_yolo):
 						graph.nodes[p2].params["handshake"][t_] = {"person": p1, "confidence": None, "iou": iou[p2]}
 				graph.state["handshake"] = 2
 
-		print("Updated the graph")
+		print("[*] HS_handler : Updated the graph")
 
 	def runForBatch(self, start_time=None, end_time = None):
 		self.update_handshake(start_time, end_time)
