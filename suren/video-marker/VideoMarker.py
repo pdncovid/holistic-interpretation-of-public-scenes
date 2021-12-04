@@ -1,3 +1,5 @@
+# 1 : Mark
+
 '''
 USAGE
 
@@ -21,9 +23,9 @@ import bisect
 from NNHandler_image import NNHandler_image
 
 try:
-    from .util import *
+    from ...util import *
 except:
-    sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+    sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
     from util import *
 
 class Marker():
@@ -566,7 +568,7 @@ if __name__ == "__main__":
 
 
     UPDATE = 0
-    MARK = 1
+    MARK = 0
 
     assert not (MARK and UPDATE), "Cannot mark and update at the same time"
 
@@ -574,6 +576,7 @@ if __name__ == "__main__":
 
         SAVE = 1        # mark new values (0 if loaded from mem)
         DEBUG = 1
+
 
     if MARK or UPDATE:
         JSON = 1        # convert and save as json
@@ -588,9 +591,9 @@ if __name__ == "__main__":
     # output_dir = "../data/ground_truth/DEEE/"
     # raw_dir = "../data/ground_truth/DEEE/mask/"
 
-    file_name = "../data/videos/UTI/ut-interaction_set2/seq18.avi"
-    output_dir = "../data/ground_truth/UTI/ut-interaction_set2/"
-    raw_dir = "../data/ground_truth/UTI/ut-interaction_set2/mask/"
+    file_name = "../../data/videos/UTI/ut-interaction_set2/seq18.avi"
+    output_dir = "../../data/ground_truth/UTI/ut-interaction_set2/"
+    raw_dir = "../../data/ground_truth/UTI/ut-interaction_set2/mask/"
 
     # img_handle = NNHandler_image(format="mp4", img_loc=file_name)
     # img_handle.runForBatch()
@@ -675,7 +678,9 @@ if __name__ == "__main__":
 
     if TEST:
 
-        points_2D, marked_2D, _ = marker.unprocess(json_data, n_frames, n_person)
+        points_2D, marked_2D, shake_2D = marker.unprocess(json_data, n_frames, n_person)
+
+        # print(shake_2D)
 
         print("[n_shakes, n_frames, 4] : ", points_2D.shape)
         # eprint(points)

@@ -371,6 +371,7 @@ class Visualizer:
                 if self.plot_out_name is not None:
                     if self.debug: print("{}fr-{:04d}.jpg".format(self.img_out_name, t))
                     cv2.imwrite("{}fr-{:04d}.jpg".format(self.img_out_name, t), rgb_)
+                    cv2.imwrite("{}inp-{:04d}.jpg".format(self.img_out_name, t), rgb)
 
             # ------------------------------- SHOW VIDEO / PLOT ----------------------------------
 
@@ -502,7 +503,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # config_file = None
-    config_file = "./data/config/uti.ini"
+    config_file = "./data/config/deee.ini"
     start_time = 0
     end_time = 1000
     col_num = 6

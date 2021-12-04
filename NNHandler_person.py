@@ -68,8 +68,14 @@ class NNHandler_person(NNHandler_yolo):
 		person_dic = defaultdict(dict)
 
 		for t in range(start_time, end_time):
-			try: yolo_bbox = self.json_data[t]
-			except: yolo_bbox = self.json_data[str(t)]		# If reading from json file
+			try:
+				yolo_bbox = self.json_data[t]
+			except KeyError:
+				try:
+					yolo_bbox = self.json_data[str(t)]		# If reading from json file
+				except:
+					continue								# No boxes detected
+
 
 			for bbox in yolo_bbox:
 				idx = bbox["id"]
