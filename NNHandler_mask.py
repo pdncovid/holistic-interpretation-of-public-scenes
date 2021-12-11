@@ -45,7 +45,7 @@ class NNHandler_mask(NNHandler_yolo):
 	nms_max_overlap = 1.0
 
 	iou_thresh = .45
-	score_thresh = .2
+	score_thresh = .5
 	input_size = 416
 
 	def __init__(self, mask_file=None, is_tracked=False, vis=False, verbose=False):

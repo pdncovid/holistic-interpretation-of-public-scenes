@@ -3,6 +3,7 @@ import json
 import numpy as np
 import os
 import sys
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
@@ -155,7 +156,7 @@ class NNHandler_yolo(NNHandler):
 
 		frame_num = 0
 		img_handle.open()
-		for t in range(img_handle.time_series_length):
+		for t in tqdm(range(img_handle.time_series_length)):
 
 			frame = img_handle.read_frame(t)
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
