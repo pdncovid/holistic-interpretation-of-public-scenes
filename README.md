@@ -21,3 +21,10 @@ python Visualize.py -i data/vid-01-graph.json -p 3 --onlyDetectedTime True --out
 
 python Visualize.py -i data/vid-01-graph.json -p 3 --onlyDetectedTime True --outputPrefix plot-figure-name --interpolateUndetected True
 ```
+
+
+## Evaluation
+```
+cd eval
+./eval.sh
+```

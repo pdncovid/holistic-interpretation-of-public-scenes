@@ -17,7 +17,7 @@ if __name__=="__main__":
         st=""
         for face in frame:
             st=st+"face 1.00 {} {} {} {}\n".format(int(face["x1"]),int(face["y1"]),int(face["x2"]),int(face["y2"]))
-        with open(args.tempFolder+"/detections/frame{}.txt".format(n),"w+") as f:
+        with open(args.tempFolder+"/detections/frame_{}.txt".format(n),"w+") as f:
             f.write(st)
         print("Frame GT {} done".format(n))
 
@@ -30,5 +30,5 @@ if __name__=="__main__":
                 st=st+"face {} {} {} {}\n".format(int(float(ar[1])),int(float(ar[2])),\
                     int(float(ar[3])),int(float(ar[4])))
 
-            with open(args.tempFolder+"/groundtruths/frame{}.txt".format(n),"w+") as f:
+            with open(args.tempFolder+"/groundtruths/frame_{}.txt".format(n),"w+") as f:
                 f.write(st)        
