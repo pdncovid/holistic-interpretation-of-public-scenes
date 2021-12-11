@@ -3,6 +3,7 @@ import json
 import numpy as np
 import os
 import sys
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
@@ -116,7 +117,7 @@ class NNHandler_yolo(NNHandler):
 		self.verbose = verbose
 		self.debug = debug
 
-	def create_yolo(self, img_handle):
+	def create_yolo(self, img_handle, temp_name=False):
 		"""
 		:param img_handle: NNHandler_image
 		:return:
@@ -155,7 +156,7 @@ class NNHandler_yolo(NNHandler):
 
 		frame_num = 0
 		img_handle.open()
-		for t in range(img_handle.time_series_length):
+		for t in tqdm(range(img_handle.time_series_length)):
 
 			frame = img_handle.read_frame(t)
 			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -306,9 +307,11 @@ class NNHandler_yolo(NNHandler):
 					print("Tracker ID: {}, Class: {},  BBox Coords (xmin, ymin, xmax, ymax): {}".format(
 						str(id), class_name, (int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3]))))
 
-				person_t.append({
-					"x1": bbox[0], "y1": bbox[1], "x2": bbox[2], "y2": bbox[3], "id": id
-				})
+				dic = {"x1": bbox[0], "y1": bbox[1], "x2": bbox[2], "y2": bbox[3], "id": id}
+
+				if temp_name: dic["name"] = class_name
+
+				person_t.append(dic)
 
 			# result = np.asarray(frame)
 			result = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)

@@ -18,7 +18,7 @@ model/*
 suren/temp/temp.py
 *.avi
 *.npy
-data/ground_truth/*
+data/ground_truth/temp/*
 data/labels/EarthCam/mask/*
 data/output/desktop.ini
 suren/temp_args.txt

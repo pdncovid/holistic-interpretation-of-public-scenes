@@ -34,7 +34,8 @@ from suren.util import get_iou, Json, eprint
 
 
 class NNHandler_mask(NNHandler_yolo):
-	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-obj_best'
+	weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-mask'
+	# weigths_filename = NNHandler_yolo.yolo_dir + '/checkpoints/yolov4-obj_best'
 
 	class_names = ["Mask", "NoMask"]
 
@@ -44,7 +45,7 @@ class NNHandler_mask(NNHandler_yolo):
 	nms_max_overlap = 1.0
 
 	iou_thresh = .45
-	score_thresh = .2
+	score_thresh = .5
 	input_size = 416
 
 	def __init__(self, mask_file=None, is_tracked=False, vis=False, verbose=False):
@@ -72,8 +73,11 @@ class NNHandler_mask(NNHandler_yolo):
 
 if __name__ == "__main__":
 
-	img_loc = "./suren/temp/18.avi"
-	json_loc = "./data/vid-01-mask.json"
+	# img_loc = "./suren/temp/18.avi"
+	# json_loc = "./data/vid-01-mask.json"
+
+	img_loc = "./data/videos/UTI/seq18.avi"
+	json_loc = "./data/labels/UTI/seq18/mask.json"
 
 	parser = argparse.ArgumentParser()
 
@@ -90,7 +94,7 @@ if __name__ == "__main__":
 	img_loc = args.input
 	json_loc = args.output
 
-	args.visualize=False
+	args.visualize=True
 	args.verbose=True
 	args.tracker=False
 
@@ -113,7 +117,7 @@ if __name__ == "__main__":
 			raise Exception("Json does not exists : %s" % json_loc)
 	except:
 		# To create YOLO mask + DSORT track and save to json
-		nn_handle.create_yolo(img_handle)
+		nn_handle.create_yolo(img_handle, temp_name=True)
 		nn_handle.save_json()
 
 
