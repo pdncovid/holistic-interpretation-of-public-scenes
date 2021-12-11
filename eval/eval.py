@@ -16,7 +16,7 @@ if __name__=="__main__":
         frame=predDict[str(n)]
         st=""
         for face in frame:
-            st=st+"face 1.00 {} {} {} {}\n".format(face["x1"],face["y1"],face["x2"],face["y2"])
+            st=st+"face 1.00 {} {} {} {}\n".format(int(face["x1"]),int(face["y1"]),int(face["x2"]),int(face["y2"]))
         with open(args.tempFolder+"/detections/frame{}.txt".format(n),"w+") as f:
             f.write(st)
         print("Frame GT {} done".format(n))
