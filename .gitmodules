@@ -4,3 +4,6 @@
 [submodule "submodules/yolov4-deepsort"]
 	path = submodules/yolov4-deepsort
 	url = https://github.com/pdncovid/yolov4-deepsort
+[submodule "submodules/Object-Detection-Metrics.git"]
+	path = submodules/Object-Detection-Metrics.git
+	url = https://github.com/pdncovid/Object-Detection-Metrics.git
