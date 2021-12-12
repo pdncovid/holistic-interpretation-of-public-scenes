@@ -7,3 +7,6 @@
 [submodule "submodules/Object-Detection-Metrics.git"]
 	path = submodules/Object-Detection-Metrics.git
 	url = https://github.com/pdncovid/Object-Detection-Metrics.git
+[submodule "submodules/mAP"]
+	path = submodules/mAP
+	url = https://github.com/Cartucho/mAP.git

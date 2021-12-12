@@ -18,6 +18,8 @@ if __name__=="__main__":
             frame=predDict[str(n)]
             s=""
             for face in frame:
+
+
                 if args.testType=="maskAgnostic":
                     s=s+"face 0.99 {} {} {} {}\n".format(int(face["x1"]),int(face["y1"]),int(face["x2"]),int(face["y2"]))
                 else:
@@ -38,16 +40,15 @@ if __name__=="__main__":
                             int(float(ar[3])),int(float(ar[4])))
                 
                 
-                if len(st.strip())>0 and len(s.strip())>0:
+                if len(st.strip())>0 and len(s.strip())>0:# and st.count("\n")==s.count("\n"):
                     
-                    with open(args.tempFolder+"/detections/frame_{}.txt".format(outFileIndex),"w+") as f:
+                    with open(args.tempFolder+"/detection-results/frame_{}.txt".format(outFileIndex),"w+") as f:
                         f.write(s.strip())
-                    with open(args.tempFolder+"/groundtruths/frame_{}.txt".format(outFileIndex),"w+") as f:
+                    with open(args.tempFolder+"/ground-truth/frame_{}.txt".format(outFileIndex),"w+") as f:
                         f.write(st.strip())
                     outFileIndex+=1
 
-                    if outFileIndex>73:
-                        break
+
 
         except:
             print("Skipping fame {}".format(n))
