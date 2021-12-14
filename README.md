@@ -34,9 +34,12 @@ cd eval
 ```
 
 ## Publications
-This repository contains the codebase for 
-Gihan Jayatilaka\*, Jameel Hassan\*, Suren Sritharan\*, Janith Bandara Senananayaka, Harshana Weligampola, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath,Janaka Ekanayake, Samath Dharmaratne, 2021. **Holistic Interpretation of Public Scenes Using Computer Vision and Temporal Graphs to Identify Social Distancing Violations**. *arXiv preprint*. 
-\[ [Preprint (PDF arXiv:2112.06428)](https://arxiv.org/pdf/2112.06428)\]
+This repository contains the codebase for
+
+Gihan Jayatilaka\*, Jameel Hassan\*, Suren Sritharan\*, Janith Bandara Senananayaka, Harshana Weligampola, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath,Janaka Ekanayake, Samath Dharmaratne, 2021. **Holistic Interpretation of Public Scenes Using Computer Vision and Temporal Graphs to Identify Social Distancing Violations**. *arXiv preprint*.
+
+\[[Preprint (PDF arXiv:2112.06428)](https://arxiv.org/pdf/2112.06428)\]
+
 \* Equally contributing authors.
 
 
@@ -53,5 +56,7 @@ You may cite this work as
 ```
 
 Another conference paper generated out of this work is
+
 Jameel Hassan, Suren Sritharan, Gihan Jayatilaka, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath, Janaka Ekanayake, 2021. **Hands Off: A Handshake Interaction Detection and Localization Model for COVID-19 Threat Control**. In *2019 14th Conference on Industrial and Information Systems (ICIIS) (pp. 260-265). IEEE*.
-\[ [Preprint (PDF arXiv:2110.0957)](https://arxiv.org/pdf/2110.09571.pdf), [Presentation (PDF)](https://gihan.me/projects/covid/iciis-2021-presentation.pdf), [Presentation (Youtube)](https://youtu.be/oLd0oU_Tiyg) \]
+
+\[[Preprint (PDF arXiv:2110.0957)](https://arxiv.org/pdf/2110.09571.pdf), [Presentation (PDF)](https://gihan.me/projects/covid/iciis-2021-presentation.pdf), [Presentation (Youtube)](https://youtu.be/oLd0oU_Tiyg)\]
