@@ -37,7 +37,9 @@ cd eval
 This repository contains the codebase for
 
 Gihan Jayatilaka, Jameel Hassan, Suren Sritharan, Janith Bandara Senanayaka, Harshana Weligampola, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath, Janaka Ekanayake, and Samath Dharmaratne. **Holistic interpretation of public scenes using computer vision and temporal graphs to identify social distancing violations.** *Applied Sciences* 12, no. 17 (2022): 8428.
+
 \[[DOI](https://doi.org/10.3390/app12178428), [Preprint (PDF)](https://arxiv.org/pdf/2112.06428)\]
+
 \* Gihan, Jameel, and Suren are equally contributing authors.
 
 
