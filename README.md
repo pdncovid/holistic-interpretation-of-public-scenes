@@ -1,4 +1,4 @@
-# People Interaction Graph
+# Holistic interpretation of public scenes using computer vision and temporal graphs to identify social distancing violations
 
 ## Abstract
 
@@ -36,27 +36,27 @@ cd eval
 ## Publications
 This repository contains the codebase for
 
-Gihan Jayatilaka\*, Jameel Hassan\*, Suren Sritharan\*, Janith Bandara Senananayaka, Harshana Weligampola, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath,Janaka Ekanayake, Samath Dharmaratne, 2021. **Holistic Interpretation of Public Scenes Using Computer Vision and Temporal Graphs to Identify Social Distancing Violations**. *arXiv preprint*.
-
-\[[Preprint (PDF arXiv:2112.06428)](https://arxiv.org/pdf/2112.06428)\]
-
-\* Equally contributing authors.
+Gihan Jayatilaka, Jameel Hassan, Suren Sritharan, Janith Bandara Senanayaka, Harshana Weligampola, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath, Janaka Ekanayake, and Samath Dharmaratne. **Holistic interpretation of public scenes using computer vision and temporal graphs to identify social distancing violations.** *Applied Sciences* 12, no. 17 (2022): 8428.
+\[[DOI](https://doi.org/10.3390/app12178428), [Preprint (PDF)](https://arxiv.org/pdf/2112.06428)\]
+\* Gihan, Jameel, and Suren are equally contributing authors.
 
 
 You may cite this work as
 ```
-@misc{holistic-interpretation-of-public-scenes-2021,
-      title={Holistic Interpretation of Public Scenes Using Computer Vision and Temporal Graphs to Identify Social Distancing Violations},
-      author={Gihan Jayatilaka and Jameel Hassan and Suren Sritharan and Janith Bandara Senananayaka and Harshana Weligampola and Roshan Godaliyadda and Parakrama Ekanayake and Vijitha Herath and Janaka Ekanayake and Samath Dharmaratne},
-      year={2021},
-      eprint={2112.06428},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{jayatilaka2022holistic,
+  title={Holistic interpretation of public scenes using computer vision and temporal graphs to identify social distancing violations},
+  author={Jayatilaka, Gihan and Hassan, Jameel and Sritharan, Suren and Senanayaka, Janith Bandara and Weligampola, Harshana and Godaliyadda, Roshan and Ekanayake, Parakrama and Herath, Vijitha and Ekanayake, Janaka and Dharmaratne, Samath},
+  journal={Applied Sciences},
+  volume={12},
+  number={17},
+  pages={8428},
+  year={2022},
+  publisher={MDPI}
 }
 ```
 
-Another conference paper generated out of this work is
+Another conference paper generated out of this work is:
 
 Jameel Hassan, Suren Sritharan, Gihan Jayatilaka, Roshan Godaliyadda, Parakrama Ekanayake, Vijitha Herath, Janaka Ekanayake, 2021. **Hands Off: A Handshake Interaction Detection and Localization Model for COVID-19 Threat Control**. In *2019 14th Conference on Industrial and Information Systems (ICIIS) (pp. 260-265). IEEE*.
 
-\[[Preprint (PDF arXiv:2110.0957)](https://arxiv.org/pdf/2110.09571.pdf), [Presentation (PDF)](https://gihan.me/projects/covid/iciis-2021-presentation.pdf), [Presentation (Youtube)](https://youtu.be/oLd0oU_Tiyg)\]
+\[[DOI](https://doi.org/10.1109/ICIIS53135.2021.9660699), [Preprint (PDF)](https://arxiv.org/pdf/2110.09571.pdf), [Presentation (PDF)](https://gihan.me/projects/covid/iciis-2021-presentation.pdf), [Presentation (Youtube)](https://youtu.be/oLd0oU_Tiyg)\]
